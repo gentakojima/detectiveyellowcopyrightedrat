@@ -240,6 +240,9 @@ def raid(bot, update, args=None):
 
   current_raid["username"] = thisuser["username"]
 
+  if args[0] == "de":
+    del args[0]
+
   for pokemon in pokemonlist:
     m = re.match("^%s$" % pokemon, args[0], flags=re.IGNORECASE)
     if m != None:
@@ -252,24 +255,33 @@ def raid(bot, update, args=None):
     t.start()
     return
 
-  m = re.match("([0-9]{1,2})[:.]?([0-9]{0,2})h?", args[1], flags=re.IGNORECASE)
+  del args[0]
+  if args[0] == "a" and args[1] == "las":
+    del args[0]
+    del args[0]
+
+  m = re.match("([0-9]{1,2})[:.]?([0-9]{0,2})h?", args[0], flags=re.IGNORECASE)
   if m != None:
     hour = str(m.group(1))
     minute = m.group(2) or "00"
     if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
         t.start()
         return
   else:
     sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-    t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+    t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
     t.start()
     return
   current_raid["time"] = "%02d:%02d" % (int(hour),int(minute))
 
+  del args[0]
+  if args[0] == "en":
+    del args[0]
+
   current_raid["gimnasio_text"] = ""
-  for i in range (2,len(args)):
+  for i in range (0,len(args)):
       current_raid["gimnasio_text"] = current_raid["gimnasio_text"] + "%s " % args[i]
   current_raid["gimnasio_text"] = current_raid["gimnasio_text"].strip()
 
