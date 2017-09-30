@@ -49,8 +49,12 @@ def update_message(chat_id, message_id, reply_markup, db, bot):
         text_edited=" _(editada)_"
     else:
         text_edited=""
-    text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\nEntrenadores apuntados (%s):" % (raid["pokemon"], raid["time"], raid["gimnasio_text"], creador["username"], text_edited, numgente)
-    if gente != None:
+    text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\n" % (raid["pokemon"], raid["time"], raid["gimnasio_text"], creador["username"], text_edited)
+    if raid["cancelled"] == 1:
+        text = text + "❌ *Incursión cancelada*"
+    else:
+        text = text + "Entrenadores apuntados (%s):" % numgente
+    if raid["cancelled"] == 0 and gente != None:
         for user in gente:
             if user["plus"] != None and user["plus"]>0:
                 plus_text = " +%i" % user["plus"]

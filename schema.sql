@@ -43,7 +43,9 @@ CREATE TABLE `incursiones` (
   `pokemon` varchar(20) NOT NULL,
   `gimnasio_text` varchar(60) DEFAULT NULL,
   `message` int(11) DEFAULT NULL,
-  `edited` tinyint(4) NOT NULL DEFAULT '0'
+  `edited` tinyint(4) NOT NULL DEFAULT '0',
+  `cancelled` TINYINT NOT NULL DEFAULT '0',
+  `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

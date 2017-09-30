@@ -105,7 +105,7 @@ def saveRaid(raid, db):
 def getRaid(raid_id, db):
     logging.debug("storagemethods:getRaid: %s %s" % (raid_id, db))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `gimnasio_id`, `gimnasio_text`, `edited` FROM `incursiones` WHERE `id`=%s"
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime` FROM `incursiones` WHERE `id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
         return result
@@ -116,7 +116,7 @@ def getRaidPeople(raid_id, db):
         sql = "SELECT `usuarios`.`id` AS `id`, `username`, `plus`, `estoy`, `level`, `team` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
         LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s \
-        ORDER BY `addedtime` ASC"
+        ORDER BY `voy`.`addedtime` ASC"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchall()
         if result[0]["id"] == None:
@@ -127,7 +127,7 @@ def getRaidPeople(raid_id, db):
 def getRaidbyMessage(grupo_id, message_id, db):
     logging.debug("storagemethods:getRaidByMessage: %s %s %s" % (grupo_id, message_id, db))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `gimnasio_id`, `gimnasio_text`, `edited` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
         cursor.execute(sql, (grupo_id, message_id))
         result = cursor.fetchone()
         return result
@@ -208,4 +208,16 @@ def deleteRaid(raid_id, db):
         sql = "DELETE FROM incursiones WHERE `id`=%s;"
         cursor.execute(sql, (raid_id))
     db.commit()
+    return True
+
+def cancelRaid(raid_id, db):
+    logging.debug("storagemethods:cancelRaid: %s %s" % (raid_id, db))
+    with db.cursor() as cursor:
+        raid = getRaid(raid_id, db)
+        if raid["cancelled"] == 1:
+            return False
+        else:
+            sql = "UPDATE incursiones SET `cancelled`=1 WHERE id=%s;"
+            cursor.execute(sql, (raid_id))
+            db.commit()
     return True

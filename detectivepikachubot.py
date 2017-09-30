@@ -26,7 +26,7 @@ import configparser
 import pymysql.cursors
 from threading import Thread
 
-from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid
+from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid
 from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message
 
 def cleanup(signum, frame):
@@ -310,7 +310,52 @@ def raid(bot, update, args=None):
 
   current_raid["id"] = saveRaid(current_raid, db)
 
-  bot.send_message(chat_id=user_id, text="Para editar o borrar la incursión de *%s* a las *%s* en *%s* debes poner los siguientes comandos por privado, cambiando el dato que aparece de ejemplo por el deseado\n\nEl número *%s* es un identificador que tienes que dejar intacto para identificar a la incursión.\n\n🕒 Para *cambiar la hora*:\n`/cambiarhora %s %s`\n\n🗺 Para *cambiar el gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 Para *cambiar el Pokémon*:\n`/cambiarpokemon %s %s`\n\n❌ Para *borrar la incursión*:\n`/borrar %s`" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
+  bot.send_message(chat_id=user_id, text="Para editar o borrar la incursión de *%s* a las *%s* en *%s* debes poner los siguientes comandos por privado, cambiando el dato de ejemplo.\n\nEl identificador de la incursión es *%s* y debes dejarlo intacto.\n\n🕒 *Cambiar la hora*:\n`/cambiarhora %s %s`\n\n🗺 *Cambiar el gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar el Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar la incursión*:\n`/cancelar %s`\n\n❌ *Borrar la incursión*:\n`/borrar %s`" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], current_raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
+
+def cancelar(bot, update, args=None):
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
+
+    thisuser = refreshUsername(user_id, user_username, db)
+
+    if chat_type != "private":
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cancelar gimnasio solo funciona en privado!")
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+        t.start()
+        return
+
+    if len(args)<1 or not str(args[0]).isnumeric():
+        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    raid_id = args[0]
+    raid = getRaid(raid_id, db)
+    if raid != None:
+        if raid["usuario_id"] == user_id:
+            if cancelRaid(raid_id, db):
+                update_message(raid["grupo_id"], raid["message"], None, db, bot)
+                bot.sendMessage(chat_id=chat_id, text="¡Has cancelado la incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
+                people = getRaidPeople(raid["id"], db)
+                warned = []
+                notwarned = []
+                for p in people:
+                    if p["username"] == user_username:
+                        continue
+                    try:
+                        bot.sendMessage(chat_id=p["id"], text="❌ @%s ha *cancelado* la incursión de %s a las %s en %s" % (user_username, raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        warned.append(p["username"])
+                    except:
+                        notwarned.append(p["username"])
+                if len(warned)>0:
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                if len(notwarned)>0:
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
+            else:
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ya estaba cancelada!",parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para cancelar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
 def cambiarhora(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -325,13 +370,16 @@ def cambiarhora(bot, update, args=None):
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
-        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nPulsa el botón de *Editar/Borrar* en la incursión y copia y pega el comando que pone de ejemplo, que lleva incorporados ya los datos.",parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     raid_id = args[0]
     raid = getRaid(raid_id, db)
     if raid != None:
         if raid["usuario_id"] == user_id:
+            if raid["cancelled"] == 1:
+                bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
             if args[1] == raid["time"]:
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta para esa hora!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
@@ -346,6 +394,21 @@ def cambiarhora(bot, update, args=None):
                         saveRaid(raid, db)
                         update_message(raid["grupo_id"], raid["message"], reply_markup, db, bot)
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora a las *%s* correctamente!" % raid["time"], parse_mode=telegram.ParseMode.MARKDOWN)
+                        people = getRaidPeople(raid["id"], db)
+                        warned = []
+                        notwarned = []
+                        for p in people:
+                            if p["username"] == user_username:
+                                continue
+                            try:
+                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*" % (user_username, raid["pokemon"], raid["gimnasio_text"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                                warned.append(p["username"])
+                            except:
+                                notwarned.append(p["username"])
+                        if len(warned)>0:
+                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                        if len(notwarned)>0:
+                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                   bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -366,7 +429,7 @@ def cambiargimnasio(bot, update, args=None):
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
-        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nPulsa el botón de *Editar/Borrar* en la incursión y copia y pega el comando que pone de ejemplo, que lleva incorporados ya los datos.",parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     new_gymtext = ""
@@ -378,6 +441,9 @@ def cambiargimnasio(bot, update, args=None):
     raid = getRaid(raid_id, db)
     if raid != None:
         if raid["usuario_id"] == user_id:
+            if raid["cancelled"] == 1:
+                bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
             if new_gymtext == raid["gimnasio_text"]:
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta en ese gimnasio!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
@@ -402,6 +468,21 @@ def cambiargimnasio(bot, update, args=None):
                     saveRaid(raid, db)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, db, bot)
                     bot.sendMessage(chat_id=chat_id, text="¡No he encontrado el gimnasio, pero lo he actualizado igualmente en la incursión a *%s*" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
+                people = getRaidPeople(raid["id"], db)
+                warned = []
+                notwarned = []
+                for p in people:
+                    if p["username"] == user_username:
+                        continue
+                    try:
+                        bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (user_username, raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        warned.append(p["username"])
+                    except:
+                        notwarned.append(p["username"])
+                if len(warned)>0:
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                if len(notwarned)>0:
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
@@ -421,13 +502,16 @@ def cambiarpokemon(bot, update, args=None):
 
 
     if len(args)<2 or not str(args[0]).isnumeric():
-        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nPulsa el botón de *Editar/Borrar* en la incursión y copia y pega el comando que pone de ejemplo, que lleva incorporados ya los datos.",parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     raid_id = args[0]
     raid = getRaid(raid_id, db)
     if raid != None:
         if raid["usuario_id"] == user_id:
+            if raid["cancelled"] == 1:
+                bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
             if args[1] == raid["pokemon"]:
                 bot.sendMessage(chat_id=chat_id, text="¡Ese ya es el Pokémon actual de la incursión!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
@@ -438,6 +522,21 @@ def cambiarpokemon(bot, update, args=None):
                         saveRaid(raid, db)
                         update_message(raid["grupo_id"], raid["message"], reply_markup, db, bot)
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el Pokémon a *%s* correctamente!" % raid["pokemon"], parse_mode=telegram.ParseMode.MARKDOWN)
+                        people = getRaidPeople(raid["id"], db)
+                        warned = []
+                        notwarned = []
+                        for p in people:
+                            if p["username"] == user_username:
+                                continue
+                            try:
+                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el Pokémon de la incursión para las %s en %s a *%s*" % (user_username, raid["time"], raid["gimnasio_text"], raid["pokemon"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                                warned.append(p["username"])
+                            except:
+                                notwarned.append(p["username"])
+                        if len(warned)>0:
+                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                        if len(notwarned)>0:
+                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
                         break
                 else:
                     bot.sendMessage(chat_id=chat_id, text="¡No he reconocido ese Pokémon!",parse_mode=telegram.ParseMode.MARKDOWN)
@@ -460,12 +559,27 @@ def borrar(bot, update, args=None):
 
     raid_id = args[0]
     if not str(raid_id).isnumeric():
-        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nPulsa el botón de *Editar/Borrar* en la incursión y copia y pega el comando que pone de ejemplo, que lleva incorporados ya los datos.",parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     raid = getRaid(raid_id, db)
     if raid != None:
         if raid["usuario_id"] == user_id:
+            people = getRaidPeople(raid["id"], db)
+            warned = []
+            notwarned = []
+            for p in people:
+                if p["username"] == user_username:
+                    continue
+                try:
+                    bot.sendMessage(chat_id=p["id"], text="🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (user_username, raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                    warned.append(p["username"])
+                except:
+                    notwarned.append(p["username"])
+            if len(warned)>0:
+                bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+            if len(notwarned)>0:
+                bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
             if deleteRaid(raid["id"], db):
                 bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
                 bot.sendMessage(chat_id=chat_id, text="Se ha borrado la incursión correctamente.",parse_mode=telegram.ParseMode.MARKDOWN)
@@ -540,6 +654,7 @@ message_handler = MessageHandler(Filters.text, processMessage)
 setspreadsheet_handler = CommandHandler('setspreadsheet', setspreadsheet, pass_args=True)
 refresh_handler = CommandHandler('refresh', refresh)
 raid_handler = CommandHandler('raid', raid, pass_args=True)
+cancelar_handler = CommandHandler('cancelar', cancelar, pass_args=True)
 cambiarhora_handler = CommandHandler('cambiarhora', cambiarhora, pass_args=True)
 cambiargimnasio_handler = CommandHandler('cambiargimnasio', cambiargimnasio, pass_args=True)
 cambiarpokemon_handler = CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True)
@@ -553,6 +668,7 @@ dispatcher.add_handler(list_handler)
 dispatcher.add_handler(setspreadsheet_handler)
 dispatcher.add_handler(refresh_handler)
 dispatcher.add_handler(raid_handler)
+dispatcher.add_handler(cancelar_handler)
 dispatcher.add_handler(cambiarhora_handler)
 dispatcher.add_handler(cambiargimnasio_handler)
 dispatcher.add_handler(cambiarpokemon_handler)
