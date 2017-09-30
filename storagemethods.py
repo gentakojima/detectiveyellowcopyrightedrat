@@ -12,6 +12,8 @@ def saveSpreadsheet(group_id, spreadsheet, db):
 def savePlaces(group_id, places, db):
     logging.debug("storagemethods:savePlaces: %s %s %s" % (group_id, places, db))
     with db.cursor() as cursor:
+        sql = "UPDATE incursiones SET gimnasio_id=NULL WHERE grupo_id=%s;"
+        cursor.execute(sql, (group_id))
         sql = "DELETE FROM gimnasios WHERE grupo_id=%s;"
         cursor.execute(sql, (group_id))
         for place in places:
