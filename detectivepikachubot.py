@@ -224,7 +224,10 @@ def raid(bot, update, args=None):
   if str(chat_id) != "-1001145756055" and str(chat_id) != "-1001131268439" and str(chat_id) != "-1001134809812":
       bot.sendMessage(chat_id=chat_id, text="Las incursiones todavía están en desarrollo y solo se permiten en grupos preaprobados. Habla con @gentakojima.",parse_mode=telegram.ParseMode.MARKDOWN)
 
-  bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
+  try:
+    bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
+  except:
+    pass
 
   if thisuser["username"] == None:
       sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
