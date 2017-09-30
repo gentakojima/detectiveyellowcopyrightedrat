@@ -107,6 +107,11 @@ def refresh(bot, update, args=None):
       names = row[3].split(",")
       latitude = str(row[1]).replace(",",".")
       longitude = str(row[2]).replace(",",".")
+      m = re.search('^-?[0-9]+.[0-9]+$', latitude, flags=re.IGNORECASE)
+      m2 = re.search('^-?[0-9]+.[0-9]+$', longitude, flags=re.IGNORECASE)
+      if m == None or m2 == None:
+        bot.sendMessage(chat_id=update.message.chat_id, text="¡No se han podido cargar los gimnasios! Parece que hay algún problema con el formato de las coordenadas. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas.")
+        return
       for i,r in enumerate(names):
         names[i] = names[i].strip()
       place.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names});
@@ -114,11 +119,11 @@ def refresh(bot, update, args=None):
 
     if counter > 1:
       savePlaces(chat_id, place, db)
-      bot.sendMessage(chat_id=update.message.chat_id, text="Cargados %i gimnasios!" % counter)
+      bot.sendMessage(chat_id=update.message.chat_id, text="¡Cargados %i gimnasios!" % counter)
     else:
       bot.sendMessage(chat_id=update.message.chat_id, text="No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto?")
   else:
-    bot.sendMessage(chat_id=update.message.chat_id, text="Error cargando spreadsheet. ¿Seguro que está pública?")
+    bot.sendMessage(chat_id=update.message.chat_id, text="Error cargando la hoja de cálculo. ¿Seguro que es pública?")
 
 def registerOak(bot, update):
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
