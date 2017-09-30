@@ -227,13 +227,13 @@ def raid(bot, update, args=None):
   bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
 
   if thisuser["username"] == None:
-      sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+      sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
       t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
       t.start()
       return
 
   if args == None or len(args)<3:
-    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No te he entendido!\nDebes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No te he entendido!\nDebes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text, parse_mode=telegram.ParseMode.MARKDOWN)
     t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
     t.start()
     return
@@ -257,12 +257,14 @@ def raid(bot, update, args=None):
     hour = str(m.group(1))
     minute = m.group(2) or "00"
     if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
         t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
         t.start()
         return
   else:
-    bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+    t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+    t.start()
     return
   current_raid["time"] = "%02d:%02d" % (int(hour),int(minute))
 
@@ -293,7 +295,7 @@ def raid(bot, update, args=None):
 
   current_raid["id"] = saveRaid(current_raid, db)
 
-  bot.send_message(chat_id=user_id, text="Para editar o borrar la incursión de *%s* a las *%s* en *%s* debes poner los siguientes comandos por privado, cambiando el dato que aparece de ejemplo por el deseado.\n\n🕒 Para *cambiar la hora*:\n`/cambiarhora %s %s`\n\n🗺 Para *cambiar el gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 Para *cambiar el Pokémon*:\n`/cambiarpokemon %s %s`\n\n❌ Para *borrar la incursión*:\n`/borrar %s`" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["time"], current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
+  bot.send_message(chat_id=user_id, text="Para editar o borrar la incursión de *%s* a las *%s* en *%s* debes poner los siguientes comandos por privado, cambiando el dato que aparece de ejemplo por el deseado\n\nEl número *%s* es un identificador que tienes que dejar intacto para identificar a la incursión.\n\n🕒 Para *cambiar la hora*:\n`/cambiarhora %s %s`\n\n🗺 Para *cambiar el gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 Para *cambiar el Pokémon*:\n`/cambiarpokemon %s %s`\n\n❌ Para *borrar la incursión*:\n`/borrar %s`" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def cambiarhora(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -469,6 +471,11 @@ def raidbutton(bot, update):
   thisuser = refreshUsername(user_id, user_username, db)
 
   update_text = False
+
+  if (data == "voy" or data == "plus1" or data == "novoy" or data == "estoy") \
+    and (thisuser["username"] == None or thisuser["username"] == "None"):
+    bot.answerCallbackQuery(text="No puedes unirte a una incursión si no tienes definido un alias.\nEn Telegram, ve a 'Ajustes' y selecciona la opción 'Alias'.", show_alert="true", callback_query_id=update.callback_query.id)
+    return
 
   if data == "voy":
       if raidVoy(chat_id, message_id, user_id, db) != False:

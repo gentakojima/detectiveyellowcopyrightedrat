@@ -70,6 +70,6 @@ def update_message(chat_id, message_id, reply_markup, db, bot):
                         team_badge = "💧"
                 text = text + "\n%s%s%s @%s%s" % (estoy_text,team_badge,user["level"],user["username"],plus_text)
             else:
-                text = text + "\n%s▪️-- @%s%s" % (estoy_text,user["username"],plus_text)
+                text = text + "\n%s▪️ - - @%s%s" % (estoy_text,user["username"],plus_text)
 
     bot.edit_message_text(text=text, chat_id=raid["grupo_id"], message_id=raid["message"], reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
