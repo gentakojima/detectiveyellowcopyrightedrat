@@ -105,9 +105,11 @@ def refresh(bot, update, args=None):
     counter = 0
     for row in csvreader:
       names = row[3].split(",")
+      latitude = str(row[1]).replace(",",".")
+      longitude = str(row[2]).replace(",",".")
       for i,r in enumerate(names):
         names[i] = names[i].strip()
-      place.append({"desc":row[0],"latitude":row[1],"longitude":row[2],"names":names});
+      place.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names});
       counter = counter + 1
 
     if counter > 1:
