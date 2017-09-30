@@ -228,13 +228,13 @@ def raid(bot, update, args=None):
 
   if thisuser["username"] == None:
       sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
-      t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+      t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
       t.start()
       return
 
   if args == None or len(args)<3:
     sent_message = bot.sendMessage(chat_id=chat_id, text="¡No te he entendido!\nDebes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text, parse_mode=telegram.ParseMode.MARKDOWN)
-    t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
+    t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot))
     t.start()
     return
 
