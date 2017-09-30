@@ -114,6 +114,8 @@ def refresh(bot, update, args=None):
         return
       for i,r in enumerate(names):
         names[i] = names[i].strip()
+        if len(names[i]) < 3:
+          del names[i]
       place.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names});
       counter = counter + 1
 
