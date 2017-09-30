@@ -91,6 +91,12 @@ def saveRaid(raid, db):
         raid["gimnasio_id"] = None
     if "id" not in raid.keys():
         with db.cursor() as cursor:
+            sql = "SELECT id FROM grupos WHERE id=%s"
+            cursor.execute(sql, (raid["grupo_id"]))
+            result = cursor.fetchone()
+            if result == None:
+                sql = "INSERT INTO grupos (`id`) VALUES (%s);"
+                cursor.execute(sql, (raid["grupo_id"]))
             sql = "INSERT INTO incursiones (`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `gimnasio_id`, `gimnasio_text` ) VALUES (%s, %s, %s, %s, %s, %s, %s);"
             cursor.execute(sql, (raid["grupo_id"], raid["usuario_id"], raid["message"], raid["pokemon"], raid["time"], raid["gimnasio_id"], raid["gimnasio_text"]))
             db.commit()
