@@ -68,6 +68,7 @@ CREATE TABLE `usuarios` (
 CREATE TABLE `voy` (
   `usuario_id` bigint(20) NOT NULL,
   `incursion_id` int(11) NOT NULL,
+  `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `plus` int(11) NOT NULL DEFAULT '0',
   `estoy` tinyint(4) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -150,5 +151,3 @@ ALTER TABLE `incursiones`
 ALTER TABLE `voy`
   ADD CONSTRAINT `incursionvoy` FOREIGN KEY (`incursion_id`) REFERENCES `incursiones` (`id`),
   ADD CONSTRAINT `usuariovoy` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
-
-

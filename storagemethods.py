@@ -113,7 +113,8 @@ def getRaidPeople(raid_id, db):
     with db.cursor() as cursor:
         sql = "SELECT `usuarios`.`id` AS `id`, `username`, `plus`, `estoy`, `level`, `team` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
-        LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s"
+        LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s \
+        ORDER BY `addedtime` ASC"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchall()
         if result[0]["id"] == None:
