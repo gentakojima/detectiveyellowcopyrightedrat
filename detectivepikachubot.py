@@ -382,10 +382,10 @@ def cancelar(bot, update, args=None):
                 warned = []
                 notwarned = []
                 for p in people:
-                    if p["username"] == user_username:
+                    if p["username"] == user_username.replace("_","\_"):
                         continue
                     try:
-                        bot.sendMessage(chat_id=p["id"], text="❌ @%s ha *cancelado* la incursión de %s a las %s en %s" % (user_username, raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=p["id"], text="❌ @%s ha *cancelado* la incursión de %s a las %s en %s" % (user_username.replace("_","\_"), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         warned.append(p["username"])
                     except:
                         notwarned.append(p["username"])
@@ -444,10 +444,10 @@ def cambiarhora(bot, update, args=None):
                         warned = []
                         notwarned = []
                         for p in people:
-                            if p["username"] == user_username:
+                            if p["username"] == user_username.replace("_","\_"):
                                 continue
                             try:
-                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*" % (user_username, raid["pokemon"], raid["gimnasio_text"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*" % (user_username.replace("_","\_"), raid["pokemon"], raid["gimnasio_text"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
                                 warned.append(p["username"])
                             except:
                                 notwarned.append(p["username"])
@@ -521,10 +521,10 @@ def cambiargimnasio(bot, update, args=None):
                 warned = []
                 notwarned = []
                 for p in people:
-                    if p["username"] == user_username:
+                    if p["username"] == user_username.replace("_","\_"):
                         continue
                     try:
-                        bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (user_username, raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (user_username.replace("_","\_"), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         warned.append(p["username"])
                     except:
                         notwarned.append(p["username"])
@@ -578,10 +578,10 @@ def cambiarpokemon(bot, update, args=None):
                         warned = []
                         notwarned = []
                         for p in people:
-                            if p["username"] == user_username:
+                            if p["username"] == user_username.replace("_","\_"):
                                 continue
                             try:
-                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el Pokémon de la incursión para las %s en %s a *%s*" % (user_username, raid["time"], raid["gimnasio_text"], raid["pokemon"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el Pokémon de la incursión para las %s en %s a *%s*" % (user_username.replace("_","\_"), raid["time"], raid["gimnasio_text"], raid["pokemon"]), parse_mode=telegram.ParseMode.MARKDOWN)
                                 warned.append(p["username"])
                             except:
                                 notwarned.append(p["username"])
@@ -624,10 +624,10 @@ def borrar(bot, update, args=None):
             warned = []
             notwarned = []
             for p in people:
-                if p["username"] == user_username:
+                if p["username"] == user_username.replace("_","\_"):
                     continue
                 try:
-                    bot.sendMessage(chat_id=p["id"], text="🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (user_username, raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=p["id"], text="🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (user_username.replace("_","\_"), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
                     warned.append(p["username"])
                 except:
                     notwarned.append(p["username"])
