@@ -27,7 +27,7 @@ import pymysql.cursors
 from threading import Thread
 
 from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids
 
 def cleanup(signum, frame):
   if db != None:
@@ -197,7 +197,7 @@ def processMessage(bot, update):
       logging.info("Encontrado: %s" % chosen["desc"])
       reverse_geocode_result = gmaps.reverse_geocode((chosen["latitude"], chosen["longitude"]))
       address = reverse_geocode_result[0]["formatted_address"]
-      time.sleep(4)
+      time.sleep(3)
       bot.sendVenue(chat_id=chat_id, latitude=chosen["latitude"], longitude=chosen["longitude"], title=chosen["desc"], address=address)
     else:
       logging.info("Oops! No encontrado")
@@ -242,7 +242,7 @@ def raid(bot, update, args=None):
       return
 
   if args == None or len(args)<3:
-    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No te he entendido!\nDebes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text, parse_mode=telegram.ParseMode.MARKDOWN)
+    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No te he entendido!\nDebes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text, parse_mode=telegram.ParseMode.MARKDOWN)
     t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot))
     t.start()
     return
@@ -259,7 +259,7 @@ def raid(bot, update, args=None):
       break
 
   if not "pokemon" in current_raid.keys():
-    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido el Pokémon! ¿Lo has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido el Pokémon! ¿Lo has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
     t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
     t.start()
     return
@@ -274,16 +274,45 @@ def raid(bot, update, args=None):
     hour = str(m.group(1))
     minute = m.group(2) or "00"
     if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
         t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
         t.start()
         return
   else:
-    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio>`\nEjemplo: `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
     t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
     t.start()
     return
   current_raid["time"] = "%02d:%02d" % (int(hour),int(minute))
+
+  m = re.match("([0-9]{1,2})[:.]?([0-9]{0,2})h?", args[-1], flags=re.IGNORECASE)
+  if m != None:
+    hour = str(m.group(1))
+    minute = m.group(2) or "00"
+    if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora de finalización! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
+        t.start()
+        return
+    current_raid["endtime"] = "%02d:%02d" % (int(hour),int(minute))
+    del args[-1]
+
+    try:
+        if args[-4] == "se" and args[-3] == "va" and args[-2] == "a" and args[-1] == "las":
+            del args[-1]
+            del args[-1]
+            del args[-1]
+            del args[-1]
+        elif args[-3] == "está" and args[-2] == "hasta" and args[-1] == "las":
+            del args[-1]
+            del args[-1]
+            del args[-1]
+        elif args[-3] == "desaparece" and args[-2] == "a" and args[-1] == "las":
+            del args[-1]
+            del args[-1]
+            del args[-1]
+    except:
+        pass
 
   del args[0]
   if args[0] == "en":
@@ -307,7 +336,12 @@ def raid(bot, update, args=None):
     current_raid["gimnasio_text"] = chosengym["desc"]
     current_raid["gimnasio_id"] = chosengym["id"]
 
-  send_text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s\nEntrenadores apuntados (0):" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["username"])
+  if "endtime" in current_raid.keys():
+    text_endtime="\n_Se va a las %s_" % current_raid["endtime"]
+  else:
+    text_endtime=""
+  send_text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\nEntrenadores apuntados (0):" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["username"], text_endtime)
+
   sent_message = bot.sendMessage(chat_id=chat_id, text=send_text,parse_mode=telegram.ParseMode.MARKDOWN,reply_markup=reply_markup)
 
   current_raid["grupo_id"] = chat_id
@@ -681,5 +715,10 @@ dispatcher.add_handler(cambiarpokemon_handler)
 dispatcher.add_handler(borrar_handler)
 dispatcher.add_handler(raidbutton_handler)
 
+def callback_oldraids(bot, job):
+    t = Thread(target=end_old_raids, args=(bot, db))
+    t.start()
+j = updater.job_queue
+job_minute = j.run_repeating(callback_oldraids, interval=60, first=0)
 
 updater.start_polling()

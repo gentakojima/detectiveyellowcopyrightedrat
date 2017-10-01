@@ -40,12 +40,14 @@ CREATE TABLE `incursiones` (
   `grupo_id` bigint(20) NOT NULL,
   `gimnasio_id` int(11) DEFAULT NULL,
   `time` varchar(5) NOT NULL,
+  `endtime` varchar(5) DEFAULT NULL,
   `pokemon` varchar(20) NOT NULL,
   `gimnasio_text` varchar(60) DEFAULT NULL,
   `message` int(11) DEFAULT NULL,
   `edited` tinyint(4) NOT NULL DEFAULT '0',
   `cancelled` TINYINT NOT NULL DEFAULT '0',
-  `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
+  `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ended` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

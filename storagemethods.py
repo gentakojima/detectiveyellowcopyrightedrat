@@ -89,6 +89,8 @@ def saveRaid(raid, db):
     logging.debug("storagemethods:saveRaid: %s %s" % (raid, db))
     if "gimnasio_id" not in raid.keys():
         raid["gimnasio_id"] = None
+    if "endtime" not in raid.keys():
+        raid["endtime"] = None
     if "id" not in raid.keys():
         with db.cursor() as cursor:
             sql = "SELECT id FROM grupos WHERE id=%s"
@@ -97,14 +99,14 @@ def saveRaid(raid, db):
             if result == None:
                 sql = "INSERT INTO grupos (`id`) VALUES (%s);"
                 cursor.execute(sql, (raid["grupo_id"]))
-            sql = "INSERT INTO incursiones (`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `gimnasio_id`, `gimnasio_text` ) VALUES (%s, %s, %s, %s, %s, %s, %s);"
-            cursor.execute(sql, (raid["grupo_id"], raid["usuario_id"], raid["message"], raid["pokemon"], raid["time"], raid["gimnasio_id"], raid["gimnasio_text"]))
+            sql = "INSERT INTO incursiones (`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text` ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);"
+            cursor.execute(sql, (raid["grupo_id"], raid["usuario_id"], raid["message"], raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"]))
             db.commit()
             return cursor.lastrowid
     else:
         with db.cursor() as cursor:
-            sql = "UPDATE incursiones SET `pokemon`=%s, `time`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=1 WHERE id=%s;"
-            cursor.execute(sql, (raid["pokemon"], raid["time"], raid["gimnasio_id"], raid["gimnasio_text"], raid["id"]))
+            sql = "UPDATE incursiones SET `pokemon`=%s, `time`=%s, `endtime`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=1 WHERE id=%s;"
+            cursor.execute(sql, (raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["id"]))
             db.commit()
             return raid["id"]
 
@@ -133,7 +135,7 @@ def getRaidPeople(raid_id, db):
 def getRaidbyMessage(grupo_id, message_id, db):
     logging.debug("storagemethods:getRaidByMessage: %s %s %s" % (grupo_id, message_id, db))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
         cursor.execute(sql, (grupo_id, message_id))
         result = cursor.fetchone()
         return result
@@ -227,3 +229,16 @@ def cancelRaid(raid_id, db):
             cursor.execute(sql, (raid_id))
             db.commit()
     return True
+
+def endOldRaids(bot, db):
+    logging.debug("storagemethods:endOldRaids: %s %s" % (bot, db))
+    with db.cursor() as cursor:
+        sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 LIMIT 0,10"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        for r in result:
+            if r["id"] != None:
+                sql = "UPDATE incursiones SET `ended`=1 WHERE id=%s;"
+                cursor.execute(sql, (r["id"]))
+        db.commit()
+        return result
