@@ -62,7 +62,7 @@ dispatcher = updater.dispatcher
 gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
 
 def start(bot, update):
-  bot.sendMessage(chat_id=update.message.chat_id, text="Aquí tienes información de todo lo que hago: http://telegra.ph/Detective-Pikachu-09-28\nDudas e insultos a @gentakojima.")
+    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear una raid</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar tu nivel y equipo</b>\nPregunta <code>¿quién soy?</code> a @profesoroak_bot y reenvíame la respuesta.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def setspreadsheet(bot, update, args=None):
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
