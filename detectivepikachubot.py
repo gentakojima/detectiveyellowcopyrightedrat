@@ -234,6 +234,10 @@ def raid(bot, update, args=None):
 
   thisuser = refreshUsername(user_id, user_username, db)
 
+  if chat_type == "private":
+    bot.sendMessage(chat_id=chat_id, text="La incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
+    return
+
   current_raid = {}
 
   try:
