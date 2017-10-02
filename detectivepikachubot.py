@@ -208,6 +208,9 @@ def list(bot, update):
     bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
     return
 
+  if not is_admin(chat_id, user_id, bot):
+    return
+
   gyms = getPlaces(chat_id, db)
   if len(gyms)==0:
     bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo")
