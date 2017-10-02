@@ -24,6 +24,7 @@ import base64
 import configparser
 import pymysql.cursors
 from threading import Thread
+from unidecode import unidecode
 
 from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid
 from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids
@@ -337,7 +338,7 @@ def raid(bot, update, args=None):
   gyms = getPlaces(chat_id, db)
   for p in gyms:
     for n in p["names"]:
-      if re.search(n,current_raid["gimnasio_text"],flags=re.IGNORECASE) != None:
+      if re.search(unidecode(n),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) != None:
         chosengym = p
         break
     if chosengym != None:
