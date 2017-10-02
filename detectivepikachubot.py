@@ -4,7 +4,6 @@
 #
 # Command list for @botfather
 # help - Muestra la ayuda
-# list - Lista los gimnasios conocidos
 # raid - Crea una incursión
 #
 
