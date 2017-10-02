@@ -2,14 +2,14 @@
 
 A Telegram Bot to create raids and show gym locations (currently in Spanish only!). Last version is always up and running in [@detectivepikachubot](https://t.me/detectivepikachubot).
 
-## Requeriments
+## Requirements
 
 Requires Python 3,4+ and a MySQL 5.5+ or MariaDB database.
 
 To install the required Python libraries, just run:
 
 ```
-pip3 install -r requeriments.txt
+pip3 install -r requirements.txt
 ```
 
 ## Configuration
