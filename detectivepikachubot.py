@@ -127,40 +127,44 @@ def refresh(bot, update, args=None):
     bot.sendMessage(chat_id=update.message.chat_id, text="Error cargando la hoja de cálculo. ¿Seguro que es pública?")
 
 def registerOak(bot, update):
-  (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-  this_date = message.date
-  forward_date = message.forward_date
-  user_username = message.from_user.username
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    this_date = message.date
+    user_username = message.from_user.username
+    try:
+        forward_date = message.forward_date
+        forward_id = message.forward_from.id
+    except:
+        forward_id = None
+        forward_date = None
 
-  if (this_date - forward_date).total_seconds() < 120:
-    bot.sendMessage(chat_id=chat_id, text="¡Recibido el mensaje de @profesoroak_bot! Vamos a ver...")
     m = re.search("@([a-zA-Z0-9]+), eres (Rojo|Azul|Amarillo) L([0-9]{1,2})[ .]",text, flags=re.IGNORECASE)
     if m != None:
-      m2 = re.search("✅",text, flags=re.IGNORECASE)
-      if m2 != None:
-          thisuser = {}
-          thisuser["id"] = user_id
-          thisuser["team"] = m.group(2)
-          thisuser["level"] = m.group(3)
-          thisuser["username"] = user_username
-          bot.sendMessage(chat_id=chat_id, text="He reconocido lo siguiente:\n - Equipo: %s\n - Nivel: %s" % (thisuser["team"],thisuser["level"]))
-          saveUser(thisuser, db)
-      else:
-          bot.sendMessage(chat_id=chat_id, text="Parece que no estás validado, no puedo aceptar tu nivel y equipo hasta que te valides.")
+        if forward_id == 201760961:
+            if (this_date - forward_date).total_seconds() < 120:
+                m2 = re.search("✅",text, flags=re.IGNORECASE)
+                if m2 != None:
+                    thisuser = {}
+                    thisuser["id"] = user_id
+                    thisuser["team"] = m.group(2)
+                    thisuser["level"] = m.group(3)
+                    thisuser["username"] = user_username
+                    bot.sendMessage(chat_id=chat_id, text="👌 ¡De acuerdo! He reconocido que eres del equipo *%s* y de *nivel %s*.\n\nA partir de ahora aparecerá tu equipo y nivel en las incursiones en las que participes. Cuando subas de nivel, repite esta operación para que pueda reflejarlo bien en las incursiones." % (thisuser["team"],thisuser["level"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                    saveUser(thisuser, db)
+                else:
+                    bot.sendMessage(chat_id=chat_id, text="❌ Parece que no estás validado con @profesoroak\_bot. No puedo aceptar tu nivel y equipo hasta que te valides.", parse_mode=telegram.ParseMode.MARKDOWN)
+            else:
+                bot.sendMessage(chat_id=chat_id, text="❌ Ese mensaje es demasiado antiguo. ¡Debes reenviarme un mensaje más reciente!", parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            bot.sendMessage(chat_id=chat_id, text="❌ ¿Has copiado y pegado el mensaje del @profesoroak\_bot? Tienes que usar la opción de *reenviar*, no sirve copiando y pegando.", parse_mode=telegram.ParseMode.MARKDOWN)
     else:
-      bot.sendMessage(chat_id=chat_id, text="No he reconocido ese mensaje de @profesoroak_bot... ¿Seguro que le has preguntado `Quién soy?` y no otra cosa?")
-  else:
-    bot.sendMessage(chat_id=chat_id, text="Ese mensaje es demasiado antiguo. Debes reenviarme un mensaje reciente!")
+        if forward_id == 201760961:
+            bot.sendMessage(chat_id=chat_id, text="❌ No he reconocido ese mensaje de @profesoroak\_bot. ¿Seguro que le has preguntado `Quién soy?` y no otra cosa?", parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def processMessage(bot, update):
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-  try:
-    forward_id = message.forward_from.id
-  except:
-    forward_id = None
 
-  if chat_type == "private" and forward_id == 201760961:
+  if chat_type == "private":
     registerOak(bot, update)
     return
 
