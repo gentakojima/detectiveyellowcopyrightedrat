@@ -1,6 +1,6 @@
 # Detective YellowCopyrightedRat
 
-A Telegram Bot to create raids and show gym locations (currently in Spanish only!). Last version is always up and running in [@detectivepikachubot](https://t.me/detectivepikachubot).
+A Telegram Bot to create raids and show gym locations for Pokémon GO. Last version is always up and running in [@detectivepikachubot](https://t.me/detectivepikachubot). The bot is currently in Spanish only.
 
 ## Requeriments
 
