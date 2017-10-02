@@ -2,22 +2,23 @@
 
 A Telegram Bot to create raids and show gym locations (currently in Spanish only!). Last version is always up and running in [@detectivepikachubot](https://t.me/detectivepikachubot).
 
-## Requeriments
+## Requirements
 
 Requires Python 3,4+ and a MySQL 5.5+ or MariaDB database.
 
 To install the required Python libraries, just run:
 
-```
-pip3 install -r requeriments.txt
+```bash
+pip3 install -r requirements.txt
 ```
 
 ## Configuration
 
 After the first run, an example configuration file will be written in `~/.config/detectivepikachu/config.ini` containing three sections:
- * `database` to configure the connection to the MySQL database
- * `telegram` to configure the Telegram bot Token
- * `googlemaps` to configure the Google Maps API key
+
+* `database` to configure the connection to the MySQL database
+* `telegram` to configure the Telegram bot Token
+* `googlemaps` to configure the Google Maps API key
 
 The database should be initialized manually with the contents of `schema.sql`.
 
@@ -31,4 +32,4 @@ This program is free software: you can redistribute it and/or modify it under th
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU Affero General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
