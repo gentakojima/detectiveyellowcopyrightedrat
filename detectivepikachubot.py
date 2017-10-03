@@ -634,18 +634,19 @@ def borrar(bot, update, args=None):
             people = getRaidPeople(raid["id"], db)
             warned = []
             notwarned = []
-            for p in people:
-                if p["username"] == user_username.replace("_","\_"):
-                    continue
-                try:
-                    bot.sendMessage(chat_id=p["id"], text="🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (user_username.replace("_","\_"), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
-                    warned.append(p["username"])
-                except:
-                    notwarned.append(p["username"])
-            if len(warned)>0:
-                bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
-            if len(notwarned)>0:
-                bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
+            if people != None:
+                for p in people:
+                    if p["username"] == user_username.replace("_","\_"):
+                        continue
+                    try:
+                        bot.sendMessage(chat_id=p["id"], text="🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (user_username.replace("_","\_"), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        warned.append(p["username"])
+                    except:
+                        notwarned.append(p["username"])
+                if len(warned)>0:
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                if len(notwarned)>0:
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
             if deleteRaid(raid["id"], db):
                 bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
                 bot.sendMessage(chat_id=chat_id, text="Se ha borrado la incursión correctamente.",parse_mode=telegram.ParseMode.MARKDOWN)
