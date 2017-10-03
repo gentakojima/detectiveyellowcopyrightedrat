@@ -35,7 +35,7 @@ def cleanup(signum, frame):
   exit(0)
 signal.signal(signal.SIGINT, cleanup)
 
-logging.basicConfig(filename='/tmp/detectivepikachubot.log',level=logging.DEBUG)
+logging.basicConfig(filename='/tmp/detectivepikachubot.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 configdir = expanduser("~") + "/.config/detectivepikachu"
 configfile = configdir + "/config.ini"
