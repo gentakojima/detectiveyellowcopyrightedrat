@@ -26,7 +26,7 @@ import pymysql.cursors
 from threading import Thread
 from unidecode import unidecode
 
-from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid
+from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids
 from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids
 
 def cleanup(signum, frame):
@@ -233,6 +233,27 @@ def list(bot, update):
     output = output + ("\n - %s" % p["desc"])
   bot.sendMessage(chat_id=chat_id, text=output)
 
+def incursiones(bot, update):
+    logging.debug("detectivepikachubot:incursiones: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    if chat_type == "private":
+        bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
+        return
+    if not is_admin(chat_id, user_id, bot):
+        return
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+    except:
+        pass
+
+    raids = getLastRaids(chat_id, 5, db)
+    output = ""
+    for r in raids:
+        creador = getCreadorRaid(r["id"], db)
+        output = ("\n - `%s` %s @%s" % (r["id"], r["pokemon"], creador["username"])) + output
+    output = "Últimas incursiones del canal:" + output
+    bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
+
 keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
               [InlineKeyboardButton("👀 ¡Ya estoy allí!", callback_data='estoy'),InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
 reply_markup = InlineKeyboardMarkup(keyboard)
@@ -392,7 +413,7 @@ def cancelar(bot, update, args=None):
     raid_id = args[0]
     raid = getRaid(raid_id, db)
     if raid != None:
-        if raid["usuario_id"] == user_id:
+        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if cancelRaid(raid_id, db):
                 if raid["ended"] == 1:
                     bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
@@ -441,7 +462,7 @@ def cambiarhora(bot, update, args=None):
     raid_id = args[0]
     raid = getRaid(raid_id, db)
     if raid != None:
-        if raid["usuario_id"] == user_id:
+        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
@@ -509,7 +530,7 @@ def cambiargimnasio(bot, update, args=None):
     raid_id = args[0]
     raid = getRaid(raid_id, db)
     if raid != None:
-        if raid["usuario_id"] == user_id:
+        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
@@ -581,7 +602,7 @@ def cambiarpokemon(bot, update, args=None):
     raid_id = args[0]
     raid = getRaid(raid_id, db)
     if raid != None:
-        if raid["usuario_id"] == user_id:
+        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
@@ -628,7 +649,7 @@ def borrar(bot, update, args=None):
 
     thisuser = refreshUsername(user_id, user_username, db)
 
-    if chat_type != "private":
+    if chat_type != "private" or is_admin(chat_id, user_id, bot):
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de borrar incursión solo funciona en privado!")
         t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
         t.start()
@@ -641,7 +662,7 @@ def borrar(bot, update, args=None):
 
     raid = getRaid(raid_id, db)
     if raid != None:
-        if raid["usuario_id"] == user_id:
+        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="No se puede borrar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
@@ -733,6 +754,7 @@ def raidbutton(bot, update):
 start_handler = CommandHandler('start', start)
 help_handler = CommandHandler('help', start)
 list_handler = CommandHandler('list', list)
+incursiones_handler = CommandHandler('incursiones', incursiones)
 message_handler = MessageHandler(Filters.text, processMessage)
 setspreadsheet_handler = CommandHandler('setspreadsheet', setspreadsheet, pass_args=True)
 refresh_handler = CommandHandler('refresh', refresh)
@@ -748,6 +770,7 @@ dispatcher.add_handler(start_handler)
 dispatcher.add_handler(help_handler)
 dispatcher.add_handler(message_handler)
 dispatcher.add_handler(list_handler)
+dispatcher.add_handler(incursiones_handler)
 dispatcher.add_handler(setspreadsheet_handler)
 dispatcher.add_handler(refresh_handler)
 dispatcher.add_handler(raid_handler)

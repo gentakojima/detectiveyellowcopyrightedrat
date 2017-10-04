@@ -140,6 +140,17 @@ def getRaidbyMessage(grupo_id, message_id, db):
         result = cursor.fetchone()
         return result
 
+def getLastRaids(grupo_id, number, db):
+    logging.debug("storagemethods:getlastRaids: %s %s %s" % (grupo_id, number, db))
+    with db.cursor() as cursor:
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended` FROM `incursiones` WHERE  grupo_id = %s ORDER BY `addedtime` DESC LIMIT 0,%s"
+        cursor.execute(sql, (grupo_id, number))
+        result = cursor.fetchall()
+        if result[0]["id"] == None:
+            return None
+        else:
+            return result
+
 def getCreadorRaid(raid_id, db):
     logging.debug("storagemethods:getCreadorRaid: %s %s" % (raid_id, db))
     with db.cursor() as cursor:
