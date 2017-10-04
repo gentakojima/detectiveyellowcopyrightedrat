@@ -251,7 +251,7 @@ def incursiones(bot, update):
     for r in raids:
         creador = getCreadorRaid(r["id"], db)
         output = ("\n - `%s` %s @%s" % (r["id"], r["pokemon"], creador["username"])) + output
-    output = "Últimas incursiones del canal:" + output
+    output = "Últimas incursiones del grupo:" + output
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
