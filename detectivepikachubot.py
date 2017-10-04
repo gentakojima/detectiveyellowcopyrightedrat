@@ -30,9 +30,10 @@ from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlace
 from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids
 
 def cleanup(signum, frame):
-  if db != None:
-    db.close()
-  exit(0)
+    if db != None:
+        db.close()
+    logging.info("Closing bot!")
+    exit(0)
 signal.signal(signal.SIGINT, cleanup)
 
 logging.basicConfig(filename='/tmp/detectivepikachubot.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
@@ -63,9 +64,11 @@ dispatcher = updater.dispatcher
 gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
 
 def start(bot, update):
+    logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
     bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear una raid</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame la respuesta.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def setspreadsheet(bot, update, args=None):
+  logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   if not is_admin(chat_id, user_id, bot):
     return
@@ -87,6 +90,7 @@ def setspreadsheet(bot, update, args=None):
     bot.sendMessage(chat_id=update.message.chat_id, text="Establecida spreadsheet con ID %s.\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios!" % spreadsheet_id )
 
 def refresh(bot, update, args=None):
+  logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   if not is_admin(chat_id, user_id, bot):
     return
@@ -128,6 +132,7 @@ def refresh(bot, update, args=None):
     bot.sendMessage(chat_id=update.message.chat_id, text="Error cargando la hoja de cálculo. ¿Seguro que es pública?")
 
 def registerOak(bot, update):
+    logging.debug("detectivepikachubot:registerOak: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     this_date = message.date
     user_username = message.from_user.username
@@ -169,6 +174,8 @@ def processMessage(bot, update):
     registerOak(bot, update)
     return
 
+  logging.debug("detectivepikachubot:processMessage: %s %s" % (bot, update))
+
   m = re.search('(crear|nueva) (raid|incursión|incursion|#raid).* en (.+)', text, flags=re.IGNORECASE)
   m2 = re.search('(dónde|donde).*(gimnasio|gym|gim) (.+)$', text, flags=re.IGNORECASE)
   m3 = re.search('(#noloc|#nl)', text, flags=re.IGNORECASE)
@@ -207,6 +214,7 @@ def processMessage(bot, update):
       logging.info("Oops! No encontrado")
 
 def list(bot, update):
+  logging.debug("detectivepikachubot:list: %s %s" % (bot, update))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   if chat_type == "private":
     bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
@@ -230,6 +238,7 @@ keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKey
 reply_markup = InlineKeyboardMarkup(keyboard)
 
 def raid(bot, update, args=None):
+  logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   user_username = message.from_user.username
 
@@ -364,6 +373,7 @@ def raid(bot, update, args=None):
   bot.send_message(chat_id=user_id, text="Para editar o borrar la incursión de *%s* a las *%s* en *%s* debes poner los siguientes comandos por privado, cambiando el dato de ejemplo.\n\nEl identificador de la incursión es *%s* y debes dejarlo intacto.\n\n🕒 *Cambiar la hora*:\n`/cambiarhora %s %s`\n\n🗺 *Cambiar el gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar el Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar la incursión*:\n`/cancelar %s`\n\n❌ *Borrar la incursión*:\n`/borrar %s`" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], current_raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def cancelar(bot, update, args=None):
+    logging.debug("detectivepikachubot:cancelar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -412,6 +422,7 @@ def cancelar(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
 def cambiarhora(bot, update, args=None):
+    logging.debug("detectivepikachubot:cambiarHora: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -474,6 +485,7 @@ def cambiarhora(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
 def cambiargimnasio(bot, update, args=None):
+    logging.debug("detectivepikachubot:cambiargimnasio: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -549,6 +561,7 @@ def cambiargimnasio(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
 def cambiarpokemon(bot, update, args=None):
+    logging.debug("detectivepikachubot:cambiarpokemon: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -609,6 +622,7 @@ def cambiarpokemon(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
 def borrar(bot, update, args=None):
+    logging.debug("detectivepikachubot:borrar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -667,6 +681,8 @@ def raidbutton(bot, update):
   thisuser = refreshUsername(user_id, user_username, db)
 
   update_text = False
+
+  logging.debug("detectivepikachubot:raidbutton:%s: %s %s" % (data, bot, update))
 
   if (data == "voy" or data == "plus1" or data == "novoy" or data == "estoy") \
     and (thisuser["username"] == None or thisuser["username"] == "None"):
@@ -747,5 +763,7 @@ def callback_oldraids(bot, job):
     t.start()
 j = updater.job_queue
 job_minute = j.run_repeating(callback_oldraids, interval=60, first=0)
+
+logging.info("Starting bot!")
 
 updater.start_polling()
