@@ -649,7 +649,7 @@ def borrar(bot, update, args=None):
 
     thisuser = refreshUsername(user_id, user_username, db)
 
-    if chat_type != "private" or is_admin(chat_id, user_id, bot):
+    if chat_type != "private":
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de borrar incursión solo funciona en privado!")
         t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
         t.start()
