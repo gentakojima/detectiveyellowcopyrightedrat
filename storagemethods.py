@@ -20,6 +20,8 @@ def savePlaces(group_id, places, db):
             sql = "INSERT INTO gimnasios (grupo_id,name,latitude,longitude,keywords) \
             VALUES (%s, %s, %s, %s, %s);"
             cursor.execute(sql, (group_id, place["desc"], place["latitude"],place["longitude"],json.dumps(place["names"])))
+            sql = "UPDATE incursiones SET gimnasio_id=%s WHERE gimnasio_text=%s and grupo_id=%s and ended = 0;"
+            cursor.execute(sql, (cursor.lastrowid, place["desc"], group_id))
     db.commit()
 
 def getSpreadsheet(group_id, db):
