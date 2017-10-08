@@ -405,8 +405,12 @@ def cancelar(bot, update, args=None):
     thisuser = refreshUsername(user_id, user_username, db)
 
     if chat_type != "private":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cancelar gimnasio solo funciona en privado!")
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cancelar incursión solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
         t.start()
         return
 
@@ -454,8 +458,12 @@ def cambiarhora(bot, update, args=None):
     thisuser = refreshUsername(user_id, user_username, db)
 
     if chat_type != "private":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar hora solo funciona en privado!")
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar la hora solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
         t.start()
         return
 
@@ -517,8 +525,12 @@ def cambiarhorafin(bot, update, args=None):
     thisuser = refreshUsername(user_id, user_username, db)
 
     if chat_type != "private":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar hora de fin solo funciona en privado!")
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar la hora de fin solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
         t.start()
         return
 
@@ -589,8 +601,12 @@ def cambiargimnasio(bot, update, args=None):
     thisuser = refreshUsername(user_id, user_username, db)
 
     if chat_type != "private":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar gimnasio solo funciona en privado!")
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar el gimnasio solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
         t.start()
         return
 
@@ -665,11 +681,14 @@ def cambiarpokemon(bot, update, args=None):
     thisuser = refreshUsername(user_id, user_username, db)
 
     if chat_type != "private":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar Pokémon solo funciona en privado!")
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar el Pokémon solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
         t.start()
         return
-
 
     if len(args)<2 or not str(args[0]).isnumeric():
         bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
@@ -719,15 +738,19 @@ def cambiarpokemon(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
 def borrar(bot, update, args=None):
-    logging.debug("detectivepikachubot:borrar: %s %s %s" % (bot, update, args))
+    logging.debug("detectivepikachubot:borrar: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
     thisuser = refreshUsername(user_id, user_username, db)
 
     if chat_type != "private":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de borrar incursión solo funciona en privado!")
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot))
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de borrar incursión solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
         t.start()
         return
 
