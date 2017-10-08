@@ -306,7 +306,7 @@ def raid(bot, update, args=None):
     return
 
   del args[0]
-  if args[0] == "a" and args[1] == "las":
+  if args[0] == "a" and (args[1] == "las" or args[1] == "la"):
     del args[0]
     del args[0]
 
@@ -339,16 +339,16 @@ def raid(bot, update, args=None):
     del args[-1]
 
     try:
-        if args[-4] == "se" and args[-3] == "va" and args[-2] == "a" and args[-1] == "las":
+        if args[-4] == "se" and args[-3] == "va" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
             del args[-1]
             del args[-1]
             del args[-1]
             del args[-1]
-        elif args[-3] == "está" and args[-2] == "hasta" and args[-1] == "las":
+        elif args[-3] == "está" and args[-2] == "hasta" and (args[-1] == "las" or args[-1] == "la"):
             del args[-1]
             del args[-1]
             del args[-1]
-        elif args[-3] == "desaparece" and args[-2] == "a" and args[-1] == "las":
+        elif args[-3] == "desaparece" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
             del args[-1]
             del args[-1]
             del args[-1]
