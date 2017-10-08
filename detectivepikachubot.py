@@ -185,7 +185,6 @@ def processMessage(bot, update):
       return
     gyms = getPlaces(chat_id, db)
     if len(gyms)==0:
-      bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo")
       return
     if m != None:
       place = m.group(3)
