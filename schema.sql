@@ -58,7 +58,7 @@ CREATE TABLE `incursiones` (
 
 CREATE TABLE `usuarios` (
   `id` bigint(20) NOT NULL,
-  `username` varchar(20) DEFAULT NULL,
+  `username` varchar(33) DEFAULT NULL,
   `level` int(11) DEFAULT NULL,
   `team` enum('Rojo','Azul','Amarillo','') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
