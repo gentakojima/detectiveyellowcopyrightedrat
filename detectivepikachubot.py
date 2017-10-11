@@ -26,17 +26,16 @@ import pymysql.cursors
 from threading import Thread
 from unidecode import unidecode
 
-from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids
+from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb
 from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids
 
 def cleanup(signum, frame):
-    if db != None:
-        db.close()
     logging.info("Closing bot!")
     exit(0)
 signal.signal(signal.SIGINT, cleanup)
 
 logging.basicConfig(filename='/tmp/detectivepikachubot.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
+logging.info("--------------------- Starting bot! -----------------------")
 
 configdir = expanduser("~") + "/.config/detectivepikachu"
 configfile = configdir + "/config.ini"
@@ -50,14 +49,9 @@ if not os.path.exists(configfile):
   print("Se acaba de crear el fichero de configuración en «»%s».\nComprueba la configuración y vuelve a ejecutarme." % configfile)
   exit(1)
 
+refreshDb()
 config = configparser.ConfigParser()
 config.read(configfile)
-
-try:
-  db = pymysql.connect(host=config["database"]["host"], user=config["database"]["user"], password=config["database"]["password"], db=config["database"]["schema"], charset="utf8mb4", cursorclass=pymysql.cursors.DictCursor)
-except:
-  print("No se puede conectar a la base de datos.\nComprueba el fichero de configuración!")
-  exit(1)
 
 updater = Updater(token=config["telegram"]["token"])
 dispatcher = updater.dispatcher
@@ -86,7 +80,7 @@ def setspreadsheet(bot, update, args=None):
     bot.sendMessage(chat_id=update.message.chat_id, text="Vaya, no he reconocido esa URL... %s" % args[0])
   else:
     spreadsheet_id = m.group(1)
-    saveSpreadsheet(chat_id, spreadsheet_id, db)
+    saveSpreadsheet(chat_id, spreadsheet_id)
     bot.sendMessage(chat_id=update.message.chat_id, text="Establecida spreadsheet con ID %s.\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios!" % spreadsheet_id )
 
 def refresh(bot, update, args=None):
@@ -95,7 +89,7 @@ def refresh(bot, update, args=None):
   if not is_admin(chat_id, user_id, bot):
     return
 
-  spreadsheet_id = getSpreadsheet(chat_id, db)
+  spreadsheet_id = getSpreadsheet(chat_id)
   if spreadsheet_id == None:
     bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo :( Debes configurar primero el spreadsheet. Pregunta a @gentakojima")
     return
@@ -124,7 +118,7 @@ def refresh(bot, update, args=None):
       counter = counter + 1
 
     if counter > 1:
-      savePlaces(chat_id, place, db)
+      savePlaces(chat_id, place)
       bot.sendMessage(chat_id=update.message.chat_id, text="¡Cargados %i gimnasios!" % counter)
     else:
       bot.sendMessage(chat_id=update.message.chat_id, text="No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto?")
@@ -155,7 +149,7 @@ def registerOak(bot, update):
                     thisuser["level"] = m.group(3)
                     thisuser["username"] = user_username
                     bot.sendMessage(chat_id=chat_id, text="👌 ¡De acuerdo! He reconocido que eres del equipo *%s* y de *nivel %s*.\n\nA partir de ahora aparecerá tu equipo y nivel en las incursiones en las que participes. Cuando subas de nivel, repite esta operación para que pueda reflejarlo bien en las incursiones." % (thisuser["team"],thisuser["level"]), parse_mode=telegram.ParseMode.MARKDOWN)
-                    saveUser(thisuser, db)
+                    saveUser(thisuser)
                 else:
                     bot.sendMessage(chat_id=chat_id, text="❌ Parece que no estás validado con @profesoroak\_bot. No puedo aceptar tu nivel y equipo hasta que te valides.", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
@@ -183,7 +177,7 @@ def processMessage(bot, update):
     if chat_type == "private":
       bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
       return
-    gyms = getPlaces(chat_id, db)
+    gyms = getPlaces(chat_id)
     if len(gyms)==0:
       return
     if m != None:
@@ -222,7 +216,7 @@ def list(bot, update):
   if not is_admin(chat_id, user_id, bot):
     return
 
-  gyms = getPlaces(chat_id, db)
+  gyms = getPlaces(chat_id)
   if len(gyms)==0:
     bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo")
     return
@@ -245,10 +239,10 @@ def incursiones(bot, update):
     except:
         pass
 
-    raids = getLastRaids(chat_id, 5, db)
+    raids = getLastRaids(chat_id, 5)
     output = ""
     for r in raids:
-        creador = getCreadorRaid(r["id"], db)
+        creador = getCreadorRaid(r["id"])
         output = ("\n - `%s` %s @%s" % (r["id"], r["pokemon"], creador["username"])) + output
     output = "Últimas incursiones del grupo:" + output
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
@@ -262,7 +256,7 @@ def raid(bot, update, args=None):
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   user_username = message.from_user.username
 
-  thisuser = refreshUsername(user_id, user_username, db)
+  thisuser = refreshUsername(user_id, user_username)
 
   if chat_type == "private":
     bot.sendMessage(chat_id=chat_id, text="La incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
@@ -364,7 +358,7 @@ def raid(bot, update, args=None):
   current_raid["gimnasio_text"] = current_raid["gimnasio_text"].strip()
 
   chosengym = None
-  gyms = getPlaces(chat_id, db)
+  gyms = getPlaces(chat_id)
   for p in gyms:
     for n in p["names"]:
       if re.search(unidecode(n),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) != None:
@@ -388,7 +382,7 @@ def raid(bot, update, args=None):
   current_raid["usuario_id"] = user_id
   current_raid["message"] = sent_message.message_id
 
-  current_raid["id"] = saveRaid(current_raid, db)
+  current_raid["id"] = saveRaid(current_raid)
 
   if current_raid["endtime"] != None:
       show_endtime = current_raid["endtime"]
@@ -402,7 +396,7 @@ def cancelar(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    thisuser = refreshUsername(user_id, user_username, db)
+    thisuser = refreshUsername(user_id, user_username)
 
     if chat_type != "private":
         try:
@@ -419,16 +413,16 @@ def cancelar(bot, update, args=None):
         return
 
     raid_id = args[0]
-    raid = getRaid(raid_id, db)
+    raid = getRaid(raid_id)
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
-            if cancelRaid(raid_id, db):
+            if cancelRaid(raid_id):
                 if raid["ended"] == 1:
                     bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                     return
-                update_message(raid["grupo_id"], raid["message"], None, db, bot)
+                update_message(raid["grupo_id"], raid["message"], None, bot)
                 bot.sendMessage(chat_id=chat_id, text="¡Has cancelado la incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
-                people = getRaidPeople(raid["id"], db)
+                people = getRaidPeople(raid["id"])
                 warned = []
                 notwarned = []
                 for p in people:
@@ -455,7 +449,7 @@ def cambiarhora(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    thisuser = refreshUsername(user_id, user_username, db)
+    thisuser = refreshUsername(user_id, user_username)
 
     if chat_type != "private":
         try:
@@ -472,7 +466,7 @@ def cambiarhora(bot, update, args=None):
         return
 
     raid_id = args[0]
-    raid = getRaid(raid_id, db)
+    raid = getRaid(raid_id)
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
@@ -492,10 +486,10 @@ def cambiarhora(bot, update, args=None):
                         bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`", parse_mode=telegram.ParseMode.MARKDOWN)
                     else:
                         raid["time"] = "%02d:%02d" % (int(hour),int(minute))
-                        saveRaid(raid, db)
-                        update_message(raid["grupo_id"], raid["message"], reply_markup, db, bot)
+                        saveRaid(raid)
+                        update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora a las *%s* correctamente!" % raid["time"], parse_mode=telegram.ParseMode.MARKDOWN)
-                        people = getRaidPeople(raid["id"], db)
+                        people = getRaidPeople(raid["id"])
                         warned = []
                         notwarned = []
                         for p in people:
@@ -522,7 +516,7 @@ def cambiarhorafin(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    thisuser = refreshUsername(user_id, user_username, db)
+    thisuser = refreshUsername(user_id, user_username)
 
     if chat_type != "private":
         try:
@@ -539,7 +533,7 @@ def cambiarhorafin(bot, update, args=None):
         return
 
     raid_id = args[0]
-    raid = getRaid(raid_id, db)
+    raid = getRaid(raid_id)
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
@@ -562,13 +556,13 @@ def cambiarhorafin(bot, update, args=None):
                         raid["endtime"] = "%02d:%02d" % (int(hour),int(minute))
                     else:
                         raid["endtime"] = None
-                    saveRaid(raid, db)
-                    update_message(raid["grupo_id"], raid["message"], reply_markup, db, bot)
+                    saveRaid(raid)
+                    update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     if raid["endtime"] != None:
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora de fin para las *%s* correctamente!" % raid["endtime"], parse_mode=telegram.ParseMode.MARKDOWN)
                     else:
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha borrado la hora de fin correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
-                    people = getRaidPeople(raid["id"], db)
+                    people = getRaidPeople(raid["id"])
                     warned = []
                     notwarned = []
                     for p in people:
@@ -598,7 +592,7 @@ def cambiargimnasio(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    thisuser = refreshUsername(user_id, user_username, db)
+    thisuser = refreshUsername(user_id, user_username)
 
     if chat_type != "private":
         try:
@@ -620,7 +614,7 @@ def cambiargimnasio(bot, update, args=None):
     new_gymtext = new_gymtext.strip()
 
     raid_id = args[0]
-    raid = getRaid(raid_id, db)
+    raid = getRaid(raid_id)
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
@@ -633,7 +627,7 @@ def cambiargimnasio(bot, update, args=None):
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta en ese gimnasio!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 chosengym = None
-                gyms = getPlaces(raid["grupo_id"], db)
+                gyms = getPlaces(raid["grupo_id"])
                 for p in gyms:
                     for n in p["names"]:
                         if re.search(n, new_gymtext, flags=re.IGNORECASE) != None:
@@ -644,16 +638,16 @@ def cambiargimnasio(bot, update, args=None):
                 if chosengym != None:
                     raid["gimnasio_text"] = chosengym["desc"]
                     raid["gimnasio_id"] = chosengym["id"]
-                    saveRaid(raid, db)
-                    update_message(raid["grupo_id"], raid["message"], reply_markup, db, bot)
+                    saveRaid(raid)
+                    update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el gimnasio a *%s* correctamente!" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                     raid["gimnasio_text"] = new_gymtext
                     raid["gimnasio_id"] = None
-                    saveRaid(raid, db)
-                    update_message(raid["grupo_id"], raid["message"], reply_markup, db, bot)
+                    saveRaid(raid)
+                    update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     bot.sendMessage(chat_id=chat_id, text="¡No he encontrado el gimnasio, pero lo he actualizado igualmente en la incursión a *%s*" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
-                people = getRaidPeople(raid["id"], db)
+                people = getRaidPeople(raid["id"])
                 warned = []
                 notwarned = []
                 for p in people:
@@ -678,7 +672,7 @@ def cambiarpokemon(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    thisuser = refreshUsername(user_id, user_username, db)
+    thisuser = refreshUsername(user_id, user_username)
 
     if chat_type != "private":
         try:
@@ -695,7 +689,7 @@ def cambiarpokemon(bot, update, args=None):
         return
 
     raid_id = args[0]
-    raid = getRaid(raid_id, db)
+    raid = getRaid(raid_id)
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
@@ -711,10 +705,10 @@ def cambiarpokemon(bot, update, args=None):
                     m = re.match("^%s$" % pokemon, args[1], flags=re.IGNORECASE)
                     if m != None:
                         raid["pokemon"] = pokemon
-                        saveRaid(raid, db)
-                        update_message(raid["grupo_id"], raid["message"], reply_markup, db, bot)
+                        saveRaid(raid)
+                        update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el Pokémon a *%s* correctamente!" % raid["pokemon"], parse_mode=telegram.ParseMode.MARKDOWN)
-                        people = getRaidPeople(raid["id"], db)
+                        people = getRaidPeople(raid["id"])
                         warned = []
                         notwarned = []
                         for p in people:
@@ -742,7 +736,7 @@ def borrar(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    thisuser = refreshUsername(user_id, user_username, db)
+    thisuser = refreshUsername(user_id, user_username)
 
     if chat_type != "private":
         try:
@@ -759,13 +753,13 @@ def borrar(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
-    raid = getRaid(raid_id, db)
+    raid = getRaid(raid_id)
     if raid != None:
-        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
+        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id):
             if raid["ended"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="No se puede borrar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            people = getRaidPeople(raid["id"], db)
+            people = getRaidPeople(raid["id"])
             warned = []
             notwarned = []
             if people != None:
@@ -781,7 +775,7 @@ def borrar(bot, update, args=None):
                     bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
                 if len(notwarned)>0:
                     bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
-            if deleteRaid(raid["id"], db):
+            if deleteRaid(raid["id"]):
                 bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
                 bot.sendMessage(chat_id=chat_id, text="Se ha borrado la incursión correctamente.",parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -798,7 +792,7 @@ def raidbutton(bot, update):
   chat_id = query.message.chat.id
   message_id = query.message.message_id
 
-  thisuser = refreshUsername(user_id, user_username, db)
+  thisuser = refreshUsername(user_id, user_username)
 
   update_text = False
 
@@ -810,33 +804,38 @@ def raidbutton(bot, update):
     return
 
   if data == "voy":
-      if raidVoy(chat_id, message_id, user_id, db) != False:
+      if raidVoy(chat_id, message_id, user_id) != False:
           bot.answerCallbackQuery(text="¡Te has apuntado! Si vas con más gente, pulsa +1", callback_query_id=update.callback_query.id)
           update_text = True
+      else:
+          bot.answerCallbackQuery(text="¡No has podido apuntarte! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
   elif data == "plus1":
-      result = raidPlus1(chat_id, message_id, user_id, db)
+      result = raidPlus1(chat_id, message_id, user_id)
       if result != False:
           bot.answerCallbackQuery(text="¡Te has apuntado con %i más! Si sois más, pulsa +1" % result, callback_query_id=update.callback_query.id)
           update_text = True
       else:
           bot.answerCallbackQuery(text="No puedes apuntarte con más de 6 personas", callback_query_id=update.callback_query.id)
   elif data == "novoy":
-      if raidNovoy(chat_id, message_id, user_id, db) != False:
+      if raidNovoy(chat_id, message_id, user_id) != False:
           bot.answerCallbackQuery(text="Te has desapuntado de la incursión", callback_query_id=update.callback_query.id)
           update_text = True
+      else:
+          bot.answerCallbackQuery(text="¡No has podido desapuntarte! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
   elif data == "estoy":
-      if raidEstoy(chat_id, message_id, user_id, db) != False:
+      if raidEstoy(chat_id, message_id, user_id) != False:
           bot.answerCallbackQuery(text="Has marcardo que has llegado a la incursión", callback_query_id=update.callback_query.id)
           update_text = True
-
+      else:
+          bot.answerCallbackQuery(text="¡No has podido marcar como llegado! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
   if update_text == True:
-      update_message(chat_id, message_id, reply_markup, db, bot)
+      update_message(chat_id, message_id, reply_markup, bot)
 
   if data=="ubicacion":
-    raid = getRaidbyMessage(chat_id, message_id, db)
+    raid = getRaidbyMessage(chat_id, message_id)
     if raid["gimnasio_id"] != None:
       try:
-        gym = getPlace(raid["gimnasio_id"], db)
+        gym = getPlace(raid["gimnasio_id"])
         if gym != None:
           reverse_geocode_result = gmaps.reverse_geocode((gym["latitude"], gym["longitude"]))
           address = reverse_geocode_result[0]["formatted_address"]
@@ -883,11 +882,9 @@ dispatcher.add_handler(borrar_handler)
 dispatcher.add_handler(raidbutton_handler)
 
 def callback_oldraids(bot, job):
-    t = Thread(target=end_old_raids, args=(bot, db))
+    t = Thread(target=end_old_raids, args=(bot,))
     t.start()
 j = updater.job_queue
-job_minute = j.run_repeating(callback_oldraids, interval=60, first=0)
-
-logging.info("Starting bot!")
+job_minute = j.run_repeating(callback_oldraids, interval=60, first=5)
 
 updater.start_polling()

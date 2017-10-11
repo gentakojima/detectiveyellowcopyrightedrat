@@ -39,11 +39,11 @@ def count_people(gente):
                 count = count + user["plus"]
     return count
 
-def update_message(chat_id, message_id, reply_markup, db, bot):
-    logging.debug("supportmethods:update_message: %s %s %s %s %s" % (chat_id, message_id, reply_markup, db, bot))
-    raid = getRaidbyMessage(chat_id, message_id, db)
-    creador = getCreadorRaid(raid["id"], db)
-    gente = getRaidPeople(raid["id"], db)
+def update_message(chat_id, message_id, reply_markup, bot):
+    logging.debug("supportmethods:update_message: %s %s %s" % (chat_id, message_id, reply_markup))
+    raid = getRaidbyMessage(chat_id, message_id)
+    creador = getCreadorRaid(raid["id"])
+    gente = getRaidPeople(raid["id"])
     numgente = count_people(gente)
     if raid["edited"]>0:
         text_edited=" _(editada)_"
@@ -80,13 +80,19 @@ def update_message(chat_id, message_id, reply_markup, db, bot):
             else:
                 text = text + "\n%s➖ - - @%s%s" % (estoy_text,user["username"],plus_text)
 
-    bot.edit_message_text(text=text, chat_id=raid["grupo_id"], message_id=raid["message"], reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+    return bot.edit_message_text(text=text, chat_id=raid["grupo_id"], message_id=raid["message"], reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
 
-def end_old_raids(bot, db):
-    raids = endOldRaids(bot, db)
+def end_old_raids(bot):
+    logging.debug("supportmethods:end_old_raids")
+    raids = endOldRaids()
     logging.debug(raids)
     for raid in raids:
         logging.debug(raid)
-        r = getRaid(raid["id"], db)
-        update_message(r["grupo_id"], r["message"], None, db, bot)
+        r = getRaid(raid["id"])
+        logging.debug("Updating message for raid ID %s" % (raid["id"]))
+        try:
+            updated = update_message(r["grupo_id"], r["message"], None, bot)
+            logging.debug(updated)
+        except:
+            pass
         time.sleep(0.5)

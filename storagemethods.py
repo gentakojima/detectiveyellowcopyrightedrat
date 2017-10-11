@@ -1,16 +1,38 @@
 import json
 import logging
+import configparser
+from os.path import expanduser
+import pymysql.cursors
 
-def saveSpreadsheet(group_id, spreadsheet, db):
-    logging.debug("storagemethods:saveSpreadsheet: %s %s %s" % (group_id, spreadsheet, db))
+configdir = expanduser("~") + "/.config/detectivepikachu"
+configfile = configdir + "/config.ini"
+
+config = configparser.ConfigParser()
+config.read(configfile)
+
+db = None
+
+def refreshDb():
+    global db
+    try:
+        db = pymysql.connect(host=config["database"]["host"], user=config["database"]["user"], password=config["database"]["password"], db=config["database"]["schema"], charset="utf8mb4", cursorclass=pymysql.cursors.DictCursor)
+        logging.debug("Connected to database")
+    except:
+        print("No se puede conectar a la base de datos.\nComprueba el fichero de configuración!")
+        logging.debug("Can't connect to database!")
+
+def saveSpreadsheet(group_id, spreadsheet):
+    global db
+    logging.debug("storagemethods:saveSpreadsheet: %s %s" % (group_id, spreadsheet))
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id,spreadsheet) VALUES (%s, %s) \
         ON DUPLICATE KEY UPDATE spreadsheet = %s;"
         cursor.execute(sql, (group_id, spreadsheet, spreadsheet))
     db.commit()
 
-def savePlaces(group_id, places, db):
-    logging.debug("storagemethods:savePlaces: %s %s %s" % (group_id, places, db))
+def savePlaces(group_id, places):
+    global db
+    logging.debug("storagemethods:savePlaces: %s %s" % (group_id, places))
     with db.cursor() as cursor:
         sql = "UPDATE incursiones SET gimnasio_id=NULL WHERE grupo_id=%s;"
         cursor.execute(sql, (group_id))
@@ -24,8 +46,9 @@ def savePlaces(group_id, places, db):
             cursor.execute(sql, (cursor.lastrowid, place["desc"], group_id))
     db.commit()
 
-def getSpreadsheet(group_id, db):
-    logging.debug("storagemethods:getSpreadsheet: %s %s" % (group_id, db))
+def getSpreadsheet(group_id):
+    global db
+    logging.debug("storagemethods:getSpreadsheet: %s" % (group_id))
     with db.cursor() as cursor:
         sql = "SELECT `spreadsheet` FROM `grupos` WHERE `id`=%s"
         cursor.execute(sql, (group_id))
@@ -35,8 +58,9 @@ def getSpreadsheet(group_id, db):
         else:
             return None
 
-def getPlaces(group_id, db):
-    logging.debug("storagemethods:getPlaces: %s %s" % (group_id, db))
+def getPlaces(group_id):
+    global db
+    logging.debug("storagemethods:getPlaces: %s" % (group_id))
     with db.cursor() as cursor:
         sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords` FROM `gimnasios` WHERE `grupo_id`=%s"
         cursor.execute(sql, (group_id))
@@ -45,8 +69,9 @@ def getPlaces(group_id, db):
             gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"])})
         return gyms
 
-def getPlace(id, db):
-    logging.debug("storagemethods:getPlace: %s %s" % (id, db))
+def getPlace(id):
+    global db
+    logging.debug("storagemethods:getPlace: %s" % (id))
     with db.cursor() as cursor:
         sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords` FROM `gimnasios` WHERE `id`=%s"
         cursor.execute(sql, (id))
@@ -54,8 +79,9 @@ def getPlace(id, db):
             return {"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"])}
         return None
 
-def saveUser(user, db):
-    logging.debug("storagemethods:saveUser: %s %s" % (user, db))
+def saveUser(user):
+    global db
+    logging.debug("storagemethods:saveUser: %s" % (user))
     with db.cursor() as cursor:
         sql = "INSERT INTO usuarios (id,level,team,username) VALUES (%s, %s, %s, %s) \
         ON DUPLICATE KEY UPDATE level=%s, team=%s, username=%s;"
@@ -68,27 +94,31 @@ def saveUser(user, db):
         cursor.execute(sql, (user["id"], user["level"], user["team"], user["username"], user["level"], user["team"], user["username"]))
     db.commit()
 
-def refreshUsername(user_id, username, db):
-    logging.debug("storagemethods:refreshUsername: %s %s %s" % (user_id, username, db))
-    thisuser = getUser(user_id, db)
+def refreshUsername(user_id, username):
+    global db
+    logging.debug("storagemethods:refreshUsername: %s %s" % (user_id, username))
+    thisuser = getUser(user_id)
     if thisuser == None:
         thisuser = {}
         thisuser["id"] = user_id
     if username != None and username != "None":
         thisuser["username"] = username.replace("_", "\_")
-    saveUser(thisuser, db)
+    saveUser(thisuser)
     return thisuser
 
-def getUser(user_id, db):
-    logging.debug("storagemethods:getUser: %s %s" % (user_id, db))
+def getUser(user_id):
+    global db
+    logging.debug("storagemethods:getUser: %s" % (user_id))
     with db.cursor() as cursor:
         sql = "SELECT `id`,`level`,`team`,`username` FROM `usuarios` WHERE `id`=%s"
+
         cursor.execute(sql, (user_id))
         result = cursor.fetchone()
         return result
 
-def saveRaid(raid, db):
-    logging.debug("storagemethods:saveRaid: %s %s" % (raid, db))
+def saveRaid(raid):
+    global db
+    logging.debug("storagemethods:saveRaid: %s" % (raid))
     if "gimnasio_id" not in raid.keys():
         raid["gimnasio_id"] = None
     if "endtime" not in raid.keys():
@@ -112,16 +142,18 @@ def saveRaid(raid, db):
             db.commit()
             return raid["id"]
 
-def getRaid(raid_id, db):
-    logging.debug("storagemethods:getRaid: %s %s" % (raid_id, db))
+def getRaid(raid_id):
+    global db
+    logging.debug("storagemethods:getRaid: %s" % (raid_id))
     with db.cursor() as cursor:
         sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended` FROM `incursiones` WHERE `id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
         return result
 
-def getRaidPeople(raid_id, db):
-    logging.debug("storagemethods:getRaidPeople: %s %s" % (raid_id, db))
+def getRaidPeople(raid_id):
+    global db
+    logging.debug("storagemethods:getRaidPeople: %s" % (raid_id))
     with db.cursor() as cursor:
         sql = "SELECT `usuarios`.`id` AS `id`, `username`, `plus`, `estoy`, `level`, `team` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
@@ -134,16 +166,18 @@ def getRaidPeople(raid_id, db):
         else:
             return result
 
-def getRaidbyMessage(grupo_id, message_id, db):
-    logging.debug("storagemethods:getRaidByMessage: %s %s %s" % (grupo_id, message_id, db))
+def getRaidbyMessage(grupo_id, message_id):
+    global db
+    logging.debug("storagemethods:getRaidByMessage: %s %s" % (grupo_id, message_id))
     with db.cursor() as cursor:
         sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
         cursor.execute(sql, (grupo_id, message_id))
         result = cursor.fetchone()
         return result
 
-def getLastRaids(grupo_id, number, db):
-    logging.debug("storagemethods:getlastRaids: %s %s %s" % (grupo_id, number, db))
+def getLastRaids(grupo_id, number):
+    global db
+    logging.debug("storagemethods:getlastRaids: %s %s" % (grupo_id, number))
     with db.cursor() as cursor:
         sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended` FROM `incursiones` WHERE  grupo_id = %s ORDER BY `addedtime` DESC LIMIT 0,%s"
         cursor.execute(sql, (grupo_id, number))
@@ -153,18 +187,22 @@ def getLastRaids(grupo_id, number, db):
         else:
             return result
 
-def getCreadorRaid(raid_id, db):
-    logging.debug("storagemethods:getCreadorRaid: %s %s" % (raid_id, db))
+def getCreadorRaid(raid_id):
+    global db
+    logging.debug("storagemethods:getCreadorRaid: %s" % (raid_id))
     with db.cursor() as cursor:
         sql = "SELECT `usuarios`.`id` AS `id`, `username` FROM `incursiones` LEFT JOIN `usuarios` ON `usuarios`.`id` = `incursiones`.`usuario_id` WHERE `incursiones`.`id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
         return result
 
-def raidVoy(grupo_id, message_id, user_id, db):
-    logging.debug("storagemethods:raidVoy: %s %s %s %s" % (grupo_id, message_id, user_id, db))
+def raidVoy(grupo_id, message_id, user_id):
+    global db
+    logging.debug("storagemethods:raidVoy: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
-        raid = getRaidbyMessage(grupo_id, message_id, db)
+        raid = getRaidbyMessage(grupo_id, message_id)
+        if raid["ended"] == 1:
+            return False
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
@@ -177,19 +215,25 @@ def raidVoy(grupo_id, message_id, user_id, db):
     db.commit()
     return True
 
-def raidNovoy(grupo_id, message_id, user_id, db):
-    logging.debug("storagemethods:raidNovoy: %s %s %s %s" % (grupo_id, message_id, user_id, db))
+def raidNovoy(grupo_id, message_id, user_id):
+    global db
+    logging.debug("storagemethods:raidNovoy: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
-        raid = getRaidbyMessage(grupo_id, message_id, db)
+        raid = getRaidbyMessage(grupo_id, message_id)
+        if raid["ended"] == 1:
+            return False
         sql = "DELETE FROM voy WHERE `incursion_id`=%s and usuario_id=%s;"
         cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True
 
-def raidPlus1(grupo_id, message_id, user_id, db):
-    logging.debug("storagemethods:raidPlus1: %s %s %s %s" % (grupo_id, message_id, user_id, db))
+def raidPlus1(grupo_id, message_id, user_id):
+    global db
+    logging.debug("storagemethods:raidPlus1: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
-        raid = getRaidbyMessage(grupo_id, message_id, db)
+        raid = getRaidbyMessage(grupo_id, message_id)
+        if raid["ended"] == 1:
+            return False
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
@@ -205,10 +249,13 @@ def raidPlus1(grupo_id, message_id, user_id, db):
     db.commit()
     return result["plus"]+1
 
-def raidEstoy(grupo_id, message_id, user_id, db):
-    logging.debug("storagemethods:raidEstoy: %s %s %s %s" % (grupo_id, message_id, user_id, db))
+def raidEstoy(grupo_id, message_id, user_id):
+    global db
+    logging.debug("storagemethods:raidEstoy: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
-        raid = getRaidbyMessage(grupo_id, message_id, db)
+        raid = getRaidbyMessage(grupo_id, message_id)
+        if raid["ended"] == 1:
+            return False
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
@@ -221,8 +268,9 @@ def raidEstoy(grupo_id, message_id, user_id, db):
     db.commit()
     return True
 
-def deleteRaid(raid_id, db):
-    logging.debug("storagemethods:deleteRaid: %s %s" % (raid_id, db))
+def deleteRaid(raid_id):
+    global db
+    logging.debug("storagemethods:deleteRaid: %s" % (raid_id))
     with db.cursor() as cursor:
         sql = "DELETE FROM voy WHERE `incursion_id`=%s;"
         cursor.execute(sql, (raid_id))
@@ -231,10 +279,11 @@ def deleteRaid(raid_id, db):
     db.commit()
     return True
 
-def cancelRaid(raid_id, db):
-    logging.debug("storagemethods:cancelRaid: %s %s" % (raid_id, db))
+def cancelRaid(raid_id):
+    global db
+    logging.debug("storagemethods:cancelRaid: %s" % (raid_id))
     with db.cursor() as cursor:
-        raid = getRaid(raid_id, db)
+        raid = getRaid(raid_id)
         if raid["cancelled"] == 1:
             return False
         else:
@@ -243,8 +292,10 @@ def cancelRaid(raid_id, db):
             db.commit()
     return True
 
-def endOldRaids(bot, db):
-    logging.debug("storagemethods:endOldRaids: %s %s" % (bot, db))
+def endOldRaids():
+    global db
+    refreshDb()
+    logging.debug("storagemethods:endOldRaids")
     with db.cursor() as cursor:
         sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 LIMIT 0,10"
         cursor.execute(sql)
