@@ -25,7 +25,10 @@ CREATE TABLE `gimnasios` (
 
 CREATE TABLE `grupos` (
   `id` bigint(20) NOT NULL,
-  `spreadsheet` varchar(100) NOT NULL
+  `title` varchar(120) NOT NULL,
+  `spreadsheet` varchar(100) NOT NULL,
+  `testgroup` TINYINT NOT NULL DEFAULT '0',
+  `alerts` TINYINT NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -78,6 +81,17 @@ CREATE TABLE `voy` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
+-- Table structure for table `alertas`
+--
+
+CREATE TABLE `alertas` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `gimnasio_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+--
 -- Indexes for dumped tables
 --
 
@@ -86,6 +100,7 @@ CREATE TABLE `voy` (
 --
 ALTER TABLE `gimnasios`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `grupo_name_unique` (`grupo_id`,`name`),
   ADD KEY `grupo` (`grupo_id`);
 
 --
@@ -118,6 +133,14 @@ ALTER TABLE `voy`
   ADD KEY `incursion_id` (`incursion_id`);
 
 --
+-- Indexes for table `alertas`
+--
+ALTER TABLE `alertas`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `usuario_id` (`usuario_id`,`gimnasio_id`) USING BTREE;
+
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -131,6 +154,13 @@ ALTER TABLE `gimnasios`
 --
 ALTER TABLE `incursiones`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1020;
+
+--
+-- AUTO_INCREMENT for table `alertas`
+--
+ALTER TABLE `alertas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
 --
 -- Constraints for dumped tables
 --

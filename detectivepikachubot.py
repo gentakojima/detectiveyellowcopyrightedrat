@@ -26,8 +26,8 @@ import pymysql.cursors
 from threading import Thread
 from unidecode import unidecode
 
-from storagemethods import saveSpreadsheet, savePlaces, getSpreadsheet, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -64,6 +64,8 @@ def start(bot, update):
 def setspreadsheet(bot, update, args=None):
   logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+  chat_title = message.chat.title
+
   if not is_admin(chat_id, user_id, bot):
     return
 
@@ -80,24 +82,32 @@ def setspreadsheet(bot, update, args=None):
     bot.sendMessage(chat_id=update.message.chat_id, text="Vaya, no he reconocido esa URL... %s" % args[0])
   else:
     spreadsheet_id = m.group(1)
-    saveSpreadsheet(chat_id, spreadsheet_id)
+    group = getGroup(chat_id)
+    if group == None:
+        group = {"id":chat_id, "title":chat_title, "spreadsheet":spreadsheet_id}
+    else:
+        group["title"] = chat_title
+        group["spreadsheet"] = spreadsheet_id
+    saveGroup(group)
     bot.sendMessage(chat_id=update.message.chat_id, text="Establecida spreadsheet con ID %s.\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios!" % spreadsheet_id )
 
 def refresh(bot, update, args=None):
   logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+  chat_title = message.chat.title
+
   if not is_admin(chat_id, user_id, bot):
     return
 
-  spreadsheet_id = getSpreadsheet(chat_id)
-  if spreadsheet_id == None:
+  grupo = getGroup(chat_id)
+  if grupo == None or grupo["spreadsheet"] == None:
     bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo :( Debes configurar primero el spreadsheet. Pregunta a @gentakojima")
     return
 
   bot.sendMessage(chat_id=update.message.chat_id, text="Refrescando lista de gimnasios...")
-  response = requests.get("https://docs.google.com/spreadsheet/ccc?key=%s&output=csv" % spreadsheet_id )
+  response = requests.get("https://docs.google.com/spreadsheet/ccc?key=%s&output=csv" % grupo["spreadsheet"] )
   if response.status_code == 200:
-    place = []
+    places = []
     f = StringIO(response.content.decode('utf-8'))
     csvreader = csv.reader(f, delimiter=',', quotechar='"')
     counter = 0
@@ -108,22 +118,27 @@ def refresh(bot, update, args=None):
       m = re.search('^-?[0-9]+.[0-9]+$', latitude, flags=re.IGNORECASE)
       m2 = re.search('^-?[0-9]+.[0-9]+$', longitude, flags=re.IGNORECASE)
       if m == None or m2 == None:
-        bot.sendMessage(chat_id=update.message.chat_id, text="¡No se han podido cargar los gimnasios! Parece que hay algún problema con el formato de las coordenadas. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas.")
+        bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido cargar los gimnasios! Parece que hay algún problema con el formato de las coordenadas. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas.")
         return
       for i,r in enumerate(names):
         names[i] = names[i].strip()
         if len(names[i]) < 3:
           del names[i]
-      place.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names});
+      places.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names});
       counter = counter + 1
 
     if counter > 1:
-      savePlaces(chat_id, place)
-      bot.sendMessage(chat_id=update.message.chat_id, text="¡Cargados %i gimnasios!" % counter)
+      grupo["title"] = chat_title
+      saveGroup(grupo)
+      if savePlaces(chat_id, places):
+          places = getPlaces(grupo["id"])
+          bot.sendMessage(chat_id=update.message.chat_id, text="¡Cargados %i gimnasios!" % len(places))
+      else:
+          bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre")
     else:
-      bot.sendMessage(chat_id=update.message.chat_id, text="No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto?")
+      bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto?")
   else:
-    bot.sendMessage(chat_id=update.message.chat_id, text="Error cargando la hoja de cálculo. ¿Seguro que es pública?")
+    bot.sendMessage(chat_id=update.message.chat_id, text="❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?")
 
 def registerOak(bot, update):
     logging.debug("detectivepikachubot:registerOak: %s %s" % (bot, update))
@@ -161,6 +176,37 @@ def registerOak(bot, update):
             bot.sendMessage(chat_id=chat_id, text="❌ No he reconocido ese mensaje de @profesoroak\_bot. ¿Seguro que le has preguntado `Quién soy?` y no otra cosa?", parse_mode=telegram.ParseMode.MARKDOWN)
 
 
+def processLocation(bot, update):
+    logging.debug("detectivepikachubot:processLocation: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    location = message.location
+
+    if chat_type == "private":
+        places = getPlacesByLocation(location.latitude, location.longitude, 200)
+        logging.debug(places)
+        if len(places) == 0:
+            bot.sendMessage(chat_id=chat_id, text="❌ No se han encontrado gimnasios cerca de esta zona.", parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            text_message = "🗺 Se han encontrado los siguientes gimnasios:"
+            example_id = None
+            alerts = getAlerts(user_id)
+            alert_ids = []
+            for alert in alerts:
+                alert_ids.append(alert["place_id"])
+            for place in places:
+                group = getGroup(place["grupo_id"])
+                if group["testgroup"] == 1 or group["alerts"] == 0:
+                    continue
+                if example_id == None:
+                    example_id = place["id"]
+                if place["id"] in alert_ids:
+                    icon = "✅"
+                else:
+                    icon = "▪️"
+                text_message = text_message + "\n%s `%s` %s - Grupo %s" % (icon, place["id"], place["name"], group["title"])
+            text_message = text_message + "\n\nPara añadir una alerta para alguno de estos gimnasios, envíame el comando `/addalert` seguido del identificador numérico.\n\nPor ejemplo:\n`/addalert %s`" % example_id
+            bot.sendMessage(chat_id=chat_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
+
 def processMessage(bot, update):
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
@@ -170,20 +216,16 @@ def processMessage(bot, update):
 
   logging.debug("detectivepikachubot:processMessage: %s %s" % (bot, update))
 
-  m = re.search('(crear|nueva) (raid|incursión|incursion|#raid).* en (.+)', text, flags=re.IGNORECASE)
   m2 = re.search('(dónde|donde).*(gimnasio|gym|gim) (.+)$', text, flags=re.IGNORECASE)
   m3 = re.search('(#noloc|#nl)', text, flags=re.IGNORECASE)
-  if (m != None or m2 != None) and m3 == None:
+  if m2 != None and m3 == None:
     if chat_type == "private":
       bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
       return
     gyms = getPlaces(chat_id)
     if len(gyms)==0:
       return
-    if m != None:
-      place = m.group(3)
-    else:
-      place = m2.group(3)
+    place = m2.group(3)
     logging.info("Buscando sitio \"%s\"..." % place)
     chosen = None
 
@@ -201,7 +243,6 @@ def processMessage(bot, update):
       logging.info("Encontrado: %s" % chosen["desc"])
       reverse_geocode_result = gmaps.reverse_geocode((chosen["latitude"], chosen["longitude"]))
       address = reverse_geocode_result[0]["formatted_address"]
-      time.sleep(3)
       bot.sendVenue(chat_id=chat_id, latitude=chosen["latitude"], longitude=chosen["longitude"], title=chosen["desc"], address=address)
     else:
       logging.info("Oops! No encontrado")
@@ -390,6 +431,117 @@ def raid(bot, update, args=None):
       show_endtime = current_raid["time"]
 
   bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que se va*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🗺 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`\n\n❌ *Borrar incursión*:\n`/borrar %s`" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], current_raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
+
+  if "gimnasio_id" in current_raid.keys():
+    send_alerts(current_raid, bot)
+
+def alerts(bot, update, args=None):
+    logging.debug("detectivepikachubot:alerts: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if chat_type != "private":
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
+        t.start()
+        return
+
+    alerts=getAlerts(user_id)
+    if len(alerts)==0:
+        text_message = "⏰ No tienes ninguna alerta de incursión definida."
+    else:
+        text_message = "⏰ Tienes definidas %s alertas para los siguientes gimnasios:\n" % len(alerts)
+        for alert in alerts:
+            place = getPlace(alert["place_id"])
+            group = getGroup(place["group_id"])
+            text_message = text_message + "\n✅ `%s` %s - Grupo %s" % (place["id"], place["desc"], group["title"])
+        text_message = text_message + "\n\nPara borrar una alerta, envíame `/delalert` seguido del identificador numérico, o `/clearalerts` para borrarlas todas."
+    text_message = text_message + "\n\nPara añadir alertas de incursión nuevas, *envíame una ubicación* con gimnasios cercanos y te explico."
+    bot.send_message(chat_id=user_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
+
+def addalert(bot, update, args=None):
+    logging.debug("detectivepikachubot:addalert: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if chat_type != "private":
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
+        t.start()
+        return
+
+    if len(args)<1 or not str(args[0]).isnumeric():
+        bot.sendMessage(chat_id=chat_id, text="❌ ¡Tienes que pasarme un identificador numérico como parámetro!", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    alerts = getAlerts(user_id)
+    if len(alerts)>=10:
+        bot.sendMessage(chat_id=chat_id, text="❌ ¡Solo se pueden configurar un máximo de 10 alertas!", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    place = getPlace(args[0])
+    if place == None:
+        bot.sendMessage(chat_id=chat_id, text="❌ ¡No he reconocido ese gimnasio! ¿Seguro que has puesto bien el identificador?", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    if addAlert(user_id, place["id"]):
+        bot.sendMessage(chat_id=chat_id, text="👌 Se ha añadido una alerta para el gimnasio *%s*.\n\nA partir de ahora, recibirás un mensaje privado cada vez que alguien cree una incursión en ese gimnasio." % place["desc"], parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        bot.sendMessage(chat_id=chat_id, text="❌ No se ha podido añadir una alerta para ese gimnasio.", parse_mode=telegram.ParseMode.MARKDOWN)
+
+
+def delalert(bot, update, args=None):
+    logging.debug("detectivepikachubot:delalert: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if chat_type != "private":
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
+        t.start()
+        return
+
+    if len(args)<1 or not str(args[0]).isnumeric():
+        bot.sendMessage(chat_id=chat_id, text="❌ ¡Tienes que pasarme un identificador numérico como parámetro!", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    place = getPlace(args[0])
+    if place == None:
+        bot.sendMessage(chat_id=chat_id, text="❌ ¡No he reconocido ese gimnasio! ¿Seguro que has puesto bien el identificador?", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    if delAlert(user_id, place["id"]):
+        bot.sendMessage(chat_id=chat_id, text="👌 Se ha eliminado la alerta del gimnasio *%s*.\n\nA partir de ahora, ya no recibirás mensajes privados cada vez que alguien cree una incursión allí." % place["desc"], parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        bot.sendMessage(chat_id=chat_id, text="❌ No se ha podido eliminar la alerta para ese gimnasio.", parse_mode=telegram.ParseMode.MARKDOWN)
+
+def clearalerts(bot, update):
+    logging.debug("detectivepikachubot:clearlerts: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if chat_type != "private":
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
+        t.start()
+        return
+
+    if clearAlerts(user_id):
+        bot.sendMessage(chat_id=chat_id, text="👌 Se han eliminado las alertas de todos los gimnasios.\n\nA partir de ahora, ya no recibirás mensajes privados cada vez que alguien cree una incursión.", parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        bot.sendMessage(chat_id=chat_id, text="❌ No se ha eliminado ninguna alerta.", parse_mode=telegram.ParseMode.MARKDOWN)
 
 def cancelar(bot, update, args=None):
     logging.debug("detectivepikachubot:cancelar: %s %s %s" % (bot, update, args))
@@ -863,6 +1015,13 @@ cambiarhorafin_handler = CommandHandler('cambiarhorafin', cambiarhorafin, pass_a
 cambiargimnasio_handler = CommandHandler('cambiargimnasio', cambiargimnasio, pass_args=True)
 cambiarpokemon_handler = CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True)
 borrar_handler = CommandHandler('borrar', borrar, pass_args=True)
+location_handler = MessageHandler(Filters.location, processLocation)
+alerts_handler = CommandHandler('alerts', alerts, pass_args=True)
+alertas_handler = CommandHandler('alertas', alerts, pass_args=True)
+addalert_handler = CommandHandler('addalert', addalert, pass_args=True)
+delalert_handler = CommandHandler('delalert', delalert, pass_args=True)
+clearalerts_handler = CommandHandler('clearalerts', clearalerts)
+borrar_handler = CommandHandler('borrar', borrar, pass_args=True)
 raidbutton_handler = CallbackQueryHandler(raidbutton)
 
 dispatcher.add_handler(start_handler)
@@ -879,6 +1038,12 @@ dispatcher.add_handler(cambiarhorafin_handler)
 dispatcher.add_handler(cambiargimnasio_handler)
 dispatcher.add_handler(cambiarpokemon_handler)
 dispatcher.add_handler(borrar_handler)
+dispatcher.add_handler(location_handler)
+dispatcher.add_handler(alerts_handler)
+dispatcher.add_handler(alertas_handler)
+dispatcher.add_handler(addalert_handler)
+dispatcher.add_handler(delalert_handler)
+dispatcher.add_handler(clearalerts_handler)
 dispatcher.add_handler(raidbutton_handler)
 
 def callback_oldraids(bot, job):

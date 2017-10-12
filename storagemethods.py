@@ -3,7 +3,7 @@ import logging
 import configparser
 from os.path import expanduser
 import pymysql.cursors
-from pymysql.err import InterfaceError
+from pymysql.err import InterfaceError, IntegrityError
 
 configdir = expanduser("~") + "/.config/detectivepikachu"
 configfile = configdir + "/config.ini"
@@ -22,42 +22,110 @@ def refreshDb():
         print("No se puede conectar a la base de datos.\nComprueba el fichero de configuración!")
         logging.debug("Can't connect to database!")
 
-def saveSpreadsheet(group_id, spreadsheet):
+def saveGroup(group):
     global db
-    logging.debug("storagemethods:saveSpreadsheet: %s %s" % (group_id, spreadsheet))
+    logging.debug("storagemethods:saveSpreadsheet: %s" % (group))
     with db.cursor() as cursor:
-        sql = "INSERT INTO grupos (id,spreadsheet) VALUES (%s, %s) \
-        ON DUPLICATE KEY UPDATE spreadsheet = %s;"
-        cursor.execute(sql, (group_id, spreadsheet, spreadsheet))
+        sql = "INSERT INTO grupos (id, title, spreadsheet) VALUES (%s, %s, %s) \
+        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"]))
     db.commit()
+
+def getGroup(group_id):
+    global db
+    logging.debug("storagemethods:getGroup: %s" % (group_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts` FROM `grupos` WHERE `id`=%s"
+        cursor.execute(sql, (group_id))
+        result = cursor.fetchone()
+        return result
 
 def savePlaces(group_id, places):
     global db
     logging.debug("storagemethods:savePlaces: %s %s" % (group_id, places))
     with db.cursor() as cursor:
-        sql = "UPDATE incursiones SET gimnasio_id=NULL WHERE grupo_id=%s;"
-        cursor.execute(sql, (group_id))
-        sql = "DELETE FROM gimnasios WHERE grupo_id=%s;"
-        cursor.execute(sql, (group_id))
+        newgymsnames = []
         for place in places:
-            sql = "INSERT INTO gimnasios (grupo_id,name,latitude,longitude,keywords) \
-            VALUES (%s, %s, %s, %s, %s);"
-            cursor.execute(sql, (group_id, place["desc"], place["latitude"],place["longitude"],json.dumps(place["names"])))
-            sql = "UPDATE incursiones SET gimnasio_id=%s WHERE gimnasio_text=%s and grupo_id=%s and ended = 0;"
-            cursor.execute(sql, (cursor.lastrowid, place["desc"], group_id))
+            newgymsnames.append("'"+place["desc"].replace("'","\'")+"'")
+        newgymsnames_str = ",".join(newgymsnames)
+        sql = "UPDATE incursiones SET gimnasio_id=NULL WHERE grupo_id=%s AND gimnasio_text NOT IN (%s)"
+        cursor.execute(sql, (group_id,newgymsnames_str))
+        sql = "DELETE alertas, gimnasios FROM gimnasios LEFT JOIN alertas ON alertas.gimnasio_id = gimnasios.id WHERE gimnasios.grupo_id=%s AND gimnasios.name NOT IN (%s)"
+        cursor.execute(sql, (group_id,newgymsnames_str))
+        for place in places:
+            try:
+                sql = "INSERT INTO gimnasios (grupo_id,name,latitude,longitude,keywords) \
+                VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE latitude=%s, longitude=%s, keywords=%s;"
+                cursor.execute(sql, (group_id, place["desc"], place["latitude"],place["longitude"], json.dumps(place["names"]),    place["latitude"],place["longitude"], json.dumps(place["names"])))
+            except IntegrityError:
+                db.rollback()
+                return False
     db.commit()
+    return True
 
-def getSpreadsheet(group_id):
+def getAlerts(user_id):
     global db
-    logging.debug("storagemethods:getSpreadsheet: %s" % (group_id))
+    logging.debug("storagemethods:getAlerts: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `spreadsheet` FROM `grupos` WHERE `id`=%s"
-        cursor.execute(sql, (group_id))
+        sql = "SELECT `id`,`usuario_id`,`gimnasio_id` FROM `alertas` WHERE `usuario_id`=%s"
+        cursor.execute(sql, (user_id))
+        alerts = []
+        for row in cursor:
+            alerts.append({"id":row["id"], "user_id":row["usuario_id"], "place_id":row["gimnasio_id"]})
+        return alerts
+
+def getAlertsByPlace(place_id):
+    global db
+    logging.debug("storagemethods:getAlertsByPlace: %s" % (place_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `id`,`usuario_id`,`gimnasio_id` FROM `alertas` WHERE `gimnasio_id`=%s"
+        cursor.execute(sql, (place_id))
+        alerts = []
+        for row in cursor:
+            alerts.append({"id":row["id"], "user_id":row["usuario_id"], "place_id":row["gimnasio_id"]})
+        return alerts
+
+def addAlert(user_id, place_id):
+    global db
+    logging.debug("storagemethods:addAlert: %s %s" % (user_id, place_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `id` FROM `alertas` WHERE `usuario_id` = %s AND `gimnasio_id` = %s"
+        cursor.execute(sql, (user_id, place_id))
         result = cursor.fetchone()
         if result != None:
-            return result["spreadsheet"]
-        else:
-            return None
+            return False
+        sql = "INSERT INTO alertas (usuario_id, gimnasio_id) VALUES (%s, %s)"
+        cursor.execute(sql, (user_id, place_id))
+    db.commit()
+    return True
+
+def delAlert(user_id, place_id):
+    global db
+    logging.debug("storagemethods:delAlert: %s %s" % (user_id, place_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `id` FROM `alertas` WHERE `usuario_id` = %s AND `gimnasio_id` = %s"
+        cursor.execute(sql, (user_id, place_id))
+        result = cursor.fetchone()
+        if result == None:
+            return False
+        sql = "DELETE FROM alertas WHERE `usuario_id`=%s and `gimnasio_id`=%s"
+        cursor.execute(sql, (user_id, place_id))
+    db.commit()
+    return True
+
+def clearAlerts(user_id):
+    global db
+    logging.debug("storagemethods:clearAlerts: %s" % (user_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `id` FROM `alertas` WHERE `usuario_id` = %s"
+        cursor.execute(sql, (user_id))
+        result = cursor.fetchone()
+        if result == None:
+            return False
+        sql = "DELETE FROM alertas WHERE `usuario_id`=%s"
+        cursor.execute(sql, (user_id))
+    db.commit()
+    return True
 
 def getPlaces(group_id):
     global db
@@ -74,11 +142,21 @@ def getPlace(id):
     global db
     logging.debug("storagemethods:getPlace: %s" % (id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords` FROM `gimnasios` WHERE `id`=%s"
+        sql = "SELECT `id`,`name`,`grupo_id`,`latitude`,`longitude`,`keywords` FROM `gimnasios` WHERE `id`=%s"
         cursor.execute(sql, (id))
         for row in cursor:
-            return {"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"])}
+            return {"id":row["id"], "group_id":row["grupo_id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"])}
         return None
+
+def getPlacesByLocation(latitude, longitude, distance=100):
+    global db
+    logging.debug("storagemethods:getPlacesByLocation: %s %s %s" % (latitude, longitude, distance))
+    d = float(distance)/50000.0
+    with db.cursor() as cursor:
+        sql = "SELECT `id`,`grupo_id`,`latitude`,`longitude`,`name` FROM `gimnasios` WHERE `latitude`> %s AND `latitude` < %s AND `longitude` > %s and `longitude` < %s"
+        cursor.execute(sql, (float(latitude)-d,float(latitude)+d,float(longitude)-d,float(longitude)+d))
+        result = cursor.fetchall()
+        return result
 
 def saveUser(user):
     global db
