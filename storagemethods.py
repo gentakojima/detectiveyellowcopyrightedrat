@@ -3,6 +3,7 @@ import logging
 import configparser
 from os.path import expanduser
 import pymysql.cursors
+from pymysql.err import InterfaceError
 
 configdir = expanduser("~") + "/.config/detectivepikachu"
 configfile = configdir + "/config.ini"
@@ -106,13 +107,21 @@ def refreshUsername(user_id, username):
     saveUser(thisuser)
     return thisuser
 
-def getUser(user_id):
+def getUser(user_id, reconnect=True):
     global db
     logging.debug("storagemethods:getUser: %s" % (user_id))
     with db.cursor() as cursor:
         sql = "SELECT `id`,`level`,`team`,`username` FROM `usuarios` WHERE `id`=%s"
-
-        cursor.execute(sql, (user_id))
+        try:
+            cursor.execute(sql, (user_id))
+        except InterfaceError:
+            if reconnect == True:
+                logging.info("Error interfacing with the database! Trying to reconnect...")
+                refreshDb()
+                getUser(user_id, False)
+            else:
+                logging.info("Error interfacing with the database but already tried to reconnect")
+                raise
         result = cursor.fetchone()
         return result
 
