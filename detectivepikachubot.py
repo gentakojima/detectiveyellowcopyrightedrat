@@ -4,7 +4,8 @@
 #
 # Command list for @botfather
 # help - Muestra la ayuda
-# raid - Crea una incursión
+# raid - Crea una incursión nueva
+# alerts - Configura alertas de incursiones
 #
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, Filters
