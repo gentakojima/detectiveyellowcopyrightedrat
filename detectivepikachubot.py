@@ -27,7 +27,7 @@ import pymysql.cursors
 from threading import Thread
 from unidecode import unidecode
 
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser
 from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts
 
 def cleanup(signum, frame):
@@ -60,7 +60,7 @@ gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
 
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
-    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear una raid</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame la respuesta.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame la respuesta.\n\n⏰ <b>Crear alerta (BETA)</b>\nEscríbeme por privado el comando <code>/alerts</code>.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def setspreadsheet(bot, update, args=None):
   logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
@@ -185,19 +185,30 @@ def processLocation(bot, update):
     if chat_type == "private":
         places = getPlacesByLocation(location.latitude, location.longitude, 200)
         logging.debug(places)
-        if len(places) == 0:
-            bot.sendMessage(chat_id=chat_id, text="❌ No se han encontrado gimnasios cerca de esta zona.", parse_mode=telegram.ParseMode.MARKDOWN)
+        filtered_places = []
+        for place in places:
+            group = getGroup(place["grupo_id"])
+            if group["testgroup"] == 1 or group["alerts"] == 0:
+                continue
+            ingroup = False
+            groups = getGroupsByUser(user_id)
+            for g in groups:
+                if group["id"] == g["id"]:
+                    ingroup = True
+            if ingroup == False:
+                continue
+            filtered_places.append(place)
+        if len(filtered_places) == 0:
+            bot.sendMessage(chat_id=chat_id, text="❌ No se han encontrado gimnasios cerca de esta zona en grupos en los que hayas participado.", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
-            text_message = "🗺 Se han encontrado los siguientes gimnasios:"
+            text_message = "🗺 Se han encontrado los siguientes gimnasios:\n"
             example_id = None
             alerts = getAlerts(user_id)
             alert_ids = []
             for alert in alerts:
                 alert_ids.append(alert["place_id"])
-            for place in places:
+            for place in filtered_places:
                 group = getGroup(place["grupo_id"])
-                if group["testgroup"] == 1 or group["alerts"] == 0:
-                    continue
                 if example_id == None:
                     example_id = place["id"]
                 if place["id"] in alert_ids:
@@ -490,6 +501,11 @@ def addalert(bot, update, args=None):
     if place == None:
         bot.sendMessage(chat_id=chat_id, text="❌ ¡No he reconocido ese gimnasio! ¿Seguro que has puesto bien el identificador?", parse_mode=telegram.ParseMode.MARKDOWN)
         return
+
+    for alert in alerts:
+        if alert["place_id"] == place["id"]:
+            bot.sendMessage(chat_id=chat_id, text="❌ ¡Ya has configurado una alerta para ese gimnasio!", parse_mode=telegram.ParseMode.MARKDOWN)
+            return
 
     if addAlert(user_id, place["id"]):
         bot.sendMessage(chat_id=chat_id, text="👌 Se ha añadido una alerta para el gimnasio *%s*.\n\nA partir de ahora, recibirás un mensaje privado cada vez que alguien cree una incursión en ese gimnasio." % place["desc"], parse_mode=telegram.ParseMode.MARKDOWN)

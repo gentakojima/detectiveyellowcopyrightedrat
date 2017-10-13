@@ -40,6 +40,19 @@ def getGroup(group_id):
         result = cursor.fetchone()
         return result
 
+def getGroupsByUser(user_id):
+    global db
+    logging.debug("storagemethods:getGroupsByUser: %s" % (user_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts` FROM `grupos` \
+        LEFT JOIN incursiones ON incursiones.grupo_id = grupos.id \
+        RIGHT JOIN voy ON voy.incursion_id = incursiones.id \
+        WHERE voy.usuario_id = %s \
+		GROUP BY grupos.id"
+        cursor.execute(sql, (user_id))
+        result = cursor.fetchall()
+        return result
+
 def savePlaces(group_id, places):
     global db
     logging.debug("storagemethods:savePlaces: %s %s" % (group_id, places))
