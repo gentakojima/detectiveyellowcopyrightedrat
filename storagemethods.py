@@ -59,7 +59,7 @@ def savePlaces(group_id, places):
     with db.cursor() as cursor:
         newgymsnames = []
         for place in places:
-            newgymsnames.append("'"+place["desc"].replace("'","\'")+"'")
+            newgymsnames.append("'"+(place["desc"].replace("'","\\\'"))+"'")
         newgymsnames_str = ",".join(newgymsnames)
         sql = "UPDATE incursiones SET gimnasio_id=NULL WHERE grupo_id=%s AND gimnasio_text NOT IN ("+newgymsnames_str+")"
         cursor.execute(sql, (group_id))
