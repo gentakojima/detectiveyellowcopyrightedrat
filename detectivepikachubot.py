@@ -493,8 +493,8 @@ def addalert(bot, update, args=None):
         return
 
     alerts = getAlerts(user_id)
-    if len(alerts)>=10:
-        bot.sendMessage(chat_id=chat_id, text="❌ ¡Solo se pueden configurar un máximo de 10 alertas!", parse_mode=telegram.ParseMode.MARKDOWN)
+    if len(alerts)>=20:
+        bot.sendMessage(chat_id=chat_id, text="❌ ¡Solo se pueden configurar un máximo de 20 alertas!", parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     place = getPlace(args[0])
