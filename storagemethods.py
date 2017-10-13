@@ -57,19 +57,20 @@ def savePlaces(group_id, places):
     global db
     logging.debug("storagemethods:savePlaces: %s %s" % (group_id, places))
     with db.cursor() as cursor:
-        newgymsnames = []
+        params_vars = []
+        params_replacements = [group_id]
         for place in places:
-            newgymsnames.append("'"+(place["desc"].replace("'","\\\'"))+"'")
-        newgymsnames_str = ",".join(newgymsnames)
-        sql = "UPDATE incursiones SET gimnasio_id=NULL WHERE grupo_id=%s AND gimnasio_text NOT IN ("+newgymsnames_str+")"
-        cursor.execute(sql, (group_id))
-        sql = "DELETE alertas, gimnasios FROM gimnasios LEFT JOIN alertas ON alertas.gimnasio_id = gimnasios.id WHERE gimnasios.grupo_id=%s AND gimnasios.name NOT IN ("+newgymsnames_str+")"
-        cursor.execute(sql, (group_id))
+            params_vars.append("%s")
+            params_replacements.append(place["desc"])
+        sql = "UPDATE incursiones SET gimnasio_id=NULL WHERE grupo_id=%s AND gimnasio_text NOT IN ("+(",".join(params_vars))+")"
+        cursor.execute(sql, params_replacements)
+        sql = "DELETE alertas, gimnasios FROM gimnasios LEFT JOIN alertas ON alertas.gimnasio_id = gimnasios.id WHERE gimnasios.grupo_id=%s AND gimnasios.name NOT IN ("+(",".join(params_vars))+")"
+        cursor.execute(sql, params_replacements)
         for place in places:
             try:
                 sql = "INSERT INTO gimnasios (grupo_id,name,latitude,longitude,keywords) \
                 VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE latitude=%s, longitude=%s, keywords=%s;"
-                cursor.execute(sql, (group_id, place["desc"], place["latitude"],place["longitude"], json.dumps(place["names"]),    place["latitude"],place["longitude"], json.dumps(place["names"])))
+                cursor.execute(sql, (group_id, place["desc"], place["latitude"], place["longitude"], json.dumps(place["names"]), place["latitude"], place["longitude"], json.dumps(place["names"])))
             except IntegrityError:
                 db.rollback()
                 return False
