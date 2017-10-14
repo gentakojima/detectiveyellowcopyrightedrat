@@ -141,11 +141,15 @@ def clearAlerts(user_id):
     db.commit()
     return True
 
-def getPlaces(group_id):
+def getPlaces(group_id, ordering="name"):
     global db
     logging.debug("storagemethods:getPlaces: %s" % (group_id))
     with db.cursor() as cursor:
         sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords` FROM `gimnasios` WHERE `grupo_id`=%s"
+        if ordering == "name":
+            sql = sql + " ORDER BY name"
+        elif ordering == "id":
+            sql = sql + " ORDER BY id"
         cursor.execute(sql, (group_id))
         gyms = []
         for row in cursor:

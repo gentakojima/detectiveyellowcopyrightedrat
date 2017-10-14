@@ -411,10 +411,12 @@ def raid(bot, update, args=None):
   current_raid["gimnasio_text"] = current_raid["gimnasio_text"].strip()
 
   chosengym = None
-  gyms = getPlaces(chat_id)
+  gyms = getPlaces(chat_id, ordering="id")
   for p in gyms:
+    logging.debug("Testing gym «%s»»" % (p["desc"]))
     for n in p["names"]:
       if re.search(unidecode(n),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) != None:
+        logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(current_raid["gimnasio_text"])))
         chosengym = p
         break
     if chosengym != None:
@@ -796,10 +798,12 @@ def cambiargimnasio(bot, update, args=None):
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta en ese gimnasio!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 chosengym = None
-                gyms = getPlaces(raid["grupo_id"])
+                gyms = getPlaces(raid["grupo_id"], ordering="id")
                 for p in gyms:
+                    logging.debug("Testing gym «%s»»" % (p["desc"]))
                     for n in p["names"]:
-                        if re.search(n, new_gymtext, flags=re.IGNORECASE) != None:
+                        if re.search(unidecode(n), unidecode(new_gymtext), flags=re.IGNORECASE) != None:
+                            logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(new_gymtext)))
                             chosengym = p
                             break
                     if chosengym != None:
