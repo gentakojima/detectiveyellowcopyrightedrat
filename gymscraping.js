@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         gymscraping
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  try to take over the world!
 // @author       You
 // @require http://code.jquery.com/jquery-1.12.4.min.js
@@ -15,13 +15,13 @@ var spacer = Array(30).join("#");
 // download a file on html5 ready browsers
 var showDownloadButton = function(){
   var button = document.createElement("button");
-  button.innerHTML = "Download GYMS as CSV";
+  button.innerHTML = "Download Gyms CSV";
   button.style = "top:0;right:0;position:absolute;margin:20px;z-index: 9999";
   document.body.appendChild(button);
   $(button).click(function(){
-    ohmylog("Click");
+    ohmylog("Click outside");
     if(window.CSV_GYMS){
-      ohmylog("Click");
+      ohmylog("Click inside");
       var address = $("#address").val().split(" ").join("_") || "";
       var filename = "gyms" + ( address ? "_" + address : "") + "_" + new Date().getTime() + ".csv";
       var blob = new Blob([CSV_GYMS], {
@@ -37,6 +37,8 @@ var showDownloadButton = function(){
     // save log and dir
     ohmylog = window.ohmylog = console.log;
     ohmydir = window.ohmydir = console.dir;
+    // initialize csv
+    window.CSV_GYMS = "";
     (function() {
        var origOpen = XMLHttpRequest.prototype.open;
        // add our hanldler as a listener to every XMLHttpRequest
@@ -45,31 +47,35 @@ var showDownloadButton = function(){
            if(this.responseText.indexOf("gyms") > 0){
                var json = JSON.parse(this.responseText);
                var gyms = json.gyms;
+               ohmylog("Received response with " + gyms.length + " gyms");
                if(gyms.length>0){
-                 var csv = "";
-                 ohmylog(spacer + ' GYMS CSV ' + spacer);
+                 var csv = window.CSV_GYMS;
+                 ohmylog('Gymscraping in action!!');
                  for(var j = 0; j < gyms.length; j++){
                      var gym = gyms[j];
                      // decode base64 until a max of 10 attemps
                      for(var i = 0; i < 10; i++){
-                         gym = Base64.decode(gym);
-                         // if decoded...
                          if(gym.indexOf("gym_id") >= 0){
                            // conver text to JSON
+                           ohmylog("Gym info: " + gym);
                            gym = JSON.parse(gym);
-                           // append a row to the csv
+                           ohmylog("Found gym id " + gym.gym_id);
+                           // append a row to the csv if not already there
                            var row = gym.gym_name + "\t" + gym.longitude + "\t"+ gym.latitude;
-                           csv = csv + row +"\n";
+                           if(csv.indexOf(row) == -1){
+                               csv = csv + row +"\n";
+                           }
                            break;
                          }
+                         // if not valid, try to base64decode it
+                         gym = Base64.decode(gym);
                      }
                  }
                  window.CSV_GYMS = csv;
                  showDownloadButton();
-                 ohmylog(csv);
-                 ohmylog(spacer + ' GYMS CSV ' + spacer);
+                 ohmylog("CSV contents: " + csv);
+                 ohmylog('Gymscraping ended!!');
                }
-               ohmylog("Found " + gyms.length + " gyms");
            }
          });
          origOpen.apply(this, arguments);
