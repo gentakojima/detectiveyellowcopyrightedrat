@@ -607,9 +607,9 @@ def cancelar(bot, update, args=None):
                     except:
                         notwarned.append(p["username"])
                 if len(warned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ensure_escaped(", ".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 if len(notwarned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ensure_escaped(", ".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ya estaba cancelada!",parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -674,9 +674,9 @@ def cambiarhora(bot, update, args=None):
                             except:
                                 notwarned.append(p["username"])
                         if len(warned)>0:
-                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ensure_escaped(", ".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                         if len(notwarned)>0:
-                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ensure_escaped(", ".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                   bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -750,9 +750,9 @@ def cambiarhorafin(bot, update, args=None):
                         except:
                             notwarned.append(p["username"])
                     if len(warned)>0:
-                        bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ensure_escaped(", ".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                     if len(notwarned)>0:
-                        bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ensure_escaped(", ".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                   bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`\n\nSi quieres borrar la hora de fin, pon un guión simple en lugar de la hora: `-`.", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -834,9 +834,9 @@ def cambiargimnasio(bot, update, args=None):
                     except:
                         notwarned.append(p["username"])
                 if len(warned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ensure_escaped(", ".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 if len(notwarned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ensure_escaped(", ".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
@@ -895,9 +895,9 @@ def cambiarpokemon(bot, update, args=None):
                             except:
                                 notwarned.append(p["username"])
                         if len(warned)>0:
-                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ensure_escaped(", ".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                         if len(notwarned)>0:
-                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ensure_escaped(", ".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
                         break
                 else:
                     bot.sendMessage(chat_id=chat_id, text="¡No he reconocido ese Pokémon!",parse_mode=telegram.ParseMode.MARKDOWN)
@@ -947,9 +947,9 @@ def borrar(bot, update, args=None):
                     except:
                         notwarned.append(p["username"])
                 if len(warned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ensure_escaped(", ".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 if len(notwarned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ensure_escaped(", ".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
             if deleteRaid(raid["id"]):
                 bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
                 bot.sendMessage(chat_id=chat_id, text="Se ha borrado la incursión correctamente.",parse_mode=telegram.ParseMode.MARKDOWN)
