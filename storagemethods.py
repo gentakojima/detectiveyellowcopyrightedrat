@@ -399,15 +399,18 @@ def cancelRaid(raid_id):
 
 def endOldRaids():
     global db
-    refreshDb()
     logging.debug("storagemethods:endOldRaids")
     with db.cursor() as cursor:
-        sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 LIMIT 0,10"
-        cursor.execute(sql)
-        result = cursor.fetchall()
-        for r in result:
-            if r["id"] != None:
-                sql = "UPDATE incursiones SET `ended`=1 WHERE id=%s;"
-                cursor.execute(sql, (r["id"]))
-        db.commit()
-        return result
+        try:
+            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 LIMIT 0,10"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            for r in result:
+                if r["id"] != None:
+                    sql = "UPDATE incursiones SET `ended`=1 WHERE id=%s;"
+                    cursor.execute(sql, (r["id"]))
+            db.commit()
+            return result
+        except:
+            refreshDb()
+            return []
