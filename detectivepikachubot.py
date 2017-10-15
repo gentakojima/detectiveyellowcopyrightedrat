@@ -10,6 +10,7 @@
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, Filters
 from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
+
 import re
 import googlemaps
 import time
@@ -28,7 +29,7 @@ from threading import Thread
 from unidecode import unidecode
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -56,6 +57,7 @@ config.read(configfile)
 
 updater = Updater(token=config["telegram"]["token"])
 dispatcher = updater.dispatcher
+dispatcher.add_error_handler(error_callback)
 gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
 
 def start(bot, update):
@@ -296,7 +298,7 @@ def incursiones(bot, update):
     output = ""
     for r in raids:
         creador = getCreadorRaid(r["id"])
-        output = ("\n - `%s` %s @%s" % (r["id"], r["pokemon"], creador["username"])) + output
+        output = ("\n - `%s` %s @%s" % (r["id"], r["pokemon"], ensure_escaped(creador["username"]))) + output
     output = "Últimas incursiones del grupo:" + output
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
@@ -429,7 +431,7 @@ def raid(bot, update, args=None):
     text_endtime="\n_Se va a las %s_" % current_raid["endtime"]
   else:
     text_endtime=""
-  send_text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\nEntrenadores apuntados (0):" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["username"], text_endtime)
+  send_text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\nEntrenadores apuntados (0):" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], ensure_escaped(current_raid["username"]), text_endtime)
 
   sent_message = bot.sendMessage(chat_id=chat_id, text=send_text,parse_mode=telegram.ParseMode.MARKDOWN,reply_markup=reply_markup)
 
@@ -597,17 +599,17 @@ def cancelar(bot, update, args=None):
                 warned = []
                 notwarned = []
                 for p in people:
-                    if p["username"] == user_username.replace("_","\_"):
+                    if p["username"] == user_username:
                         continue
                     try:
-                        bot.sendMessage(chat_id=p["id"], text="❌ @%s ha *cancelado* la incursión de %s a las %s en %s" % (user_username.replace("_","\_"), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=p["id"], text="❌ @%s ha *cancelado* la incursión de %s a las %s en %s" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         warned.append(p["username"])
                     except:
                         notwarned.append(p["username"])
                 if len(warned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 if len(notwarned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ya estaba cancelada!",parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -618,7 +620,7 @@ def cancelar(bot, update, args=None):
 def cambiarhora(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarHora: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    user_username = message.from_user.username
+    user_ = message.from_user.username
 
     thisuser = refreshUsername(user_id, user_username)
 
@@ -664,17 +666,17 @@ def cambiarhora(bot, update, args=None):
                         warned = []
                         notwarned = []
                         for p in people:
-                            if p["username"] == user_username.replace("_","\_"):
+                            if p["username"] == user_username:
                                 continue
                             try:
-                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*" % (user_username.replace("_","\_"), raid["pokemon"], raid["gimnasio_text"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*" % (ensure_escaped(user_username), raid["pokemon"], raid["gimnasio_text"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
                                 warned.append(p["username"])
                             except:
                                 notwarned.append(p["username"])
                         if len(warned)>0:
-                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                         if len(notwarned)>0:
-                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
+                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                   bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -737,20 +739,20 @@ def cambiarhorafin(bot, update, args=None):
                     warned = []
                     notwarned = []
                     for p in people:
-                        if p["username"] == user_username.replace("_","\_"):
+                        if p["username"] == user_username:
                             continue
                         try:
                             if raid["endtime"] != None:
-                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado la hora a la que se termina la incursión de %s en %s a las *%s* (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_username.replace("_","\_"), raid["pokemon"], raid["gimnasio_text"], raid["endtime"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado la hora a la que se termina la incursión de %s en %s a las *%s* (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], raid["gimnasio_text"], raid["endtime"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
                             else:
-                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha borrado la hora a la que se termina la incursión de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_username.replace("_","\_"), raid["pokemon"], raid["gimnasio_text"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha borrado la hora a la que se termina la incursión de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], raid["gimnasio_text"], raid["time"]), parse_mode=telegram.ParseMode.MARKDOWN)
                             warned.append(p["username"])
                         except:
                             notwarned.append(p["username"])
                     if len(warned)>0:
-                        bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                     if len(notwarned)>0:
-                        bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                   bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`\n\nSi quieres borrar la hora de fin, pon un guión simple en lugar de la hora: `-`.", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -824,17 +826,17 @@ def cambiargimnasio(bot, update, args=None):
                 warned = []
                 notwarned = []
                 for p in people:
-                    if p["username"] == user_username.replace("_","\_"):
+                    if p["username"] == user_username:
                         continue
                     try:
-                        bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (user_username.replace("_","\_"), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         warned.append(p["username"])
                     except:
                         notwarned.append(p["username"])
                 if len(warned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 if len(notwarned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
@@ -885,17 +887,17 @@ def cambiarpokemon(bot, update, args=None):
                         warned = []
                         notwarned = []
                         for p in people:
-                            if p["username"] == user_username.replace("_","\_"):
+                            if p["username"] == user_username:
                                 continue
                             try:
-                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el Pokémon de la incursión para las %s en %s a *%s*" % (user_username.replace("_","\_"), raid["time"], raid["gimnasio_text"], raid["pokemon"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                                bot.sendMessage(chat_id=p["id"], text="⚠️ @%s ha cambiado el Pokémon de la incursión para las %s en %s a *%s*" % (ensure_escaped(user_username), raid["time"], raid["gimnasio_text"], raid["pokemon"]), parse_mode=telegram.ParseMode.MARKDOWN)
                                 warned.append(p["username"])
                             except:
                                 notwarned.append(p["username"])
                         if len(warned)>0:
-                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                            bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                         if len(notwarned)>0:
-                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
+                            bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
                         break
                 else:
                     bot.sendMessage(chat_id=chat_id, text="¡No he reconocido ese Pokémon!",parse_mode=telegram.ParseMode.MARKDOWN)
@@ -937,17 +939,17 @@ def borrar(bot, update, args=None):
             notwarned = []
             if people != None:
                 for p in people:
-                    if p["username"] == user_username.replace("_","\_"):
+                    if p["username"] == user_username:
                         continue
                     try:
-                        bot.sendMessage(chat_id=p["id"], text="🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (user_username.replace("_","\_"), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=p["id"], text="🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         warned.append(p["username"])
                     except:
                         notwarned.append(p["username"])
                 if len(warned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".join(warned), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: %s" % ", ".ensure_escaped(join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
                 if len(notwarned)>0:
-                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".join(notwarned), parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: %s" % ", ".ensure_escaped(join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
             if deleteRaid(raid["id"]):
                 bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
                 bot.sendMessage(chat_id=chat_id, text="Se ha borrado la incursión correctamente.",parse_mode=telegram.ParseMode.MARKDOWN)

@@ -199,7 +199,7 @@ def refreshUsername(user_id, username):
         thisuser = {}
         thisuser["id"] = user_id
     if username != None and username != "None":
-        thisuser["username"] = username.replace("_", "\_")
+        thisuser["username"] = username
     saveUser(thisuser)
     return thisuser
 
