@@ -60,7 +60,7 @@ def update_message(chat_id, message_id, reply_markup, bot):
         text_endtime="\n_Se va a las %s_" % raid["endtime"]
     else:
         text_endtime=""
-    text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s%s\n" % (raid["pokemon"], raid["time"], raid["gimnasio_text"], creador["username"], text_edited, text_endtime)
+    text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s%s\n" % (raid["pokemon"], raid["time"], raid["gimnasio_text"], creador["username"].replace("_","\\_"), text_edited, text_endtime)
     if raid["cancelled"] == 1:
         text = text + "❌ *Incursión cancelada*"
     else:
@@ -83,9 +83,9 @@ def update_message(chat_id, message_id, reply_markup, bot):
                         team_badge = "⚡️"
                     else:
                         team_badge = "❄️"
-                text = text + "\n%s%s%s @%s%s" % (estoy_text,team_badge,user["level"],user["username"],plus_text)
+                text = text + "\n%s%s%s @%s%s" % (estoy_text,team_badge,user["level"],user["username"].replace("_","\\_"),plus_text)
             else:
-                text = text + "\n%s➖ - - @%s%s" % (estoy_text,user["username"],plus_text)
+                text = text + "\n%s➖ - - @%s%s" % (estoy_text,user["username"].replace("_","\\_"),plus_text)
 
     return bot.edit_message_text(text=text, chat_id=raid["grupo_id"], message_id=raid["message"], reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
 
