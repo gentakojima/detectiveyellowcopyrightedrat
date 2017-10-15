@@ -620,7 +620,7 @@ def cancelar(bot, update, args=None):
 def cambiarhora(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarHora: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    user_ = message.from_user.username
+    user_username = message.from_user.username
 
     thisuser = refreshUsername(user_id, user_username)
 
