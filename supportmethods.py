@@ -127,3 +127,34 @@ def error_callback(bot, update, error):
         logging.debug("TELEGRAM ERROR: Other error - %s" % update)
     except:
         logging.debug("TELEGRAM ERROR: Unknown - %s" % update)
+
+def warn_people(warntype, raid, user_username, chat_id, bot):
+    people = getRaidPeople(raid["id"])
+    warned = []
+    notwarned = []
+    for p in people:
+        if p["username"] == user_username:
+            continue
+        try:
+            if warntype == "cancelar":
+                text = "❌ @%s ha *cancelado* la incursión de %s a las %s en %s" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], raid["gimnasio_text"])
+            elif warntype == "borrar":
+                text = "🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], raid["gimnasio_text"])
+            elif warntype == "cambiarhora":
+                text = "⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*" % (ensure_escaped(user_username), raid["pokemon"], raid["gimnasio_text"], raid["time"])
+            elif warntype == "cambiarhorafin":
+                text = "⚠️ @%s ha cambiado la hora a la que se termina la incursión de %s en %s a las *%s* (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], raid["gimnasio_text"], raid["endtime"], raid["time"])
+            elif warntype == "borrarhorafin":
+                text = "⚠️ @%s ha borrado la hora a la que se termina la incursión de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], raid["gimnasio_text"], raid["time"])
+            elif warntype == "cambiargimnasio":
+                text = "⚠️ @%s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], raid["gimnasio_text"])
+            elif warntype == "cambiarpokemon":
+                text = "⚠️ @%s ha cambiado el Pokémon de la incursión para las %s en %s a *%s*" % (ensure_escaped(user_username), raid["time"], raid["gimnasio_text"], raid["pokemon"])
+            bot.sendMessage(chat_id=p["id"], text=text, parse_mode=telegram.ParseMode.MARKDOWN)
+            warned.append(p["username"])
+        except:
+            notwarned.append(p["username"])
+    if len(warned)>0:
+        bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: @%s" % ensure_escaped(", @".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
+    if len(notwarned)>0:
+        bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: @%s" % ensure_escaped(", @".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
