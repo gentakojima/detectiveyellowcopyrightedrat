@@ -858,7 +858,7 @@ def borrar(bot, update, args=None):
 
     raid = getRaid(raid_id)
     if raid != None:
-        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id):
+        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="No se puede borrar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return

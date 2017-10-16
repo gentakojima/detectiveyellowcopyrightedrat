@@ -132,6 +132,8 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
     people = getRaidPeople(raid["id"])
     warned = []
     notwarned = []
+    if people == None:
+        return
     for p in people:
         if p["username"] == user_username:
             continue
