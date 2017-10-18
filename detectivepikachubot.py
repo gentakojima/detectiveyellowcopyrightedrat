@@ -22,9 +22,7 @@ import signal
 from os.path import expanduser
 import os
 import telegram
-import base64
 import configparser
-import pymysql.cursors
 from threading import Thread
 from unidecode import unidecode
 
@@ -73,16 +71,16 @@ def setspreadsheet(bot, update, args=None):
     return
 
   if args == None or len(args)!=1:
-    bot.sendMessage(chat_id=chat_id, text="Debes pasarme la URL de la Google Spreadsheet como un único parámetro.")
+    bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro")
     return
 
   if chat_type == "private":
-    bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos :(")
+    bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
     return
 
   m = re.search('docs.google.com/.*spreadsheets/d/([a-zA-Z0-9_-]+)', args[0], flags=re.IGNORECASE)
   if m == None:
-    bot.sendMessage(chat_id=update.message.chat_id, text="Vaya, no he reconocido esa URL... %s" % args[0])
+    bot.sendMessage(chat_id=update.message.chat_id, text="❌ Vaya, no he reconocido esa URL... %s" % args[0])
   else:
     spreadsheet_id = m.group(1)
     group = getGroup(chat_id)
@@ -92,7 +90,7 @@ def setspreadsheet(bot, update, args=None):
         group["title"] = chat_title
         group["spreadsheet"] = spreadsheet_id
     saveGroup(group)
-    bot.sendMessage(chat_id=update.message.chat_id, text="Establecida spreadsheet con ID %s.\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios!" % spreadsheet_id )
+    bot.sendMessage(chat_id=update.message.chat_id, text="👌 Establecida spreadsheet con ID %s.\n\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios." % spreadsheet_id )
 
 def refresh(bot, update, args=None):
   logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
@@ -102,12 +100,18 @@ def refresh(bot, update, args=None):
   if not is_admin(chat_id, user_id, bot):
     return
 
-  grupo = getGroup(chat_id)
-  if grupo == None or grupo["spreadsheet"] == None:
-    bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo :( Debes configurar primero el spreadsheet. Pregunta a @gentakojima")
+  if chat_type == "private":
+    bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
     return
 
-  bot.sendMessage(chat_id=update.message.chat_id, text="Refrescando lista de gimnasios...")
+  grupo = getGroup(chat_id)
+  if grupo == None or grupo["spreadsheet"] == None:
+    bot.sendMessage(chat_id=chat_id, text="❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/setspreadsheet`", parse_mode=telegram.ParseMode.MARKDOWN)
+    return
+
+  sent_message = bot.sendMessage(chat_id=update.message.chat_id, text="🗺 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
+  Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+
   response = requests.get("https://docs.google.com/spreadsheet/ccc?key=%s&output=csv" % grupo["spreadsheet"] )
   if response.status_code == 200:
     places = []
@@ -115,6 +119,9 @@ def refresh(bot, update, args=None):
     csvreader = csv.reader(f, delimiter=',', quotechar='"')
     counter = 0
     for row in csvreader:
+      if len(row) != 4:
+          bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido cargar los gimnasios! Parece que hay al menos alguna fila sin las 4 columnas requeridas.")
+          return
       names = row[3].split(",")
       latitude = str(row[1]).replace(",",".")
       longitude = str(row[2]).replace(",",".")
@@ -135,7 +142,7 @@ def refresh(bot, update, args=None):
       saveGroup(grupo)
       if savePlaces(chat_id, places):
           places = getPlaces(grupo["id"])
-          bot.sendMessage(chat_id=update.message.chat_id, text="¡Cargados %i gimnasios!" % len(places))
+          bot.sendMessage(chat_id=update.message.chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
       else:
           bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre")
     else:
@@ -326,14 +333,12 @@ def raid(bot, update, args=None):
 
   if thisuser["username"] == None:
       sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
-      t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-      t.start()
+      Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
       return
 
   if args == None or len(args)<3:
     sent_message = bot.sendMessage(chat_id=chat_id, text="¡No te he entendido!\nDebes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text, parse_mode=telegram.ParseMode.MARKDOWN)
-    t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot))
-    t.start()
+    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
     return
 
   current_raid["username"] = thisuser["username"]
@@ -349,8 +354,7 @@ def raid(bot, update, args=None):
 
   if not "pokemon" in current_raid.keys():
     sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido el Pokémon! ¿Lo has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-    t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-    t.start()
+    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
     return
 
   del args[0]
@@ -364,13 +368,11 @@ def raid(bot, update, args=None):
     minute = m.group(2) or "00"
     if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
   else:
     sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-    t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-    t.start()
+    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
     return
   current_raid["time"] = "%02d:%02d" % (int(hour),int(minute))
 
@@ -380,8 +382,7 @@ def raid(bot, update, args=None):
     minute = m.group(2) or "00"
     if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora de finalización! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
     current_raid["endtime"] = "%02d:%02d" % (int(hour),int(minute))
     del args[-1]
@@ -461,8 +462,7 @@ def alerts(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     alerts=getAlerts(user_id)
@@ -488,8 +488,7 @@ def addalert(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     if len(args)<1 or not str(args[0]).isnumeric():
@@ -527,8 +526,7 @@ def delalert(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     if len(args)<1 or not str(args[0]).isnumeric():
@@ -555,8 +553,7 @@ def clearalerts(bot, update):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     if clearAlerts(user_id):
@@ -577,8 +574,7 @@ def cancelar(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cancelar incursión solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     if len(args)<1 or not str(args[0]).isnumeric():
@@ -616,8 +612,7 @@ def cambiarhora(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar la hora solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
@@ -669,8 +664,7 @@ def cambiarhorafin(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar la hora de fin solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
@@ -729,8 +723,7 @@ def cambiargimnasio(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar el gimnasio solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
@@ -797,8 +790,7 @@ def cambiarpokemon(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar el Pokémon solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
@@ -847,8 +839,7 @@ def borrar(bot, update, args=None):
         except:
           pass
         sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de borrar incursión solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        t = Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot))
-        t.start()
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return
 
     raid_id = args[0]
@@ -936,55 +927,30 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
 
-
-start_handler = CommandHandler('start', start)
-help_handler = CommandHandler('help', start)
-list_handler = CommandHandler('list', list)
-incursiones_handler = CommandHandler('incursiones', incursiones)
-message_handler = MessageHandler(Filters.text, processMessage)
-setspreadsheet_handler = CommandHandler('setspreadsheet', setspreadsheet, pass_args=True)
-refresh_handler = CommandHandler('refresh', refresh)
-raid_handler = CommandHandler('raid', raid, pass_args=True)
-cancelar_handler = CommandHandler('cancelar', cancelar, pass_args=True)
-cambiarhora_handler = CommandHandler('cambiarhora', cambiarhora, pass_args=True)
-cambiarhorafin_handler = CommandHandler('cambiarhorafin', cambiarhorafin, pass_args=True)
-cambiargimnasio_handler = CommandHandler('cambiargimnasio', cambiargimnasio, pass_args=True)
-cambiarpokemon_handler = CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True)
-borrar_handler = CommandHandler('borrar', borrar, pass_args=True)
-location_handler = MessageHandler(Filters.location, processLocation)
-alerts_handler = CommandHandler('alerts', alerts, pass_args=True)
-alertas_handler = CommandHandler('alertas', alerts, pass_args=True)
-addalert_handler = CommandHandler('addalert', addalert, pass_args=True)
-delalert_handler = CommandHandler('delalert', delalert, pass_args=True)
-clearalerts_handler = CommandHandler('clearalerts', clearalerts)
-borrar_handler = CommandHandler('borrar', borrar, pass_args=True)
-raidbutton_handler = CallbackQueryHandler(raidbutton)
-
-dispatcher.add_handler(start_handler)
-dispatcher.add_handler(help_handler)
-dispatcher.add_handler(message_handler)
-dispatcher.add_handler(list_handler)
-dispatcher.add_handler(incursiones_handler)
-dispatcher.add_handler(setspreadsheet_handler)
-dispatcher.add_handler(refresh_handler)
-dispatcher.add_handler(raid_handler)
-dispatcher.add_handler(cancelar_handler)
-dispatcher.add_handler(cambiarhora_handler)
-dispatcher.add_handler(cambiarhorafin_handler)
-dispatcher.add_handler(cambiargimnasio_handler)
-dispatcher.add_handler(cambiarpokemon_handler)
-dispatcher.add_handler(borrar_handler)
-dispatcher.add_handler(location_handler)
-dispatcher.add_handler(alerts_handler)
-dispatcher.add_handler(alertas_handler)
-dispatcher.add_handler(addalert_handler)
-dispatcher.add_handler(delalert_handler)
-dispatcher.add_handler(clearalerts_handler)
-dispatcher.add_handler(raidbutton_handler)
+dispatcher.add_handler(CommandHandler('start', start))
+dispatcher.add_handler(CommandHandler('help', start))
+dispatcher.add_handler(CommandHandler('list', list))
+dispatcher.add_handler(CommandHandler('incursiones', incursiones))
+dispatcher.add_handler(MessageHandler(Filters.text, processMessage))
+dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
+dispatcher.add_handler(CommandHandler('refresh', refresh))
+dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))
+dispatcher.add_handler(CommandHandler('cancelar', cancelar, pass_args=True))
+dispatcher.add_handler(CommandHandler('cambiarhora', cambiarhora, pass_args=True))
+dispatcher.add_handler(CommandHandler('cambiarhorafin', cambiarhorafin, pass_args=True))
+dispatcher.add_handler(CommandHandler('cambiargimnasio', cambiargimnasio, pass_args=True))
+dispatcher.add_handler(CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True))
+dispatcher.add_handler(CommandHandler('borrar', borrar, pass_args=True))
+dispatcher.add_handler(MessageHandler(Filters.location, processLocation))
+dispatcher.add_handler(CommandHandler('alerts', alerts, pass_args=True))
+dispatcher.add_handler(CommandHandler('alertas', alerts, pass_args=True))
+dispatcher.add_handler(CommandHandler('addalert', addalert, pass_args=True))
+dispatcher.add_handler(CommandHandler('delalert', delalert, pass_args=True))
+dispatcher.add_handler(CommandHandler('clearalerts', clearalerts))
+dispatcher.add_handler(CallbackQueryHandler(raidbutton))
 
 def callback_oldraids(bot, job):
-    t = Thread(target=end_old_raids, args=(bot,))
-    t.start()
+    Thread(target=end_old_raids, args=(bot,)).start()
 j = updater.job_queue
 job_minute = j.run_repeating(callback_oldraids, interval=60, first=5)
 
