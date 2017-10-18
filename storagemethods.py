@@ -25,17 +25,21 @@ def refreshDb():
 def saveGroup(group):
     global db
     logging.debug("storagemethods:saveSpreadsheet: %s" % (group))
+    if "settings_message" not in group.keys():
+        group["settings_message"] = None
+    if "alerts" not in group.keys():
+        group["alerts"] = 1
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, spreadsheet) VALUES (%s, %s, %s) \
-        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s;"
-        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"]))
+        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"]))
     db.commit()
 
 def getGroup(group_id):
     global db
     logging.debug("storagemethods:getGroup: %s" % (group_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts` FROM `grupos` WHERE `id`=%s"
+        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`settings_message` FROM `grupos` WHERE `id`=%s"
         cursor.execute(sql, (group_id))
         result = cursor.fetchone()
         return result

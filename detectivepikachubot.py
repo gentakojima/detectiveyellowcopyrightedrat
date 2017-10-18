@@ -27,7 +27,7 @@ from threading import Thread
 from unidecode import unidecode
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -270,6 +270,33 @@ def processMessage(bot, update):
       bot.sendVenue(chat_id=chat_id, latitude=chosen["latitude"], longitude=chosen["longitude"], title=chosen["desc"], address=address)
     else:
       logging.info("Oops! No encontrado")
+
+def settings(bot, update):
+    logging.debug("detectivepikachubot:settings: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    if chat_type == "private":
+      bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
+      return
+    if not is_admin(chat_id, user_id, bot):
+      return
+
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+    except:
+        pass
+
+    group = getGroup(chat_id)
+    if group["settings_message"] != None:
+        try:
+            bot.deleteMessage(chat_id=chat_id,message_id=group["settings_message"])
+        except:
+            pass
+
+    settings_markup = get_settings_keyboard(chat_id)
+    message = bot.sendMessage(chat_id=chat_id, text="Cargando preferencias del grupo. Un momento...")
+    group["settings_message"] = message.message_id
+    saveGroup(group)
+    update_settings_message(chat_id, bot)
 
 def list(bot, update):
   logging.debug("detectivepikachubot:list: %s %s" % (bot, update))
@@ -930,13 +957,29 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
 
+  if data=="alertas":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          group = getGroup(chat_id)
+          if group["alerts"] == 1:
+              group["alerts"] = 0
+          else:
+              group["alerts"] = 1
+          saveGroup(group)
+          update_settings_message(chat_id, bot)
+
+# Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
-dispatcher.add_handler(CommandHandler('list', list))
-dispatcher.add_handler(CommandHandler('incursiones', incursiones))
 dispatcher.add_handler(MessageHandler(Filters.text, processMessage))
+# Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('refresh', refresh))
+dispatcher.add_handler(CommandHandler('list', list))
+dispatcher.add_handler(CommandHandler('incursiones', incursiones))
+dispatcher.add_handler(CommandHandler('settings', settings))
+# Commands related to raids
 dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))
 dispatcher.add_handler(CommandHandler('cancelar', cancelar, pass_args=True))
 dispatcher.add_handler(CommandHandler('cambiarhora', cambiarhora, pass_args=True))
@@ -944,6 +987,7 @@ dispatcher.add_handler(CommandHandler('cambiarhorafin', cambiarhorafin, pass_arg
 dispatcher.add_handler(CommandHandler('cambiargimnasio', cambiargimnasio, pass_args=True))
 dispatcher.add_handler(CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True))
 dispatcher.add_handler(CommandHandler('borrar', borrar, pass_args=True))
+# Commands related to alerts
 dispatcher.add_handler(MessageHandler(Filters.location, processLocation))
 dispatcher.add_handler(CommandHandler('alerts', alerts, pass_args=True))
 dispatcher.add_handler(CommandHandler('alertas', alerts, pass_args=True))

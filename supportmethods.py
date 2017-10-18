@@ -2,6 +2,8 @@ import time
 import logging
 import telegram
 
+from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
+
 from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, endOldRaids, getRaid, getAlertsByPlace, getGroup
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
@@ -44,8 +46,9 @@ def send_alerts(raid, bot):
     logging.debug("supportmethods:end_alerts: %s" % (raid))
     alerts = getAlertsByPlace(raid["gimnasio_id"])
     group = getGroup(raid["grupo_id"])
-    for alert in alerts:
-        bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una incursión de *%s* en *%s* a las *%s* en el grupo _%s_.\n\n_Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando_ `/clearalerts`" % (raid["pokemon"], raid["gimnasio_text"], raid["time"], group["title"]), parse_mode=telegram.ParseMode.MARKDOWN)
+    if group["alerts"] == 1:
+        for alert in alerts:
+            bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una incursión de *%s* en *%s* a las *%s* en el grupo _%s_.\n\n_Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando_ `/clearalerts`" % (raid["pokemon"], raid["gimnasio_text"], raid["time"], group["title"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def update_message(chat_id, message_id, reply_markup, bot):
     logging.debug("supportmethods:update_message: %s %s %s" % (chat_id, message_id, reply_markup))
@@ -160,3 +163,21 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
         bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: @%s" % ensure_escaped(", @".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
     if len(notwarned)>0:
         bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: @%s" % ensure_escaped(", @".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
+
+def get_settings_keyboard(chat_id):
+    logging.debug("supportmethods:get_settings_keyboard")
+    group = getGroup(chat_id)
+    if group["alerts"] == 1:
+        alertas_text = "✅ Alertas activadas"
+    else:
+        alertas_text = "▪️ Alertas desactivadas"
+    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='alertas')]]
+    settings_markup = InlineKeyboardMarkup(settings_keyboard)
+    return settings_markup
+
+def update_settings_message(chat_id, bot):
+    logging.debug("supportmethods:update_settings_message")
+    group = getGroup(chat_id)
+
+    settings_markup = get_settings_keyboard(chat_id)
+    return bot.edit_message_text(text="Pulsa en las opciones para activarlas o desactivarlas. Una vez termines de configurar, puedes borrar este mensaje.", chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.MARKDOWN)
