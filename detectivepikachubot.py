@@ -512,9 +512,9 @@ def alerts(bot, update, args=None):
 
     alerts=getAlerts(user_id)
     if len(alerts)==0:
-        text_message = "⏰ No tienes ninguna alerta de incursión definida."
+        text_message = "🔔 No tienes ninguna alerta de incursión definida."
     else:
-        text_message = "⏰ Tienes definidas %s alertas para los siguientes gimnasios:\n" % len(alerts)
+        text_message = "🔔 Tienes definidas %s alertas para los siguientes gimnasios:\n" % len(alerts)
         for alert in alerts:
             place = getPlace(alert["place_id"])
             group = getGroup(place["group_id"])
