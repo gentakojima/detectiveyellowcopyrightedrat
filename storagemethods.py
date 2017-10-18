@@ -406,15 +406,20 @@ def endOldRaids():
     logging.debug("storagemethods:endOldRaids")
     with db.cursor() as cursor:
         try:
-            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 LIMIT 0,10"
+            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 AND pokemon<>'Mewtwo' LIMIT 0,10"
             cursor.execute(sql)
             result = cursor.fetchall()
-            for r in result:
+            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 5 DAY) AND ended = 0 AND pokemon='Mewtwo' LIMIT 0,10"
+            cursor.execute(sql)
+            result2 = cursor.fetchall()
+            results = result1 + result2
+            for r in results:
                 if r["id"] != None:
                     sql = "UPDATE incursiones SET `ended`=1 WHERE id=%s;"
                     cursor.execute(sql, (r["id"]))
+
             db.commit()
-            return result
+            return results
         except:
             refreshDb()
             return []
