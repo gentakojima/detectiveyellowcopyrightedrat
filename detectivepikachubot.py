@@ -70,12 +70,17 @@ def setspreadsheet(bot, update, args=None):
   if not is_admin(chat_id, user_id, bot):
     return
 
-  if args == None or len(args)!=1:
-    bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro")
-    return
-
   if chat_type == "private":
     bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
+    return
+
+  try:
+      bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+  except:
+      pass
+
+  if args == None or len(args)!=1:
+    bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro")
     return
 
   m = re.search('docs.google.com/.*spreadsheets/d/([a-zA-Z0-9_-]+)', args[0], flags=re.IGNORECASE)
@@ -103,6 +108,11 @@ def refresh(bot, update, args=None):
   if chat_type == "private":
     bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
     return
+
+  try:
+      bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+  except:
+      pass
 
   grupo = getGroup(chat_id)
   if grupo == None or grupo["spreadsheet"] == None:
@@ -304,6 +314,11 @@ def list(bot, update):
   if chat_type == "private":
     bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
     return
+
+  try:
+      bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+  except:
+      pass
 
   if not is_admin(chat_id, user_id, bot):
     return
