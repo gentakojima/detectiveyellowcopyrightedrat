@@ -119,6 +119,9 @@ def refresh(bot, update, args=None):
     csvreader = csv.reader(f, delimiter=',', quotechar='"')
     counter = 0
     for row in csvreader:
+      if counter > 700:
+          bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se permiten más de 700 gimnasios por grupo!")
+          return
       if len(row) != 4:
           bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido cargar los gimnasios! Parece que hay al menos alguna fila sin las 4 columnas requeridas.")
           return
