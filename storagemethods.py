@@ -1,6 +1,7 @@
 import json
 import logging
 import configparser
+import types
 from os.path import expanduser
 import pymysql.cursors
 from pymysql.err import InterfaceError, IntegrityError
@@ -406,18 +407,24 @@ def endOldRaids():
     logging.debug("storagemethods:endOldRaids")
     with db.cursor() as cursor:
         try:
-            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 AND pokemon<>'Mewtwo' LIMIT 0,10"
+            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 AND pokemon NOT IN ('Mewtwo', 'Ho-Oh') LIMIT 0,10"
             cursor.execute(sql)
-            result = cursor.fetchall()
-            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 5 DAY) AND ended = 0 AND pokemon='Mewtwo' LIMIT 0,10"
+            result1 = cursor.fetchall()
+            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 5 DAY) AND ended = 0 AND pokemon IN ('Mewtwo', 'Ho-Oh') LIMIT 0,10"
             cursor.execute(sql)
             result2 = cursor.fetchall()
-            results = result1 + result2
+            if isinstance(result1,list) and isinstance(result2,list):
+                results = result1 + result2
+            elif isinstance(result1,list):
+                results = result1
+            elif isinstance(result2,list):
+                results = result2
+            else:
+                results = []
             for r in results:
                 if r["id"] != None:
                     sql = "UPDATE incursiones SET `ended`=1 WHERE id=%s;"
                     cursor.execute(sql, (r["id"]))
-
             db.commit()
             return results
         except:
