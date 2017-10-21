@@ -275,8 +275,11 @@ def processMessage(bot, update):
     if chosen != None:
       bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
       logging.info("Encontrado: %s" % chosen["desc"])
-      reverse_geocode_result = gmaps.reverse_geocode((chosen["latitude"], chosen["longitude"]))
-      address = reverse_geocode_result[0]["formatted_address"]
+      try:
+        reverse_geocode_result = gmaps.reverse_geocode((chosen["latitude"], chosen["longitude"]))
+        address = reverse_geocode_result[0]["formatted_address"]
+      except:
+        address = "-"
       bot.sendVenue(chat_id=chat_id, latitude=chosen["latitude"], longitude=chosen["longitude"], title=chosen["desc"], address=address)
     else:
       logging.info("Oops! No encontrado")
@@ -961,8 +964,11 @@ def raidbutton(bot, update):
       try:
         gym = getPlace(raid["gimnasio_id"])
         if gym != None:
-          reverse_geocode_result = gmaps.reverse_geocode((gym["latitude"], gym["longitude"]))
-          address = reverse_geocode_result[0]["formatted_address"]
+          try:
+            reverse_geocode_result = gmaps.reverse_geocode((gym["latitude"], gym["longitude"]))
+            address = reverse_geocode_result[0]["formatted_address"]
+          except:
+            address = "-"
           bot.sendVenue(chat_id=user_id, latitude=gym["latitude"], longitude=gym["longitude"], title=gym["desc"], address=address)
           bot.answerCallbackQuery(text="Te envío la ubicación por privado", callback_query_id=update.callback_query.id)
         else:
