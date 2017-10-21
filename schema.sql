@@ -29,7 +29,8 @@ CREATE TABLE `grupos` (
   `spreadsheet` varchar(100) NOT NULL,
   `testgroup` TINYINT NOT NULL DEFAULT '0',
   `alerts` TINYINT NOT NULL DEFAULT '1',
-  `disaggregated` TINYINT NOT NULL DEFAULT '0'
+  `disaggregated` TINYINT NOT NULL DEFAULT '0',
+  `latebutton` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -78,7 +79,8 @@ CREATE TABLE `voy` (
   `incursion_id` int(11) NOT NULL,
   `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `plus` int(11) NOT NULL DEFAULT '0',
-  `estoy` tinyint(4) NOT NULL DEFAULT '0'
+  `estoy` tinyint(4) NOT NULL DEFAULT '0',
+  `tarde` tinyint(4) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

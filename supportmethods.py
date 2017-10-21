@@ -103,6 +103,8 @@ def update_message(chat_id, message_id, reply_markup, bot):
                 plus_text = ""
             if user["estoy"] != None and user["estoy"]>0:
                 estoy_text = "✅ "
+            elif user["tarde"] != None and user["tarde"]>0:
+                estoy_text = "⏳ "
             else:
                 estoy_text = "▪️ "
             if user["level"] != None and user["team"] != None:
@@ -201,9 +203,24 @@ def get_settings_keyboard(chat_id):
         disaggregated_text = "👫 Totales desagregados"
     else:
         disaggregated_text = "👬 Total simplificado"
-    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='alertas')], [InlineKeyboardButton(disaggregated_text, callback_data='desagregado')]]
+    if group["latebutton"] == 1:
+        latebutton_text = "✅ Botón «¡Llego tarde!» activado"
+    else:
+        latebutton_text = "▪️ Botón «¡Llego tarde!» desactivado"
+    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='alertas')], [InlineKeyboardButton(latebutton_text, callback_data='botonllegotarde')], [InlineKeyboardButton(disaggregated_text, callback_data='desagregado')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
+
+def get_keyboard(chat_id):
+    group = getGroup(chat_id)
+    if group != None and group["latebutton"] == 1:
+        keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
+                  [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy'), InlineKeyboardButton("⏳ ¡Llego tarde!", callback_data='llegotarde'), InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
+    else:
+        keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
+                  [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy'), InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
 
 def update_settings_message(chat_id, bot):
     logging.debug("supportmethods:update_settings_message")

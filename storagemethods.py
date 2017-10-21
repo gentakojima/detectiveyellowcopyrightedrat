@@ -32,17 +32,19 @@ def saveGroup(group):
         group["alerts"] = 1
     if "disaggregated" not in group.keys():
         group["disaggregated"] = 0
+    if "latebutton" not in group.keys():
+        group["latebutton"] = 0
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, spreadsheet) VALUES (%s, %s, %s) \
-        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s;"
-        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"]))
+        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"]))
     db.commit()
 
 def getGroup(group_id):
     global db
     logging.debug("storagemethods:getGroup: %s" % (group_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message` FROM `grupos` WHERE `id`=%s"
+        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton` FROM `grupos` WHERE `id`=%s"
         cursor.execute(sql, (group_id))
         result = cursor.fetchone()
         return result
@@ -51,7 +53,7 @@ def getGroupsByUser(user_id):
     global db
     logging.debug("storagemethods:getGroupsByUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated` FROM `grupos` \
+        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`latebutton` FROM `grupos` \
         LEFT JOIN incursiones ON incursiones.grupo_id = grupos.id \
         RIGHT JOIN voy ON voy.incursion_id = incursiones.id \
         WHERE voy.usuario_id = %s \
@@ -267,7 +269,7 @@ def getRaidPeople(raid_id):
     global db
     logging.debug("storagemethods:getRaidPeople: %s" % (raid_id))
     with db.cursor() as cursor:
-        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `plus`, `estoy`, `level`, `team` FROM `incursiones` \
+        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `plus`, `estoy`, `tarde`, `level`, `team` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
         LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s \
         ORDER BY `voy`.`addedtime` ASC"
@@ -322,7 +324,7 @@ def raidVoy(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id) VALUES (%s, %s)"
             cursor.execute(sql, (raid["id"], user_id))
         else:
-            sql = "UPDATE voy SET plus = 0, estoy = 0 WHERE incursion_id=%s and usuario_id=%s"
+            sql = "UPDATE voy SET plus = 0, estoy = 0, tarde = 0 WHERE incursion_id=%s and usuario_id=%s"
             cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True
@@ -375,7 +377,26 @@ def raidEstoy(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id, estoy) VALUES (%s, %s, 1)"
             cursor.execute(sql, (raid["id"], user_id))
         else:
-            sql = "UPDATE voy SET estoy=1 WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET estoy=1, tarde=0 WHERE `incursion_id`=%s and usuario_id=%s;"
+            cursor.execute(sql, (raid["id"], user_id))
+    db.commit()
+    return True
+
+def raidLlegotarde(grupo_id, message_id, user_id):
+    global db
+    logging.debug("storagemethods:raidLlegotarde: %s %s %s" % (grupo_id, message_id, user_id))
+    with db.cursor() as cursor:
+        raid = getRaidbyMessage(grupo_id, message_id)
+        if raid["ended"] == 1:
+            return False
+        sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
+        cursor.execute(sql, (raid["id"],user_id))
+        result = cursor.fetchone()
+        if result == None:
+            sql = "INSERT INTO voy (incursion_id, usuario_id, tarde) VALUES (%s, %s, 1)"
+            cursor.execute(sql, (raid["id"], user_id))
+        else:
+            sql = "UPDATE voy SET tarde=1, estoy=0 WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True

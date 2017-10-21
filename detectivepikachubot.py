@@ -26,8 +26,8 @@ import configparser
 from threading import Thread
 from unidecode import unidecode
 
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -357,10 +357,6 @@ def incursiones(bot, update):
     output = "Últimas incursiones del grupo:" + output
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
-keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
-              [InlineKeyboardButton("👀 ¡Ya estoy allí!", callback_data='estoy'),InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
-reply_markup = InlineKeyboardMarkup(keyboard)
-
 def raid(bot, update, args=None):
   logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -488,6 +484,7 @@ def raid(bot, update, args=None):
 
   send_text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\n%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], ensure_escaped(current_raid["username"]), text_endtime, text_apuntados)
 
+  reply_markup = get_keyboard(chat_id)
   sent_message = bot.sendMessage(chat_id=chat_id, text=send_text,parse_mode=telegram.ParseMode.MARKDOWN,reply_markup=reply_markup)
 
   current_raid["grupo_id"] = chat_id
@@ -695,6 +692,7 @@ def cambiarhora(bot, update, args=None):
                     else:
                         raid["time"] = "%02d:%02d" % (int(hour),int(minute))
                         saveRaid(raid)
+                        reply_markup = get_keyboard(raid["grupo_id"])
                         update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora a las *%s* correctamente!" % raid["time"], parse_mode=telegram.ParseMode.MARKDOWN)
                         warn_people("cambiarhora", raid, user_username, chat_id, bot)
@@ -750,6 +748,7 @@ def cambiarhorafin(bot, update, args=None):
                     else:
                         raid["endtime"] = None
                     saveRaid(raid)
+                    reply_markup = get_keyboard(raid["grupo_id"])
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     if raid["endtime"] != None:
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora de fin para las *%s* correctamente!" % raid["endtime"], parse_mode=telegram.ParseMode.MARKDOWN)
@@ -817,12 +816,14 @@ def cambiargimnasio(bot, update, args=None):
                     raid["gimnasio_text"] = chosengym["desc"]
                     raid["gimnasio_id"] = chosengym["id"]
                     saveRaid(raid)
+                    reply_markup = get_keyboard(raid["grupo_id"])
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el gimnasio a *%s* correctamente!" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                     raid["gimnasio_text"] = new_gymtext
                     raid["gimnasio_id"] = None
                     saveRaid(raid)
+                    reply_markup = get_keyboard(raid["grupo_id"])
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     bot.sendMessage(chat_id=chat_id, text="¡No he encontrado el gimnasio, pero lo he actualizado igualmente en la incursión a *%s*" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
                 warn_people("cambiargimnasio", raid, user_username, chat_id, bot)
@@ -869,6 +870,7 @@ def cambiarpokemon(bot, update, args=None):
                     if m != None:
                         raid["pokemon"] = pokemon
                         saveRaid(raid)
+                        reply_markup = get_keyboard(raid["grupo_id"])
                         update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el Pokémon a *%s* correctamente!" % raid["pokemon"], parse_mode=telegram.ParseMode.MARKDOWN)
                         warn_people("cambiarpokemon", raid, user_username, chat_id, bot)
@@ -961,7 +963,14 @@ def raidbutton(bot, update):
           update_text = True
       else:
           bot.answerCallbackQuery(text="¡No has podido marcar como llegado! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
+  elif data == "llegotarde":
+      if raidLlegotarde(chat_id, message_id, user_id) != False:
+          bot.answerCallbackQuery(text="Has marcardo que llegarás tarde a la incursión", callback_query_id=update.callback_query.id)
+          update_text = True
+      else:
+          bot.answerCallbackQuery(text="¡No has podido marcar como que llegas tarde! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
   if update_text == True:
+      reply_markup = get_keyboard(chat_id)
       update_message(chat_id, message_id, reply_markup, bot)
 
   if data=="ubicacion":
@@ -1004,6 +1013,17 @@ def raidbutton(bot, update):
               group["disaggregated"] = 0
           else:
               group["disaggregated"] = 1
+          saveGroup(group)
+          update_settings_message(chat_id, bot)
+  elif data=="botonllegotarde":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          group = getGroup(chat_id)
+          if group["latebutton"] == 1:
+              group["latebutton"] = 0
+          else:
+              group["latebutton"] = 1
           saveGroup(group)
           update_settings_message(chat_id, bot)
 
