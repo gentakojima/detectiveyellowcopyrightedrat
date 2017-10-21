@@ -30,7 +30,8 @@ CREATE TABLE `grupos` (
   `testgroup` TINYINT NOT NULL DEFAULT '0',
   `alerts` TINYINT NOT NULL DEFAULT '1',
   `disaggregated` TINYINT NOT NULL DEFAULT '0',
-  `latebutton` TINYINT NOT NULL DEFAULT '0'
+  `latebutton` TINYINT NOT NULL DEFAULT '0',
+  `refloat` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

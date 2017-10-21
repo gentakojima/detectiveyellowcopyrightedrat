@@ -498,7 +498,11 @@ def raid(bot, update, args=None):
   else:
       show_endtime = current_raid["time"]
 
-  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que se va*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🗺 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`\n\n❌ *Borrar incursión*:\n`/borrar %s`" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], current_raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
+  if group["refloat"] == 1 or is_admin(current_raid["grupo_id"], user_id, bot):
+      text_refloat="\n\n🎈 *Reflotar incursión*:\n`/reflotar %s`" % current_raid["id"]
+  else:
+      text_refloat=""
+  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que se va*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🗺 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`\n\n❌ *Borrar incursión*:\n`/borrar %s`%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], current_raid["id"], text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
 
   if "gimnasio_id" in current_raid.keys():
     send_alerts(current_raid, bot)
@@ -854,8 +858,9 @@ def reflotar(bot, update, args=None):
 
     raid_id = args[0]
     raid = getRaid(raid_id)
+    group = getGroup(raid["grupo_id"])
     if raid != None:
-        if is_admin(raid["grupo_id"], user_id, bot):  # or raid["usuario_id"] == user_id
+        if is_admin(raid["grupo_id"], user_id, bot) or (group["refloat"] == 1 and raid["usuario_id"] == user_id):
             if raid["ended"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="No se puede reflotar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
@@ -1067,6 +1072,17 @@ def raidbutton(bot, update):
               group["latebutton"] = 0
           else:
               group["latebutton"] = 1
+          saveGroup(group)
+          update_settings_message(chat_id, bot)
+  elif data=="reflotar":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          group = getGroup(chat_id)
+          if group["refloat"] == 1:
+              group["refloat"] = 0
+          else:
+              group["refloat"] = 1
           saveGroup(group)
           update_settings_message(chat_id, bot)
 

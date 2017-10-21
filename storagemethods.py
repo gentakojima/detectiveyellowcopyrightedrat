@@ -34,17 +34,19 @@ def saveGroup(group):
         group["disaggregated"] = 0
     if "latebutton" not in group.keys():
         group["latebutton"] = 0
+    if "refloat" not in group.keys():
+        group["refloat"] = 0
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, spreadsheet) VALUES (%s, %s, %s) \
-        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s;"
-        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"]))
+        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"]))
     db.commit()
 
 def getGroup(group_id):
     global db
     logging.debug("storagemethods:getGroup: %s" % (group_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton` FROM `grupos` WHERE `id`=%s"
+        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat` FROM `grupos` WHERE `id`=%s"
         cursor.execute(sql, (group_id))
         result = cursor.fetchone()
         return result
@@ -53,7 +55,7 @@ def getGroupsByUser(user_id):
     global db
     logging.debug("storagemethods:getGroupsByUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`latebutton` FROM `grupos` \
+        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`latebutton`,`refloat` FROM `grupos` \
         LEFT JOIN incursiones ON incursiones.grupo_id = grupos.id \
         RIGHT JOIN voy ON voy.incursion_id = incursiones.id \
         WHERE voy.usuario_id = %s \

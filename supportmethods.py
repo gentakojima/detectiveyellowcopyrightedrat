@@ -207,7 +207,11 @@ def get_settings_keyboard(chat_id):
         latebutton_text = "✅ Botón «¡Llego tarde!» activado"
     else:
         latebutton_text = "▪️ Botón «¡Llego tarde!» desactivado"
-    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='alertas')], [InlineKeyboardButton(latebutton_text, callback_data='botonllegotarde')], [InlineKeyboardButton(disaggregated_text, callback_data='desagregado')]]
+    if group["refloat"] == 1:
+        refloat_text = "✅ Reflotar incursiones activado"
+    else:
+        refloat_text = "▪️ Reflotar incursiones desactivado"
+    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='alertas')], [InlineKeyboardButton(latebutton_text, callback_data='botonllegotarde')], [InlineKeyboardButton(refloat_text, callback_data='reflotar')], [InlineKeyboardButton(disaggregated_text, callback_data='desagregado')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
