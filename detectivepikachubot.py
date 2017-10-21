@@ -365,7 +365,6 @@ def raid(bot, update, args=None):
   logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   user_username = message.from_user.username
-
   thisuser = refreshUsername(user_id, user_username)
 
   if chat_type == "private":
@@ -480,7 +479,14 @@ def raid(bot, update, args=None):
     text_endtime="\n_Se va a las %s_" % current_raid["endtime"]
   else:
     text_endtime=""
-  send_text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\nEntrenadores apuntados (0):" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], ensure_escaped(current_raid["username"]), text_endtime)
+
+  group = getGroup(chat_id)
+  if group != None and group["disaggregated"] == 1:
+    text_apuntados = "❄️0 · 🔥0 · ⚡️0 · ❓0 · 👩‍👩‍👧‍👧0"
+  else:
+    text_apuntados = "0 entrenadores apuntados:"
+
+  send_text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\n%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], ensure_escaped(current_raid["username"]), text_endtime, text_apuntados)
 
   sent_message = bot.sendMessage(chat_id=chat_id, text=send_text,parse_mode=telegram.ParseMode.MARKDOWN,reply_markup=reply_markup)
 
@@ -987,6 +993,17 @@ def raidbutton(bot, update):
               group["alerts"] = 0
           else:
               group["alerts"] = 1
+          saveGroup(group)
+          update_settings_message(chat_id, bot)
+  elif data=="desagregado":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          group = getGroup(chat_id)
+          if group["disaggregated"] == 1:
+              group["disaggregated"] = 0
+          else:
+              group["disaggregated"] = 1
           saveGroup(group)
           update_settings_message(chat_id, bot)
 

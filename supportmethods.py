@@ -36,11 +36,32 @@ def count_people(gente):
     count = 0
     if gente != None:
         for user in gente:
-            logging.debug(user)
             count = count + 1
             if user["plus"] != None and user["plus"] > 0:
                 count = count + user["plus"]
     return count
+
+def count_people_disaggregated(gente):
+    numrojos = 0
+    numazules = 0
+    numamarillos = 0
+    numotros = 0
+    count = 0
+    if gente != None:
+        for user in gente:
+            count = count + 1
+            if user["plus"] != None and user["plus"] > 0:
+                count = count + user["plus"]
+                numotros = numotros + user["plus"]
+            if user["team"] == "Rojo":
+                numrojos = numrojos + 1
+            elif user["team"] == "Azul":
+                numazules = numazules + 1
+            elif user["team"] == "Amarillo":
+                numamarillos = numamarillos + 1
+            else:
+                numotros = numotros + 1
+    return (numazules, numrojos, numamarillos, numotros, count)
 
 def send_alerts(raid, bot):
     logging.debug("supportmethods:end_alerts: %s" % (raid))
@@ -55,7 +76,7 @@ def update_message(chat_id, message_id, reply_markup, bot):
     raid = getRaidbyMessage(chat_id, message_id)
     creador = getCreadorRaid(raid["id"])
     gente = getRaidPeople(raid["id"])
-    numgente = count_people(gente)
+    group = getGroup(chat_id)
     if raid["edited"]>0:
         text_edited=" _(editada)_"
     else:
@@ -68,7 +89,12 @@ def update_message(chat_id, message_id, reply_markup, bot):
     if raid["cancelled"] == 1:
         text = text + "❌ *Incursión cancelada*"
     else:
-        text = text + "Entrenadores apuntados (%s):" % numgente
+        if group["disaggregated"] == 1:
+            (numazules, numrojos, numamarillos, numotros, numgente) = count_people_disaggregated(gente)
+            text = text + "❄️%s · 🔥%s · ⚡️%s · ❓%s · 👩‍👩‍👧‍👧%s" % (numazules, numrojos, numamarillos, numotros, numgente)
+        else:
+            numgente = count_people(gente)
+            text = text + "%s entrenadores apuntados:" % numgente
     if raid["cancelled"] == 0 and gente != None:
         for user in gente:
             if user["plus"] != None and user["plus"]>0:
@@ -171,7 +197,11 @@ def get_settings_keyboard(chat_id):
         alertas_text = "✅ Alertas activadas"
     else:
         alertas_text = "▪️ Alertas desactivadas"
-    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='alertas')]]
+    if group["disaggregated"] == 1:
+        disaggregated_text = "👫 Totales desagregados"
+    else:
+        disaggregated_text = "👬 Total simplificado"
+    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='alertas')], [InlineKeyboardButton(disaggregated_text, callback_data='desagregado')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
@@ -180,4 +210,4 @@ def update_settings_message(chat_id, bot):
     group = getGroup(chat_id)
 
     settings_markup = get_settings_keyboard(chat_id)
-    return bot.edit_message_text(text="Pulsa en las opciones para activarlas o desactivarlas. Una vez termines de configurar, puedes borrar este mensaje.", chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+    return bot.edit_message_text(text="Pulsa en los botones de las opciones para cambiarlas. Cuando acabes, puedes borrar el mensaje.", chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.MARKDOWN)
