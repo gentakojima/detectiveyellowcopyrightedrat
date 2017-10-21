@@ -832,6 +832,49 @@ def cambiargimnasio(bot, update, args=None):
     else:
         bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
+def reflotar(bot, update, args=None):
+    logging.debug("detectivepikachubot:reflotar: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
+
+    thisuser = refreshUsername(user_id, user_username)
+
+    if chat_type != "private":
+        try:
+          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+          pass
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de reflotar solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+        return
+
+    if len(args)<1 or not str(args[0]).isnumeric():
+        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!",parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    raid_id = args[0]
+    raid = getRaid(raid_id)
+    if raid != None:
+        if is_admin(raid["grupo_id"], user_id, bot):  # or raid["usuario_id"] == user_id
+            if raid["ended"] == 1:
+                bot.sendMessage(chat_id=chat_id, text="No se puede reflotar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            if raid["cancelled"] == 1:
+                bot.sendMessage(chat_id=chat_id, text="¡No se pueden reflotar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+
+            bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text="Reflotando incursión...", parse_mode=telegram.ParseMode.MARKDOWN)
+            raid["message"] = sent_message.message_id
+            saveRaid(raid)
+            reply_markup = get_keyboard(raid["grupo_id"])
+            update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
+            bot.sendMessage(chat_id=chat_id, text="¡Se ha reflotado la incursión correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para reflotar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
+
 def cambiarpokemon(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarpokemon: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1045,6 +1088,7 @@ dispatcher.add_handler(CommandHandler('cambiarhorafin', cambiarhorafin, pass_arg
 dispatcher.add_handler(CommandHandler('cambiargimnasio', cambiargimnasio, pass_args=True))
 dispatcher.add_handler(CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True))
 dispatcher.add_handler(CommandHandler('borrar', borrar, pass_args=True))
+dispatcher.add_handler(CommandHandler('reflotar', reflotar, pass_args=True))
 # Commands related to alerts
 dispatcher.add_handler(MessageHandler(Filters.location, processLocation))
 dispatcher.add_handler(CommandHandler('alerts', alerts, pass_args=True))

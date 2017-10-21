@@ -251,8 +251,8 @@ def saveRaid(raid):
             return cursor.lastrowid
     else:
         with db.cursor() as cursor:
-            sql = "UPDATE incursiones SET `pokemon`=%s, `time`=%s, `endtime`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=1 WHERE id=%s;"
-            cursor.execute(sql, (raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["id"]))
+            sql = "UPDATE incursiones SET `pokemon`=%s, `time`=%s, `endtime`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=1, message=%s WHERE id=%s;"
+            cursor.execute(sql, (raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["message"], raid["id"]))
             db.commit()
             return raid["id"]
 
