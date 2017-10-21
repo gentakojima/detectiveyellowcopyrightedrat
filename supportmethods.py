@@ -104,7 +104,7 @@ def update_message(chat_id, message_id, reply_markup, bot):
             if user["estoy"] != None and user["estoy"]>0:
                 estoy_text = "✅ "
             elif user["tarde"] != None and user["tarde"]>0:
-                estoy_text = "⏳ "
+                estoy_text = "🕒 "
             else:
                 estoy_text = "▪️ "
             if user["level"] != None and user["team"] != None:
@@ -215,7 +215,7 @@ def get_keyboard(chat_id):
     group = getGroup(chat_id)
     if group != None and group["latebutton"] == 1:
         keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
-                  [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy'), InlineKeyboardButton("⏳ ¡Llego tarde!", callback_data='llegotarde'), InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
+                  [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy'), InlineKeyboardButton("🕒 ¡Llego tarde!", callback_data='llegotarde'), InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
     else:
         keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
                   [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy'), InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
