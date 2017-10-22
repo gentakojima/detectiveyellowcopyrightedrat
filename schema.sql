@@ -31,7 +31,9 @@ CREATE TABLE `grupos` (
   `alerts` TINYINT NOT NULL DEFAULT '1',
   `disaggregated` TINYINT NOT NULL DEFAULT '0',
   `latebutton` TINYINT NOT NULL DEFAULT '0',
-  `refloat` TINYINT NOT NULL DEFAULT '0'
+  `refloat` TINYINT NOT NULL DEFAULT '0',
+  `candelete` TINYINT NOT NULL DEFAULT '1',
+  `gotitbuttons` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -81,7 +83,8 @@ CREATE TABLE `voy` (
   `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `plus` int(11) NOT NULL DEFAULT '0',
   `estoy` tinyint(4) NOT NULL DEFAULT '0',
-  `tarde` tinyint(4) NOT NULL DEFAULT '0'
+  `tarde` tinyint(4) NOT NULL DEFAULT '0',
+  `lotengo` tinyint(4) NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

@@ -107,6 +107,12 @@ def update_message(chat_id, message_id, reply_markup, bot):
                 estoy_text = "🕒 "
             else:
                 estoy_text = "▪️ "
+            if user["lotengo"] == 0:
+                lotengo_text = "👎"
+            elif user["lotengo"] == 1:
+                lotengo_text = "👍"
+            else:
+                lotengo_text = ""
             if user["level"] != None and user["team"] != None:
                 if user["team"] != None:
                     if user["team"]=="Rojo":
@@ -115,9 +121,9 @@ def update_message(chat_id, message_id, reply_markup, bot):
                         team_badge = "⚡️"
                     else:
                         team_badge = "❄️"
-                text = text + "\n%s%s%s @%s%s" % (estoy_text,team_badge,user["level"],ensure_escaped(user["username"]),plus_text)
+                text = text + "\n%s%s%s @%s%s%s" % (estoy_text,team_badge,user["level"],ensure_escaped(user["username"]),lotengo_text,plus_text)
             else:
-                text = text + "\n%s➖ - - @%s%s" % (estoy_text,ensure_escaped(user["username"]),plus_text)
+                text = text + "\n%s➖ - - @%s%s%s" % (estoy_text,ensure_escaped(user["username"]),lotengo_text,plus_text)
 
     return bot.edit_message_text(text=text, chat_id=raid["grupo_id"], message_id=raid["message"], reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
 
@@ -211,7 +217,15 @@ def get_settings_keyboard(chat_id):
         refloat_text = "✅ Reflotar incursiones activado"
     else:
         refloat_text = "▪️ Reflotar incursiones desactivado"
-    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='alertas')], [InlineKeyboardButton(latebutton_text, callback_data='botonllegotarde')], [InlineKeyboardButton(refloat_text, callback_data='reflotar')], [InlineKeyboardButton(disaggregated_text, callback_data='desagregado')]]
+    if group["candelete"] == 1:
+        candelete_text = "✅ Borrar incursiones activado"
+    else:
+        candelete_text = "▪️ Borrar incursiones desactivado"
+    if group["gotitbuttons"] == 1:
+        gotitbuttons_text = "✅ Botones «¡Lo tengo!» activados"
+    else:
+        gotitbuttons_text = "▪️ Botones «¡Lo tengo!» desactivados"
+    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar')], [InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
@@ -223,6 +237,8 @@ def get_keyboard(chat_id):
     else:
         keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
                   [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy'), InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
+    if group != None and group["gotitbuttons"] == 1:
+        keyboard.append( [InlineKeyboardButton("👍 ¡Lo tengo!", callback_data='lotengo'), InlineKeyboardButton("👎 ¡Ha escapado!", callback_data='escapou')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 

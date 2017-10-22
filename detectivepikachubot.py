@@ -26,7 +26,7 @@ import configparser
 from threading import Thread
 from unidecode import unidecode
 
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou
 from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard
 
 def cleanup(signum, frame):
@@ -497,12 +497,15 @@ def raid(bot, update, args=None):
       show_endtime = current_raid["endtime"]
   else:
       show_endtime = current_raid["time"]
-
   if group["refloat"] == 1 or is_admin(current_raid["grupo_id"], user_id, bot):
       text_refloat="\n\n🎈 *Reflotar incursión*:\n`/reflotar %s`" % current_raid["id"]
   else:
       text_refloat=""
-  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que se va*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🗺 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`\n\n❌ *Borrar incursión*:\n`/borrar %s`%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], current_raid["id"], text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+  if group["candelete"] == 1 or is_admin(current_raid["grupo_id"], user_id, bot):
+      text_delete="\n\n❌ *Borrar incursión*:\n`/borrar %s`" % current_raid["id"]
+  else:
+      text_delete=""
+  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que se va*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🗺 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
 
   if "gimnasio_id" in current_raid.keys():
     send_alerts(current_raid, bot)
@@ -953,7 +956,7 @@ def borrar(bot, update, args=None):
 
     raid = getRaid(raid_id)
     if raid != None:
-        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
+        if is_admin(raid["grupo_id"], user_id, bot) or (group["candelete"] == 1 and raid["usuario_id"] == user_id):
             if raid["ended"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="No se puede borrar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
@@ -1017,6 +1020,18 @@ def raidbutton(bot, update):
           update_text = True
       else:
           bot.answerCallbackQuery(text="¡No has podido marcar como que llegas tarde! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
+  elif data == "lotengo":
+      if raidLotengo(chat_id, message_id, user_id) != False:
+          bot.answerCallbackQuery(text="¡Enhorabuena! Has marcado que lo has capturado", callback_query_id=update.callback_query.id)
+          update_text = True
+      else:
+          bot.answerCallbackQuery(text="¡No has podido marcar como que lo has capturado! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
+  elif data == "escapou":
+      if raidEscapou(chat_id, message_id, user_id) != False:
+          bot.answerCallbackQuery(text="¡Lo siento! Has marcado que ha escapado", callback_query_id=update.callback_query.id)
+          update_text = True
+      else:
+          bot.answerCallbackQuery(text="¡No has podido marcar como que ha escapado! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
   if update_text == True:
       reply_markup = get_keyboard(chat_id)
       update_message(chat_id, message_id, reply_markup, bot)
@@ -1041,50 +1056,21 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
 
-  if data=="alertas":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          group = getGroup(chat_id)
-          if group["alerts"] == 1:
-              group["alerts"] = 0
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete"}
+
+  for k in settings:
+      if data==k:
+          if not is_admin(chat_id, user_id, bot):
+              bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
           else:
-              group["alerts"] = 1
-          saveGroup(group)
-          update_settings_message(chat_id, bot)
-  elif data=="desagregado":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          group = getGroup(chat_id)
-          if group["disaggregated"] == 1:
-              group["disaggregated"] = 0
-          else:
-              group["disaggregated"] = 1
-          saveGroup(group)
-          update_settings_message(chat_id, bot)
-  elif data=="botonllegotarde":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          group = getGroup(chat_id)
-          if group["latebutton"] == 1:
-              group["latebutton"] = 0
-          else:
-              group["latebutton"] = 1
-          saveGroup(group)
-          update_settings_message(chat_id, bot)
-  elif data=="reflotar":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          group = getGroup(chat_id)
-          if group["refloat"] == 1:
-              group["refloat"] = 0
-          else:
-              group["refloat"] = 1
-          saveGroup(group)
-          update_settings_message(chat_id, bot)
+              group = getGroup(chat_id)
+              if group[settings[k]] == 1:
+                  group[settings[k]] = 0
+              else:
+                  group[settings[k]] = 1
+              saveGroup(group)
+              update_settings_message(chat_id, bot)
+
 
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
