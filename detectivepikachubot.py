@@ -60,7 +60,7 @@ gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
 
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
-    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame la respuesta.\n\n🔔 <b>Configurar alertas (BETA)</b>\nEscríbeme por privado el comando <code>/alerts</code>.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame la respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado el comando <code>/alerts</code>.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def setspreadsheet(bot, update, args=None):
   logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
@@ -119,7 +119,7 @@ def refresh(bot, update, args=None):
     bot.sendMessage(chat_id=chat_id, text="❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/setspreadsheet`", parse_mode=telegram.ParseMode.MARKDOWN)
     return
 
-  sent_message = bot.sendMessage(chat_id=update.message.chat_id, text="🗺 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
+  sent_message = bot.sendMessage(chat_id=update.message.chat_id, text="🌎 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
   Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
 
   response = requests.get("https://docs.google.com/spreadsheet/ccc?key=%s&output=csv" % grupo["spreadsheet"] )
@@ -505,10 +505,16 @@ def raid(bot, update, args=None):
       text_delete="\n\n❌ *Borrar incursión*:\n`/borrar %s`" % current_raid["id"]
   else:
       text_delete=""
-  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que se va*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🗺 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que se va*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
 
-  if "gimnasio_id" in current_raid.keys():
-    send_alerts(current_raid, bot)
+  if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] != None:
+      send_alerts(current_raid, bot)
+  else:
+      if group["alerts"] == 1:
+           text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
+      else:
+           text_alertas = ""
+      bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: `%s`\n\nTe aconsejo que lo intentes cambiar para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto que has puesto por otro:\n\n`/cambiargimnasio %s %s`" % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def alerts(bot, update, args=None):
     logging.debug("detectivepikachubot:alerts: %s %s %s" % (bot, update, args))
@@ -699,7 +705,7 @@ def cambiarhora(bot, update, args=None):
                     else:
                         raid["time"] = "%02d:%02d" % (int(hour),int(minute))
                         saveRaid(raid)
-                        reply_markup = get_keyboard(raid["grupo_id"])
+                        reply_markup = get_keyboard(raid)
                         update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora a las *%s* correctamente!" % raid["time"], parse_mode=telegram.ParseMode.MARKDOWN)
                         warn_people("cambiarhora", raid, user_username, chat_id, bot)
@@ -755,7 +761,7 @@ def cambiarhorafin(bot, update, args=None):
                     else:
                         raid["endtime"] = None
                     saveRaid(raid)
-                    reply_markup = get_keyboard(raid["grupo_id"])
+                    reply_markup = get_keyboard(raid)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     if raid["endtime"] != None:
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora de fin para las *%s* correctamente!" % raid["endtime"], parse_mode=telegram.ParseMode.MARKDOWN)
@@ -823,17 +829,19 @@ def cambiargimnasio(bot, update, args=None):
                     raid["gimnasio_text"] = chosengym["desc"]
                     raid["gimnasio_id"] = chosengym["id"]
                     saveRaid(raid)
-                    reply_markup = get_keyboard(raid["grupo_id"])
+                    reply_markup = get_keyboard(raid)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el gimnasio a *%s* correctamente!" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                     raid["gimnasio_text"] = new_gymtext
                     raid["gimnasio_id"] = None
                     saveRaid(raid)
-                    reply_markup = get_keyboard(raid["grupo_id"])
+                    reply_markup = get_keyboard(raid)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     bot.sendMessage(chat_id=chat_id, text="¡No he encontrado el gimnasio, pero lo he actualizado igualmente en la incursión a *%s*" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
                 warn_people("cambiargimnasio", raid, user_username, chat_id, bot)
+                if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] != None:
+                    send_alerts(raid, bot)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
@@ -875,7 +883,7 @@ def reflotar(bot, update, args=None):
             sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text="Reflotando incursión...", parse_mode=telegram.ParseMode.MARKDOWN)
             raid["message"] = sent_message.message_id
             saveRaid(raid)
-            reply_markup = get_keyboard(raid["grupo_id"])
+            reply_markup = get_keyboard(raid)
             update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
             bot.sendMessage(chat_id=chat_id, text="¡Se ha reflotado la incursión correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
@@ -921,7 +929,7 @@ def cambiarpokemon(bot, update, args=None):
                     if m != None:
                         raid["pokemon"] = pokemon
                         saveRaid(raid)
-                        reply_markup = get_keyboard(raid["grupo_id"])
+                        reply_markup = get_keyboard(raid)
                         update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                         bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el Pokémon a *%s* correctamente!" % raid["pokemon"], parse_mode=telegram.ParseMode.MARKDOWN)
                         warn_people("cambiarpokemon", raid, user_username, chat_id, bot)
@@ -1033,7 +1041,7 @@ def raidbutton(bot, update):
       else:
           bot.answerCallbackQuery(text="¡No has podido marcar como que ha escapado! ¿La incursión ha caducado?", callback_query_id=update.callback_query.id)
   if update_text == True:
-      reply_markup = get_keyboard(chat_id)
+      reply_markup = get_keyboard(getRaidbyMessage(chat_id, message_id))
       update_message(chat_id, message_id, reply_markup, bot)
 
   if data=="ubicacion":

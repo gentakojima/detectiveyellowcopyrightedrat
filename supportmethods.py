@@ -85,7 +85,11 @@ def update_message(chat_id, message_id, reply_markup, bot):
         text_endtime="\n_Se va a las %s_" % raid["endtime"]
     else:
         text_endtime=""
-    text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s%s\n" % (raid["pokemon"], raid["time"], raid["gimnasio_text"], ensure_escaped(creador["username"]), text_edited, text_endtime)
+    if raid["gimnasio_id"] != None:
+        gym_emoji="🌎"
+    else:
+        gym_emoji=""
+    text = "Incursión de *%s* a las *%s* en %s*%s*\nCreada por @%s%s%s\n" % (raid["pokemon"], raid["time"], gym_emoji, raid["gimnasio_text"], ensure_escaped(creador["username"]), text_edited, text_endtime)
     if raid["cancelled"] == 1:
         text = text + "❌ *Incursión cancelada*"
     else:
@@ -229,16 +233,17 @@ def get_settings_keyboard(chat_id):
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
-def get_keyboard(chat_id):
-    group = getGroup(chat_id)
-    if group != None and group["latebutton"] == 1:
-        keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
-                  [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy'), InlineKeyboardButton("🕒 ¡Llego tarde!", callback_data='llegotarde'), InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
-    else:
-        keyboard = [[InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')],
-                  [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy'), InlineKeyboardButton("🗺 Ubicación", callback_data='ubicacion')]]
+def get_keyboard(raid):
+    group = getGroup(raid["grupo_id"])
+    keyboard_row1 = [InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')]
+    keyboard_row2 = [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy')]
+    if group["latebutton"] == 1:
+        keyboard_row2.append(InlineKeyboardButton("🕒 ¡Llego tarde!", callback_data='llegotarde'))
+    if raid["gimnasio_id"] != None:
+        keyboard_row2.append(InlineKeyboardButton("🌎 Ubicación", callback_data='ubicacion'))
+    keyboard = [keyboard_row1, keyboard_row2]
     if group != None and group["gotitbuttons"] == 1:
-        keyboard.append( [InlineKeyboardButton("👍 ¡Lo tengo!", callback_data='lotengo'), InlineKeyboardButton("👎 ¡Ha escapado!", callback_data='escapou')])
+        keyboard.append([InlineKeyboardButton("👍 ¡Lo tengo!", callback_data='lotengo'), InlineKeyboardButton("👎 ¡Ha escapado!", callback_data='escapou')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
