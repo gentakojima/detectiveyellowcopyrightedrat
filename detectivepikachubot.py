@@ -471,28 +471,16 @@ def raid(bot, update, args=None):
     current_raid["gimnasio_text"] = chosengym["desc"]
     current_raid["gimnasio_id"] = chosengym["id"]
 
-  if "endtime" in current_raid.keys():
-    text_endtime="\n_Se va a las %s_" % current_raid["endtime"]
-  else:
-    text_endtime=""
-
-  group = getGroup(chat_id)
-  if group != None and group["disaggregated"] == 1:
-    text_apuntados = "❄️0 · 🔥0 · ⚡️0 · ❓0 · 👩‍👩‍👧‍👧0"
-  else:
-    text_apuntados = "0 entrenadores apuntados:"
-
-  send_text = "Incursión de *%s* a las *%s* en *%s*\nCreada por @%s%s\n%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], ensure_escaped(current_raid["username"]), text_endtime, text_apuntados)
-
-  reply_markup = get_keyboard(chat_id)
-  sent_message = bot.sendMessage(chat_id=chat_id, text=send_text,parse_mode=telegram.ParseMode.MARKDOWN,reply_markup=reply_markup)
-
+  sent_message = bot.sendMessage(chat_id=chat_id, text="Creando incursión. Un momento...")
   current_raid["grupo_id"] = chat_id
   current_raid["usuario_id"] = user_id
   current_raid["message"] = sent_message.message_id
-
   current_raid["id"] = saveRaid(current_raid)
 
+  reply_markup = get_keyboard(current_raid)
+  update_message(current_raid["grupo_id"], current_raid["message"], reply_markup, bot)
+
+  group = getGroup(chat_id)
   if current_raid["endtime"] != None:
       show_endtime = current_raid["endtime"]
   else:
