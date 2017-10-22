@@ -419,7 +419,7 @@ def raid(bot, update, args=None):
     return
   current_raid["time"] = "%02d:%02d" % (int(hour),int(minute))
 
-  m = re.match("([0-9]{1,2})[:.]?([0-9]{0,2})h?", args[-1], flags=re.IGNORECASE)
+  m = re.match("([0-9]{1,2})[:.]([0-9]{1,2})h?", args[-1], flags=re.IGNORECASE)
   if m != None:
     hour = str(m.group(1))
     minute = m.group(2) or "00"
