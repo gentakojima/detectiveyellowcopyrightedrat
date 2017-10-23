@@ -951,6 +951,7 @@ def borrar(bot, update, args=None):
         return
 
     raid = getRaid(raid_id)
+    group = getGroup(raid["grupo_id"])
     if raid != None:
         if is_admin(raid["grupo_id"], user_id, bot) or (group["candelete"] == 1 and raid["usuario_id"] == user_id):
             if raid["ended"] == 1:
