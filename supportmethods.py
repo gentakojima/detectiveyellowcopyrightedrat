@@ -88,7 +88,7 @@ def update_message(chat_id, message_id, reply_markup, bot):
     if raid["gimnasio_id"] != None:
         gym_emoji="🌎"
     else:
-        gym_emoji=""
+        gym_emoji="❓"
     text = "Incursión de *%s* a las *%s* en %s*%s*\nCreada por @%s%s%s\n" % (raid["pokemon"], raid["time"], gym_emoji, raid["gimnasio_text"], ensure_escaped(creador["username"]), text_edited, text_endtime)
     if raid["cancelled"] == 1:
         text = text + "❌ *Incursión cancelada*"

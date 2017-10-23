@@ -502,7 +502,7 @@ def raid(bot, update, args=None):
            text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
       else:
            text_alertas = ""
-      bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: `%s`\n\nTe aconsejo que lo intentes cambiar para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto que has puesto por otro:\n\n`/cambiargimnasio %s %s`" % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+      bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _%s_\n\nDebes cambiarlo por un gimnasio reconocido para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto del final:\n\n`/cambiargimnasio %s %s`\n\nSi no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente." % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def alerts(bot, update, args=None):
     logging.debug("detectivepikachubot:alerts: %s %s %s" % (bot, update, args))
