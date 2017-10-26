@@ -981,7 +981,7 @@ def raidbutton(bot, update):
 
   logging.debug("detectivepikachubot:raidbutton:%s: %s %s" % (data, bot, update))
 
-  if (data == "voy" or data == "plus1" or data == "novoy" or data == "estoy") \
+  if (data == "voy" or data == "plus1" or data == "novoy" or data == "estoy" or data == "lotengo" or data == "escapou" or data == "llegotarde") \
     and (thisuser["username"] == None or thisuser["username"] == "None"):
     bot.answerCallbackQuery(text="No puedes unirte a una incursión si no tienes definido un alias.\nEn Telegram, ve a 'Ajustes' y selecciona la opción 'Alias'.", show_alert="true", callback_query_id=update.callback_query.id)
     return
