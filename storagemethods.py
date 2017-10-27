@@ -36,6 +36,10 @@ def saveGroup(group):
         group["latebutton"] = 0
     if "refloat" not in group.keys():
         group["refloat"] = 0
+    if "candelete" not in group.keys():
+        group["candelete"] = 1
+    if "gotitbuttons" not in group.keys():
+        group["gotitbuttons"] = 0
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, spreadsheet) VALUES (%s, %s, %s) \
         ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s;"
