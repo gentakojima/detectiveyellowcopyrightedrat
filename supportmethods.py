@@ -74,23 +74,29 @@ def send_alerts(raid, bot):
 def update_message(chat_id, message_id, reply_markup, bot):
     logging.debug("supportmethods:update_message: %s %s %s" % (chat_id, message_id, reply_markup))
     raid = getRaidbyMessage(chat_id, message_id)
+    text = format_message(raid)
+    return bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+
+def format_message(raid):
+    logging.debug("supportmethods:format_message: %s" % (raid))
     creador = getCreadorRaid(raid["id"])
     gente = getRaidPeople(raid["id"])
-    group = getGroup(chat_id)
-    if raid["edited"]>0:
+    group = getGroup(raid["grupo_id"])
+
+    if "edited" in raid.keys() and raid["edited"]>0:
         text_edited=" _(editada)_"
     else:
         text_edited=""
-    if raid["endtime"] != None:
+    if "endtime" in raid.keys() and raid["endtime"] != None:
         text_endtime="\n_Se va a las %s_" % raid["endtime"]
     else:
         text_endtime=""
-    if raid["gimnasio_id"] != None:
+    if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] != None:
         gym_emoji="🌎"
     else:
         gym_emoji="❓"
     text = "Incursión de *%s* a las *%s* en %s*%s*\nCreada por @%s%s%s\n" % (raid["pokemon"], raid["time"], gym_emoji, raid["gimnasio_text"], ensure_escaped(creador["username"]), text_edited, text_endtime)
-    if raid["cancelled"] == 1:
+    if "cancelled" in raid.keys() and raid["cancelled"] == 1:
         text = text + "❌ *Incursión cancelada*"
     else:
         if group["disaggregated"] == 1:
@@ -99,7 +105,7 @@ def update_message(chat_id, message_id, reply_markup, bot):
         else:
             numgente = count_people(gente)
             text = text + "%s entrenadores apuntados:" % numgente
-    if raid["cancelled"] == 0 and gente != None:
+    if (not "cancelled" in raid.keys() or raid["cancelled"] == 0) and gente != None:
         for user in gente:
             if user["plus"] != None and user["plus"]>0:
                 plus_text = " +%i" % user["plus"]
@@ -128,8 +134,7 @@ def update_message(chat_id, message_id, reply_markup, bot):
                 text = text + "\n%s%s%s @%s%s%s" % (estoy_text,team_badge,user["level"],ensure_escaped(user["username"]),lotengo_text,plus_text)
             else:
                 text = text + "\n%s➖ - - @%s%s%s" % (estoy_text,ensure_escaped(user["username"]),lotengo_text,plus_text)
-
-    return bot.edit_message_text(text=text, chat_id=raid["grupo_id"], message_id=raid["message"], reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+    return text
 
 def ensure_escaped(username):
     if username.find("_") != -1 and username.find("\\_") == -1:

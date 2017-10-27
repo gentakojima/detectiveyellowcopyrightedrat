@@ -27,7 +27,7 @@ from threading import Thread
 from unidecode import unidecode
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -471,14 +471,15 @@ def raid(bot, update, args=None):
     current_raid["gimnasio_text"] = chosengym["desc"]
     current_raid["gimnasio_id"] = chosengym["id"]
 
-  sent_message = bot.sendMessage(chat_id=chat_id, text="Creando incursión. Un momento...")
   current_raid["grupo_id"] = chat_id
   current_raid["usuario_id"] = user_id
-  current_raid["message"] = sent_message.message_id
   current_raid["id"] = saveRaid(current_raid)
 
+  text  = format_message(current_raid)
   reply_markup = get_keyboard(current_raid)
-  update_message(current_raid["grupo_id"], current_raid["message"], reply_markup, bot)
+  sent_message = bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+  current_raid["message"] = sent_message.message_id
+  saveRaid(current_raid)
 
   group = getGroup(chat_id)
   if current_raid["endtime"] != None:
@@ -868,11 +869,11 @@ def reflotar(bot, update, args=None):
                 return
 
             bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
-            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text="Reflotando incursión...", parse_mode=telegram.ParseMode.MARKDOWN)
+            text = format_message(raid)
+            reply_markup = get_keyboard(raid)
+            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
             raid["message"] = sent_message.message_id
             saveRaid(raid)
-            reply_markup = get_keyboard(raid)
-            update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
             bot.sendMessage(chat_id=chat_id, text="¡Se ha reflotado la incursión correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para reflotar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)

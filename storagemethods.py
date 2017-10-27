@@ -241,6 +241,8 @@ def saveRaid(raid):
     logging.debug("storagemethods:saveRaid: %s" % (raid))
     if "gimnasio_id" not in raid.keys():
         raid["gimnasio_id"] = None
+    if "message" not in raid.keys():
+        raid["message"] = None
     if "endtime" not in raid.keys():
         raid["endtime"] = None
     if "id" not in raid.keys():
