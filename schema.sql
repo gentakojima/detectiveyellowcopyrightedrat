@@ -27,6 +27,7 @@ CREATE TABLE `grupos` (
   `id` bigint(20) NOT NULL,
   `title` varchar(120) NOT NULL,
   `spreadsheet` varchar(100) NOT NULL,
+  `settings_message` bigint(20) DEFAULT NULL,
   `testgroup` TINYINT NOT NULL DEFAULT '0',
   `alerts` TINYINT NOT NULL DEFAULT '1',
   `disaggregated` TINYINT NOT NULL DEFAULT '0',
