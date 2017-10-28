@@ -34,7 +34,9 @@ CREATE TABLE `grupos` (
   `latebutton` TINYINT NOT NULL DEFAULT '0',
   `refloat` TINYINT NOT NULL DEFAULT '0',
   `candelete` TINYINT NOT NULL DEFAULT '1',
-  `gotitbuttons` TINYINT NOT NULL DEFAULT '0'
+  `gotitbuttons` TINYINT NOT NULL DEFAULT '0',
+  `locations` TINYINT NOT NULL DEFAULT '1',
+  `gymcommand` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

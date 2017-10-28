@@ -242,47 +242,10 @@ def processLocation(bot, update):
             bot.sendMessage(chat_id=chat_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def processMessage(bot, update):
-  (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-
-  if chat_type == "private":
-    registerOak(bot, update)
-    return
-
-  logging.debug("detectivepikachubot:processMessage: %s %s" % (bot, update))
-
-  m2 = re.search('(dónde|donde).*(gimnasio|gym|gim) (.+)$', text, flags=re.IGNORECASE)
-  m3 = re.search('(#noloc|#nl)', text, flags=re.IGNORECASE)
-  if m2 != None and m3 == None:
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     if chat_type == "private":
-      bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
-      return
-    gyms = getPlaces(chat_id)
-    if len(gyms)==0:
-      return
-    place = m2.group(3)
-    logging.info("Buscando sitio \"%s\"..." % place)
-    chosen = None
-
-    for p in gyms:
-      for n in p["names"]:
-        logging.debug("Matching '%s' with '%s'..." % (n,place))
-        if re.search(n,place,flags=re.IGNORECASE) != None:
-          logging.debug("Matched '%s'!!" % n)
-          chosen = p
-          break
-      if chosen != None:
-        break
-    if chosen != None:
-      bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
-      logging.info("Encontrado: %s" % chosen["desc"])
-      try:
-        reverse_geocode_result = gmaps.reverse_geocode((chosen["latitude"], chosen["longitude"]))
-        address = reverse_geocode_result[0]["formatted_address"]
-      except:
-        address = "-"
-      bot.sendVenue(chat_id=chat_id, latitude=chosen["latitude"], longitude=chosen["longitude"], title=chosen["desc"], address=address)
-    else:
-      logging.info("Oops! No encontrado")
+        registerOak(bot, update)
+    return
 
 def settings(bot, update):
     logging.debug("detectivepikachubot:settings: %s %s" % (bot, update))
@@ -356,6 +319,47 @@ def incursiones(bot, update):
         output = ("\n - `%s` %s @%s" % (r["id"], r["pokemon"], ensure_escaped(creador["username"]))) + output
     output = "Últimas incursiones del grupo:" + output
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
+
+def gym(bot, update, args=None):
+    logging.debug("detectivepikachubot:gym: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
+    thisuser = refreshUsername(user_id, user_username)
+    group = getGroup(chat_id)
+
+    if chat_type == "private":
+        bot.sendMessage(chat_id=chat_id, text="El comando de buscar gimnasios solo funcionan en canales y grupos. Si quieres probarlo, puedes pasarte por @detectivepikachuayuda.")
+        return
+
+    if group["gymcommand"] == 0 and not is_admin(chat_id, user_id, bot):
+        return
+
+    gym_text = ""
+    for i in range (0,len(args)):
+        gym_text = gym_text + "%s " % args[i]
+    gym_text = gym_text.strip()
+
+    chosengym = None
+    gyms = getPlaces(chat_id, ordering="id")
+    for p in gyms:
+        for n in p["names"]:
+            if re.search(unidecode(n),unidecode(gym_text),flags=re.IGNORECASE) != None:
+                logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(gym_text)))
+                chosengym = p
+                break
+        if chosengym != None:
+            break
+    if chosengym != None:
+        bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
+        logging.info("Encontrado: %s" % chosengym["desc"])
+        try:
+            reverse_geocode_result = gmaps.reverse_geocode((chosengym["latitude"], chosengym["longitude"]))
+            address = reverse_geocode_result[0]["formatted_address"]
+        except:
+            address = "-"
+        bot.sendVenue(chat_id=chat_id, latitude=chosengym["latitude"], longitude=chosengym["longitude"], title=chosengym["desc"], address=address)
+    else:
+        bot.sendMessage(chat_id=chat_id, text="Lo siento, pero no he encontrado el gimnasio _%s_." % gym_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def raid(bot, update, args=None):
   logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
@@ -496,14 +500,15 @@ def raid(bot, update, args=None):
       text_delete=""
   bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que se va*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
 
-  if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] != None:
-      send_alerts(current_raid, bot)
-  else:
-      if group["alerts"] == 1:
-           text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
+  if group["locations"] == 1:
+      if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] != None:
+          send_alerts(current_raid, bot)
       else:
-           text_alertas = ""
-      bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _%s_\n\nDebes cambiarlo por un gimnasio reconocido para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto del final:\n\n`/cambiargimnasio %s %s`\n\nSi no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente." % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+          if group["alerts"] == 1:
+               text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
+          else:
+               text_alertas = ""
+          bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _%s_\n\nDebes cambiarlo por un gimnasio reconocido para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto del final:\n\n`/cambiargimnasio %s %s`\n\nSi no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente." % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def alerts(bot, update, args=None):
     logging.debug("detectivepikachubot:alerts: %s %s %s" % (bot, update, args))
@@ -792,6 +797,7 @@ def cambiargimnasio(bot, update, args=None):
 
     raid_id = args[0]
     raid = getRaid(raid_id)
+    group = getGroup(raid["grupo_id"])
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
@@ -804,16 +810,17 @@ def cambiargimnasio(bot, update, args=None):
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta en ese gimnasio!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 chosengym = None
-                gyms = getPlaces(raid["grupo_id"], ordering="id")
-                for p in gyms:
-                    logging.debug("Testing gym «%s»»" % (p["desc"]))
-                    for n in p["names"]:
-                        if re.search(unidecode(n), unidecode(new_gymtext), flags=re.IGNORECASE) != None:
-                            logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(new_gymtext)))
-                            chosengym = p
+                if group["locations"] == 1:
+                    gyms = getPlaces(raid["grupo_id"], ordering="id")
+                    for p in gyms:
+                        logging.debug("Testing gym «%s»»" % (p["desc"]))
+                        for n in p["names"]:
+                            if re.search(unidecode(n), unidecode(new_gymtext), flags=re.IGNORECASE) != None:
+                                logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(new_gymtext)))
+                                chosengym = p
+                                break
+                        if chosengym != None:
                             break
-                    if chosengym != None:
-                        break
                 if chosengym != None:
                     raid["gimnasio_text"] = chosengym["desc"]
                     raid["gimnasio_id"] = chosengym["id"]
@@ -827,7 +834,10 @@ def cambiargimnasio(bot, update, args=None):
                     saveRaid(raid)
                     reply_markup = get_keyboard(raid)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
-                    bot.sendMessage(chat_id=chat_id, text="¡No he encontrado el gimnasio, pero lo he actualizado igualmente en la incursión a *%s*" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
+                    if group["locations"] == 1:
+                        bot.sendMessage(chat_id=chat_id, text="⚠️ ¡No he encontrado la ubicación del gimnasio que indicas, pero lo he actualizado igualmente a *%s*." % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
+                    else:
+                        bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el gimnasio a *%s* correctamente!" % raid["gimnasio_text"], parse_mode=telegram.ParseMode.MARKDOWN)
                 warn_people("cambiargimnasio", raid, user_username, chat_id, bot)
                 if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] != None:
                     send_alerts(raid, bot)
@@ -1054,7 +1064,7 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete"}
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_gymcommand":"gymcommand"}
 
   for k in settings:
       if data==k:
@@ -1064,8 +1074,12 @@ def raidbutton(bot, update):
               group = getGroup(chat_id)
               if group[settings[k]] == 1:
                   group[settings[k]] = 0
+                  if k == "settings_locations":
+                      group["alerts"] = 0
               else:
                   group[settings[k]] = 1
+                  if k == "settings_alertas":
+                      group["locations"] = 1
               saveGroup(group)
               update_settings_message(chat_id, bot)
 
@@ -1089,6 +1103,7 @@ dispatcher.add_handler(CommandHandler('cambiargimnasio', cambiargimnasio, pass_a
 dispatcher.add_handler(CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True))
 dispatcher.add_handler(CommandHandler('borrar', borrar, pass_args=True))
 dispatcher.add_handler(CommandHandler('reflotar', reflotar, pass_args=True))
+dispatcher.add_handler(CommandHandler('gym', gym, pass_args=True))
 # Commands related to alerts
 dispatcher.add_handler(MessageHandler(Filters.location, processLocation))
 dispatcher.add_handler(CommandHandler('alerts', alerts, pass_args=True))

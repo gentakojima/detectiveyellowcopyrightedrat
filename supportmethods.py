@@ -91,10 +91,13 @@ def format_message(raid):
         text_endtime="\n_Se va a las %s_" % raid["endtime"]
     else:
         text_endtime=""
-    if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] != None:
-        gym_emoji="🌎"
+    if group["locations"] == 1:
+        if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] != None:
+            gym_emoji="🌎"
+        else:
+            gym_emoji="❓"
     else:
-        gym_emoji="❓"
+        gym_emoji=""
     text = "Incursión de *%s* a las *%s* en %s*%s*\nCreada por @%s%s%s\n" % (raid["pokemon"], raid["time"], gym_emoji, raid["gimnasio_text"], ensure_escaped(creador["username"]), text_edited, text_endtime)
     if "cancelled" in raid.keys() and raid["cancelled"] == 1:
         text = text + "❌ *Incursión cancelada*"
@@ -211,30 +214,38 @@ def get_settings_keyboard(chat_id):
     logging.debug("supportmethods:get_settings_keyboard")
     group = getGroup(chat_id)
     if group["alerts"] == 1:
-        alertas_text = "✅ Alertas activadas"
+        alertas_text = "✅ Alertas"
     else:
-        alertas_text = "▪️ Alertas desactivadas"
+        alertas_text = "▪️ Alertas"
     if group["disaggregated"] == 1:
         disaggregated_text = "👫 Totales desagregados"
     else:
         disaggregated_text = "👬 Total simplificado"
     if group["latebutton"] == 1:
-        latebutton_text = "✅ Botón «¡Llego tarde!» activado"
+        latebutton_text = "✅ ¡Llego tarde!"
     else:
-        latebutton_text = "▪️ Botón «¡Llego tarde!» desactivado"
+        latebutton_text = "▪️ ¡Llego tarde!"
     if group["refloat"] == 1:
-        refloat_text = "✅ Reflotar incursiones activado"
+        refloat_text = "✅ Reflotar incursiones"
     else:
-        refloat_text = "▪️ Reflotar incursiones desactivado"
+        refloat_text = "▪️ Reflotar incursiones"
     if group["candelete"] == 1:
-        candelete_text = "✅ Borrar incursiones activado"
+        candelete_text = "✅ Borrar incursiones"
     else:
-        candelete_text = "▪️ Borrar incursiones desactivado"
+        candelete_text = "▪️ Borrar incursiones"
     if group["gotitbuttons"] == 1:
-        gotitbuttons_text = "✅ Botones «¡Lo tengo!» activados"
+        gotitbuttons_text = "✅ ¡Lo tengo!"
     else:
-        gotitbuttons_text = "▪️ Botones «¡Lo tengo!» desactivados"
-    settings_keyboard = [[InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar')], [InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')]]
+        gotitbuttons_text = "▪️ ¡Lo tengo!"
+    if group["locations"] == 1:
+        locations_text = "✅ Ubicaciones"
+    else:
+        locations_text = "▪️ Ubicaciones"
+    if group["gymcommand"] == 1:
+        gymcommand_text = "✅ Comando «/gym»"
+    else:
+        gymcommand_text = "▪️ Comando «/gym»"
+    settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
@@ -257,4 +268,4 @@ def update_settings_message(chat_id, bot):
     group = getGroup(chat_id)
 
     settings_markup = get_settings_keyboard(chat_id)
-    return bot.edit_message_text(text="Pulsa en los botones de las opciones para cambiarlas. Cuando acabes, puedes borrar el mensaje.", chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+    return bot.edit_message_text(text="Pulsa en los botones de las opciones para cambiarlas. Cuando acabes, puedes borrar el mensaje.\n\nTen en cuenta que los <strong>administradores del grupo</strong> siempre pueden borrar y reflotar incursiones, aunque desactives aquí las opciones.\n\nPara más información sobre estas funciones, <a href='http://telegra.ph/Detective-Pikachu-09-28'>consulta la ayuda</a>.", chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
