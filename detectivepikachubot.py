@@ -27,7 +27,7 @@ from threading import Thread
 from unidecode import unidecode
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -60,7 +60,7 @@ gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
 
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
-    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame la respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado el comando <code>/alerts</code>.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame a @detectivepikachubot la respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @detectivepikachubot el comando <code>/alerts</code>.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def setspreadsheet(bot, update, args=None):
   logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
@@ -250,6 +250,7 @@ def processMessage(bot, update):
 def settings(bot, update):
     logging.debug("detectivepikachubot:settings: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
     if chat_type == "private":
       bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
       return
@@ -513,14 +514,10 @@ def raid(bot, update, args=None):
 def alerts(bot, update, args=None):
     logging.debug("detectivepikachubot:alerts: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "alerts", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     alerts=getAlerts(user_id)
@@ -539,14 +536,10 @@ def alerts(bot, update, args=None):
 def addalert(bot, update, args=None):
     logging.debug("detectivepikachubot:addalert: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "addalert", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if len(args)<1 or not str(args[0]).isnumeric():
@@ -577,14 +570,10 @@ def addalert(bot, update, args=None):
 def delalert(bot, update, args=None):
     logging.debug("detectivepikachubot:delalert: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "delalert", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if len(args)<1 or not str(args[0]).isnumeric():
@@ -604,14 +593,10 @@ def delalert(bot, update, args=None):
 def clearalerts(bot, update):
     logging.debug("detectivepikachubot:clearlerts: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ ¡Los comandos de alertas solo funcionan por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "clearalerts", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if clearAlerts(user_id):
@@ -623,16 +608,10 @@ def cancelar(bot, update, args=None):
     logging.debug("detectivepikachubot:cancelar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
-
     thisuser = refreshUsername(user_id, user_username)
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cancelar incursión solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "cancelar", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if len(args)<1 or not str(args[0]).isnumeric():
@@ -661,16 +640,10 @@ def cambiarhora(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarHora: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
-
     thisuser = refreshUsername(user_id, user_username)
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar la hora solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "cambiarhora", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
@@ -714,16 +687,10 @@ def cambiarhorafin(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarHoraFin: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
-
     thisuser = refreshUsername(user_id, user_username)
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar la hora de fin solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "cambiarhorafin", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
@@ -774,16 +741,10 @@ def cambiargimnasio(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiargimnasio: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
-
     thisuser = refreshUsername(user_id, user_username)
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar el gimnasio solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "cambiargimnasio", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
@@ -850,16 +811,10 @@ def reflotar(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
-
     thisuser = refreshUsername(user_id, user_username)
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de reflotar solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "reflotar", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if len(args)<1 or not str(args[0]).isnumeric():
@@ -894,16 +849,10 @@ def cambiarpokemon(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarpokemon: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
-
     thisuser = refreshUsername(user_id, user_username)
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de cambiar el Pokémon solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "cambiarpokemon", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     if len(args)<2 or not str(args[0]).isnumeric():
@@ -944,16 +893,10 @@ def borrar(bot, update, args=None):
     logging.debug("detectivepikachubot:borrar: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
-
     thisuser = refreshUsername(user_id, user_username)
 
-    if chat_type != "private":
-        try:
-          bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-        except:
-          pass
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡El comando de borrar incursión solo funciona por privado!\n\n_(Este mensaje se borrará en unos segundos)_",parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    if edit_check_private(chat_id, chat_type, user_username, "borrar", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
         return
 
     raid_id = args[0]

@@ -1,7 +1,7 @@
 import time
 import logging
+from threading import Thread
 import telegram
-
 from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
 
 from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, endOldRaids, getRaid, getAlertsByPlace, getGroup
@@ -30,7 +30,14 @@ def extract_update_info(update):
 
 def delete_message_timed(chat_id, message_id, sleep_time, bot):
     time.sleep(sleep_time)
-    bot.deleteMessage(chat_id=chat_id,message_id=message_id)
+    delete_message(chat_id, message_id, bot)
+
+def delete_message(chat_id, message_id, bot):
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message_id)
+        return true
+    except:
+        return false
 
 def count_people(gente):
     count = 0
@@ -269,3 +276,15 @@ def update_settings_message(chat_id, bot):
 
     settings_markup = get_settings_keyboard(chat_id)
     return bot.edit_message_text(text="Pulsa en los botones de las opciones para cambiarlas. Cuando acabes, puedes borrar el mensaje.\n\nTen en cuenta que los <strong>administradores del grupo</strong> siempre pueden borrar y reflotar incursiones, aunque desactives aquí las opciones.\n\nPara más información sobre estas funciones, <a href='http://telegra.ph/Detective-Pikachu-09-28'>consulta la ayuda</a>.", chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+def edit_check_private(chat_id, chat_type, user_username, command, bot):
+    if chat_type != "private":
+        if user_username != None:
+            text = "@%s el comando `/%s` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_" % (user_username, command)
+        else:
+            text = "El comando `/%s` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_" % command
+        sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+        return False
+    else:
+        return True
