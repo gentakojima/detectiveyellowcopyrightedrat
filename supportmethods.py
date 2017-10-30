@@ -35,9 +35,9 @@ def delete_message_timed(chat_id, message_id, sleep_time, bot):
 def delete_message(chat_id, message_id, bot):
     try:
         bot.deleteMessage(chat_id=chat_id,message_id=message_id)
-        return true
+        return True
     except:
-        return false
+        return False
 
 def count_people(gente):
     count = 0
