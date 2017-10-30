@@ -389,7 +389,7 @@ def raidEstoy(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id, estoy) VALUES (%s, %s, 1)"
             cursor.execute(sql, (raid["id"], user_id))
         else:
-            sql = "UPDATE voy SET estoy=1, tarde=0 WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET estoy=1, tarde=0, lotengo=NULL WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True
@@ -408,7 +408,7 @@ def raidLlegotarde(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id, tarde) VALUES (%s, %s, 1)"
             cursor.execute(sql, (raid["id"], user_id))
         else:
-            sql = "UPDATE voy SET tarde=1, estoy=0 WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET tarde=1, estoy=0, lotengo=NULL WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True
