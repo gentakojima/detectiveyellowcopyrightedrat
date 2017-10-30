@@ -95,7 +95,7 @@ def format_message(raid):
     else:
         text_edited=""
     if "endtime" in raid.keys() and raid["endtime"] != None:
-        text_endtime="\n_Se va a las %s_" % raid["endtime"]
+        text_endtime="\n_Desaparece a las %s_" % raid["endtime"]
     else:
         text_endtime=""
     if group["locations"] == 1:
