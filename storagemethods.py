@@ -249,6 +249,8 @@ def saveRaid(raid):
         raid["message"] = None
     if "endtime" not in raid.keys():
         raid["endtime"] = None
+    if "edited" not in raid.keys():
+        raid["edited"] = 0
     if "id" not in raid.keys():
         with db.cursor() as cursor:
             sql = "SELECT id FROM grupos WHERE id=%s"
@@ -263,8 +265,8 @@ def saveRaid(raid):
             return cursor.lastrowid
     else:
         with db.cursor() as cursor:
-            sql = "UPDATE incursiones SET `pokemon`=%s, `time`=%s, `endtime`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=1, message=%s WHERE id=%s;"
-            cursor.execute(sql, (raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["message"], raid["id"]))
+            sql = "UPDATE incursiones SET `pokemon`=%s, `time`=%s, `endtime`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=%s, message=%s WHERE id=%s;"
+            cursor.execute(sql, (raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["edited"], raid["message"], raid["id"]))
             db.commit()
             return raid["id"]
 

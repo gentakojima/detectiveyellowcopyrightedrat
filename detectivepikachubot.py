@@ -671,6 +671,7 @@ def cambiarhora(bot, update, args=None):
                         bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`", parse_mode=telegram.ParseMode.MARKDOWN)
                     else:
                         raid["time"] = "%02d:%02d" % (int(hour),int(minute))
+                        raid["edited"] = 1
                         saveRaid(raid)
                         reply_markup = get_keyboard(raid)
                         update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
@@ -721,6 +722,7 @@ def cambiarhorafin(bot, update, args=None):
                         raid["endtime"] = "%02d:%02d" % (int(hour),int(minute))
                     else:
                         raid["endtime"] = None
+                    raid["edited"] = 1
                     saveRaid(raid)
                     reply_markup = get_keyboard(raid)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
@@ -785,6 +787,7 @@ def cambiargimnasio(bot, update, args=None):
                 if chosengym != None:
                     raid["gimnasio_text"] = chosengym["desc"]
                     raid["gimnasio_id"] = chosengym["id"]
+                    raid["edited"] = 1
                     saveRaid(raid)
                     reply_markup = get_keyboard(raid)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
@@ -792,6 +795,7 @@ def cambiargimnasio(bot, update, args=None):
                 else:
                     raid["gimnasio_text"] = new_gymtext
                     raid["gimnasio_id"] = None
+                    raid["edited"] = 1
                     saveRaid(raid)
                     reply_markup = get_keyboard(raid)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
@@ -876,6 +880,7 @@ def cambiarpokemon(bot, update, args=None):
                     m = re.match("^%s$" % pokemon, args[1], flags=re.IGNORECASE)
                     if m != None:
                         raid["pokemon"] = pokemon
+                        raid["edited"] = 1
                         saveRaid(raid)
                         reply_markup = get_keyboard(raid)
                         update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
