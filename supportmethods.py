@@ -252,7 +252,11 @@ def get_settings_keyboard(chat_id):
         gymcommand_text = "✅ Comando «/gym»"
     else:
         gymcommand_text = "▪️ Comando «/gym»"
-    settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand')]]
+    if group["babysitter"] == 1:
+        babysitter_text = "✅ Modo niñero (BETA)"
+    else:
+        babysitter_text = "▪️ Modo niñero (BETA)"
+    settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 

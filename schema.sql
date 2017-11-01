@@ -36,7 +36,8 @@ CREATE TABLE `grupos` (
   `candelete` TINYINT NOT NULL DEFAULT '1',
   `gotitbuttons` TINYINT NOT NULL DEFAULT '0',
   `locations` TINYINT NOT NULL DEFAULT '1',
-  `gymcommand` TINYINT NOT NULL DEFAULT '0'
+  `gymcommand` TINYINT NOT NULL DEFAULT '0',
+  `babysitter` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

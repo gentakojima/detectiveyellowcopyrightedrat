@@ -243,8 +243,20 @@ def processLocation(bot, update):
 
 def processMessage(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
+
     if chat_type == "private":
         registerOak(bot, update)
+    else:
+        group = getGroup(chat_id)
+        if group["babysitter"] == 1 and not is_admin(chat_id, user_id, bot):
+            delete_message(chat_id, message.message_id, bot)
+            if user_username != None:
+                text = "@%s en este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.\n\n_(Este mensaje se borrará en unos segundos)_" % (user_username)
+            else:
+                text = "En este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.\n\n_(Este mensaje se borrará en unos segundos)_"
+            sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
+            Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot)).start()
     return
 
 def settings(bot, update):
@@ -1012,7 +1024,7 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_gymcommand":"gymcommand"}
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter"}
 
   for k in settings:
       if data==k:
@@ -1035,7 +1047,7 @@ def raidbutton(bot, update):
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
-dispatcher.add_handler(MessageHandler(Filters.text, processMessage))
+dispatcher.add_handler(MessageHandler(Filters.text | Filters.photo | Filters.voice | Filters.sticker | Filters.audio | Filters.video, processMessage))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('refresh', refresh))
