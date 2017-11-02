@@ -26,7 +26,7 @@ import configparser
 from threading import Thread
 from unidecode import unidecode
 
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou
 from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message
 
 def cleanup(signum, frame):
@@ -62,12 +62,44 @@ def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
     bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame a @detectivepikachubot la respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @detectivepikachubot el comando <code>/alerts</code>.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
+def settimezone(bot, update, args=None):
+    logging.debug("detectivepikachubot:settimezone: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    chat_title = message.chat.title
+
+    if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
+        return
+
+    if chat_type == "private":
+        bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
+        return
+
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+    except:
+        pass
+
+    if args == None or len(args)!=1 or len(args[0])<3 or len(args[0])>60:
+        bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme un nombre de zona horaria en inglés, por ejemplo, `America/Montevideo` o `Europe/Madrid`.", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    tz = searchTimezone(args[0])
+    if tz != None:
+        group = getGroup(chat_id)
+        group["timezone"] = tz["name"]
+        saveGroup(group)
+        bot.sendMessage(chat_id=chat_id, text="👌 Establecida zona horaria *%s*." % group["timezone"], parse_mode=telegram.ParseMode.MARKDOWN)
+        now = datetime.now(timezone(group["timezone"])).strftime("%H:%M")
+        bot.sendMessage(chat_id=chat_id, text="🕒 Comprueba que la hora sea correcta: %s" % now, parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        bot.sendMessage(chat_id=chat_id, text="❌ No se ha encontrado ninguna zona horaria válida con ese nombre.", parse_mode=telegram.ParseMode.MARKDOWN)
+
 def setspreadsheet(bot, update, args=None):
   logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   chat_title = message.chat.title
 
-  if not is_admin(chat_id, user_id, bot):
+  if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
     return
 
   if chat_type == "private":
@@ -102,7 +134,7 @@ def refresh(bot, update, args=None):
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   chat_title = message.chat.title
 
-  if not is_admin(chat_id, user_id, bot):
+  if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
     return
 
   if chat_type == "private":
@@ -175,6 +207,9 @@ def registerOak(bot, update):
         forward_id = None
         forward_date = None
 
+    if isBanned(user_id):
+        return
+
     m = re.search("@([a-zA-Z0-9]+), eres (Rojo|Azul|Amarillo) L([0-9]{1,2})[ .]",text, flags=re.IGNORECASE)
     if m != None:
         if forward_id == 201760961:
@@ -203,6 +238,9 @@ def processLocation(bot, update):
     logging.debug("detectivepikachubot:processLocation: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     location = message.location
+
+    if isBanned(user_id):
+        return
 
     if chat_type == "private":
         places = getPlacesByLocation(location.latitude, location.longitude, 200)
@@ -245,11 +283,14 @@ def processMessage(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(user_id):
+        return
+
     if chat_type == "private":
         registerOak(bot, update)
     else:
         group = getGroup(chat_id)
-        if group["babysitter"] == 1 and not is_admin(chat_id, user_id, bot):
+        if group != None and group["babysitter"] == 1 and not is_admin(chat_id, user_id, bot):
             delete_message(chat_id, message.message_id, bot)
             if user_username != None:
                 text = "@%s en este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.\n\n_(Este mensaje se borrará en unos segundos)_" % (user_username)
@@ -266,7 +307,7 @@ def settings(bot, update):
     if chat_type == "private":
       bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
       return
-    if not is_admin(chat_id, user_id, bot):
+    if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
       return
 
     try:
@@ -299,7 +340,7 @@ def list(bot, update):
   except:
       pass
 
-  if not is_admin(chat_id, user_id, bot):
+  if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
     return
 
   gyms = getPlaces(chat_id)
@@ -318,7 +359,7 @@ def incursiones(bot, update):
     if chat_type == "private":
         bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
         return
-    if not is_admin(chat_id, user_id, bot):
+    if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
         return
     try:
         bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
@@ -339,6 +380,9 @@ def gym(bot, update, args=None):
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
     group = getGroup(chat_id)
+
+    if isBanned(user_id):
+        return
 
     if chat_type == "private":
         bot.sendMessage(chat_id=chat_id, text="El comando de buscar gimnasios solo funcionan en canales y grupos. Si quieres probarlo, puedes pasarte por @detectivepikachuayuda.")
@@ -528,6 +572,9 @@ def alerts(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(user_id):
+        return
+
     if edit_check_private(chat_id, chat_type, user_username, "alerts", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
@@ -549,6 +596,9 @@ def addalert(bot, update, args=None):
     logging.debug("detectivepikachubot:addalert: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
+
+    if isBanned(user_id):
+        return
 
     if edit_check_private(chat_id, chat_type, user_username, "addalert", bot) == False:
         delete_message(chat_id, message.message_id, bot)
@@ -584,6 +634,9 @@ def delalert(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(user_id):
+        return
+
     if edit_check_private(chat_id, chat_type, user_username, "delalert", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
@@ -607,6 +660,9 @@ def clearalerts(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(user_id):
+        return
+
     if edit_check_private(chat_id, chat_type, user_username, "clearalerts", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
@@ -621,6 +677,9 @@ def cancelar(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
+
+    if isBanned(user_id):
+        return
 
     if edit_check_private(chat_id, chat_type, user_username, "cancelar", bot) == False:
         delete_message(chat_id, message.message_id, bot)
@@ -653,6 +712,9 @@ def cambiarhora(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
+
+    if isBanned(user_id):
+        return
 
     if edit_check_private(chat_id, chat_type, user_username, "cambiarhora", bot) == False:
         delete_message(chat_id, message.message_id, bot)
@@ -701,6 +763,9 @@ def cambiarhorafin(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
+
+    if isBanned(user_id):
+        return
 
     if edit_check_private(chat_id, chat_type, user_username, "cambiarhorafin", bot) == False:
         delete_message(chat_id, message.message_id, bot)
@@ -756,6 +821,9 @@ def cambiargimnasio(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
+
+    if isBanned(user_id):
+        return
 
     if edit_check_private(chat_id, chat_type, user_username, "cambiargimnasio", bot) == False:
         delete_message(chat_id, message.message_id, bot)
@@ -829,6 +897,9 @@ def reflotar(bot, update, args=None):
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
 
+    if isBanned(user_id):
+        return
+
     if edit_check_private(chat_id, chat_type, user_username, "reflotar", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
@@ -866,6 +937,9 @@ def cambiarpokemon(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
+
+    if isBanned(user_id):
+        return
 
     if edit_check_private(chat_id, chat_type, user_username, "cambiarpokemon", bot) == False:
         delete_message(chat_id, message.message_id, bot)
@@ -912,6 +986,9 @@ def borrar(bot, update, args=None):
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
 
+    if isBanned(user_id):
+        return
+
     if edit_check_private(chat_id, chat_type, user_username, "borrar", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
@@ -945,6 +1022,9 @@ def raidbutton(bot, update):
   user_username = query.from_user.username
   chat_id = query.message.chat.id
   message_id = query.message.message_id
+
+  if isBanned(user_id):
+      return
 
   thisuser = refreshUsername(user_id, user_username)
 

@@ -202,14 +202,16 @@ def saveUser(user):
     logging.debug("storagemethods:saveUser: %s" % (user))
     with db.cursor() as cursor:
         sql = "INSERT INTO usuarios (id,level,team,username) VALUES (%s, %s, %s, %s) \
-        ON DUPLICATE KEY UPDATE level=%s, team=%s, username=%s;"
+        ON DUPLICATE KEY UPDATE level=%s, team=%s, username=%s, banned=%s;"
         if "level" not in user.keys():
             user["level"] = None
         if "team" not in user.keys():
             user["team"] = None
         if "username" not in user.keys():
             user["username"] = None
-        cursor.execute(sql, (user["id"], user["level"], user["team"], user["username"], user["level"], user["team"], user["username"]))
+        if "banned" not in user.keys():
+            user["banned"] = 0
+        cursor.execute(sql, (user["id"], user["level"], user["team"], user["username"], user["level"], user["team"], user["username"], user["banned"]))
     db.commit()
 
 def refreshUsername(user_id, username):
@@ -228,7 +230,7 @@ def getUser(user_id, reconnect=True):
     global db
     logging.debug("storagemethods:getUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`level`,`team`,`username` FROM `usuarios` WHERE `id`=%s"
+        sql = "SELECT `id`,`level`,`team`,`username`,`banned` FROM `usuarios` WHERE `id`=%s"
         try:
             cursor.execute(sql, (user_id))
             result = cursor.fetchone()
@@ -241,6 +243,18 @@ def getUser(user_id, reconnect=True):
                 logging.info("Error interfacing with the database but already tried to reconnect!")
                 raise
         return result
+
+def isBanned(user_id):
+    global db
+    logging.debug("storagemethods:isBanned: %s" % (user_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `id` FROM `usuarios` WHERE `id`=%s AND banned=1"
+        cursor.execute(sql, (user_id))
+        result = cursor.fetchone()
+        if result == None:
+            return False
+        else:
+            return True
 
 def saveRaid(raid):
     global db

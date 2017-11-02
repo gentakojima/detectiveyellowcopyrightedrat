@@ -72,7 +72,8 @@ CREATE TABLE `usuarios` (
   `id` bigint(20) NOT NULL,
   `username` varchar(33) DEFAULT NULL,
   `level` int(11) DEFAULT NULL,
-  `team` enum('Rojo','Azul','Amarillo','') DEFAULT NULL
+  `team` enum('Rojo','Azul','Amarillo','') DEFAULT NULL,
+  `banned` tinyint(4) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
