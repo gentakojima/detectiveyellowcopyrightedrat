@@ -231,15 +231,15 @@ def getUser(user_id, reconnect=True):
         sql = "SELECT `id`,`level`,`team`,`username` FROM `usuarios` WHERE `id`=%s"
         try:
             cursor.execute(sql, (user_id))
+            result = cursor.fetchone()
         except InterfaceError:
             if reconnect == True:
                 logging.info("Error interfacing with the database! Trying to reconnect...")
                 refreshDb()
-                getUser(user_id, False)
+                result = getUser(user_id, False)
             else:
-                logging.info("Error interfacing with the database but already tried to reconnect")
+                logging.info("Error interfacing with the database but already tried to reconnect!")
                 raise
-        result = cursor.fetchone()
         return result
 
 def saveRaid(raid):
