@@ -23,6 +23,15 @@ def refreshDb():
         print("No se puede conectar a la base de datos.\nComprueba el fichero de configuración!")
         logging.debug("Can't connect to database!")
 
+def searchTimezone(tz):
+    global db
+    logging.debug("storagemethods:searchTimezone: %s" % (tz))
+    with db.cursor() as cursor:
+        sql = "SELECT `Name` as `name` FROM `mysql`.`time_zone_name` WHERE Name NOT LIKE %s AND Name NOT LIKE %s AND Name LIKE %s"
+        cursor.execute(sql, ("posix%", "right%", "%"+tz+"%"))
+        result = cursor.fetchone()
+        return result
+
 def saveGroup(group):
     global db
     logging.debug("storagemethods:saveSpreadsheet: %s" % (group))
@@ -46,17 +55,19 @@ def saveGroup(group):
         group["gymcommand"] = 0
     if "babysitter" not in group.keys():
         group["babysitter"] = 0
+    if "timezone" not in group.keys():
+        group["timezone"] = 0
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, spreadsheet) VALUES (%s, %s, %s) \
-        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, babysitter = %s;"
-        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["babysitter"]))
+        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, babysitter = %s, timezone = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["babysitter"], group["timezone"]))
     db.commit()
 
 def getGroup(group_id):
     global db
     logging.debug("storagemethods:getGroup: %s" % (group_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `babysitter` FROM `grupos` WHERE `id`=%s"
+        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `babysitter`, `timezone` FROM `grupos` WHERE `id`=%s"
         cursor.execute(sql, (group_id))
         result = cursor.fetchone()
         return result
@@ -65,7 +76,7 @@ def getGroupsByUser(user_id):
     global db
     logging.debug("storagemethods:getGroupsByUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`,`locations`,`gymcommand`,`babysitter` FROM `grupos` \
+        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`,`locations`,`gymcommand`,`babysitter`,`timezone` FROM `grupos` \
         LEFT JOIN incursiones ON incursiones.grupo_id = grupos.id \
         RIGHT JOIN voy ON voy.incursion_id = incursiones.id \
         WHERE voy.usuario_id = %s \
@@ -265,6 +276,10 @@ def saveRaid(raid):
         raid["message"] = None
     if "endtime" not in raid.keys():
         raid["endtime"] = None
+    if "timeraid" not in raid.keys():
+        raid["timeraid"] = None
+    if "timeend" not in raid.keys():
+        raid["timeend"] = None
     if "edited" not in raid.keys():
         raid["edited"] = 0
     if "id" not in raid.keys():
@@ -275,14 +290,14 @@ def saveRaid(raid):
             if result == None:
                 sql = "INSERT INTO grupos (`id`) VALUES (%s);"
                 cursor.execute(sql, (raid["grupo_id"]))
-            sql = "INSERT INTO incursiones (`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text` ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);"
-            cursor.execute(sql, (raid["grupo_id"], raid["usuario_id"], raid["message"], raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"]))
+            sql = "INSERT INTO incursiones (`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `timeraid`, `timeend` ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            cursor.execute(sql, (raid["grupo_id"], raid["usuario_id"], raid["message"], raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["timeraid"], raid["timeend"]))
             db.commit()
             return cursor.lastrowid
     else:
         with db.cursor() as cursor:
-            sql = "UPDATE incursiones SET `pokemon`=%s, `time`=%s, `endtime`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=%s, message=%s WHERE id=%s;"
-            cursor.execute(sql, (raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["edited"], raid["message"], raid["id"]))
+            sql = "UPDATE incursiones SET `pokemon`=%s, `time`=%s, `endtime`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=%s, message=%s, timeraid=%s, timeend=%s WHERE id=%s;"
+            cursor.execute(sql, (raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["edited"], raid["message"], raid["timeraid"], raid["timeend"], raid["id"]))
             db.commit()
             return raid["id"]
 
@@ -290,7 +305,7 @@ def getRaid(raid_id):
     global db
     logging.debug("storagemethods:getRaid: %s" % (raid_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended` FROM `incursiones` WHERE `id`=%s"
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended`, `timeraid`, `timeend` FROM `incursiones` WHERE `id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
         return result
@@ -314,7 +329,7 @@ def getRaidbyMessage(grupo_id, message_id):
     global db
     logging.debug("storagemethods:getRaidByMessage: %s %s" % (grupo_id, message_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended`, `timeraid`, `timeend` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
         cursor.execute(sql, (grupo_id, message_id))
         result = cursor.fetchone()
         return result
@@ -323,7 +338,7 @@ def getLastRaids(grupo_id, number):
     global db
     logging.debug("storagemethods:getlastRaids: %s %s" % (grupo_id, number))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended` FROM `incursiones` WHERE  grupo_id = %s ORDER BY `addedtime` DESC LIMIT 0,%s"
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `edited`, `cancelled`, `addedtime`, `ended`, `timeraid`, `timeend` FROM `incursiones` WHERE  grupo_id = %s ORDER BY `addedtime` DESC LIMIT 0,%s"
         cursor.execute(sql, (grupo_id, number))
         result = cursor.fetchall()
         if result[0]["id"] == None:

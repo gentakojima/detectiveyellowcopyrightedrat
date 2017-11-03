@@ -1,3 +1,6 @@
+import re
+from datetime import datetime
+from pytz import timezone
 import time
 import logging
 from threading import Thread
@@ -282,6 +285,7 @@ def update_settings_message(chat_id, bot):
     return bot.edit_message_text(text="Pulsa en los botones de las opciones para cambiarlas. Cuando acabes, puedes borrar el mensaje.\n\nTen en cuenta que los <strong>administradores del grupo</strong> siempre pueden borrar y reflotar incursiones, aunque desactives aquí las opciones.\n\nPara más información sobre estas funciones, <a href='http://telegra.ph/Detective-Pikachu-09-28'>consulta la ayuda</a>.", chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def edit_check_private(chat_id, chat_type, user_username, command, bot):
+    logging.debug("supportmethods:edit_check_private")
     if chat_type != "private":
         if user_username != None:
             text = "@%s el comando `/%s` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_" % (user_username, command)
@@ -292,3 +296,38 @@ def edit_check_private(chat_id, chat_type, user_username, command, bot):
         return False
     else:
         return True
+
+def parse_time(st, tz):
+    logging.debug("supportmethods:parse_time")
+    m = re.match("([0-9]{1,2})[:.]?([0-9]{0,2})h?", st, flags=re.IGNORECASE)
+    if m != None:
+        hour = str(m.group(1))
+        minute = m.group(2) or "00"
+        if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
+            logging.debug("supportmethods::parse_time failed parsing time from %s" % st)
+            return None
+    else:
+        logging.debug("supportmethods::parse_time failed parsing time from %s" % st)
+        return None
+
+    localdatetime = datetime.now(timezone(tz))
+    localtime = localdatetime.time()
+    if int(hour) <= 12:
+      if (int(hour) <= 6) or \
+         (int(localtime.hour) >= 15 and int(hour) <= 11):
+          hour = int(hour) + 12
+    raid_datetime = datetime.now(timezone(tz)).replace(hour=int(hour),minute=int(minute))
+    raid_datetime_str = raid_datetime.strftime("%Y-%m-%d %H:%M:00")
+    logging.debug("supportmethods::parse_time parsed %s" % raid_datetime_str)
+    return raid_datetime_str
+
+def extract_time(formatted_datetime):
+    logging.debug("supportmethods:extract_time %s" % formatted_datetime)
+    m = re.search("([0-9]{1,2}):([0-9]{0,2}):00", formatted_datetime, flags=re.IGNORECASE)
+    if m != None:
+        extracted_time = "%02d:%02d" % (int(m.group(1)), int(m.group(2)))
+        logging.debug("supportmethods::extract_time extracted %s" % extracted_time)
+        return extracted_time
+    else:
+        logging.debug("supportmethods::parse_time failed extracting time from %s" % formatted_datetime)
+        return None

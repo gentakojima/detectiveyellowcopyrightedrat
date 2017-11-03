@@ -25,9 +25,11 @@ import telegram
 import configparser
 from threading import Thread
 from unidecode import unidecode
+from datetime import datetime
+from pytz import timezone
 
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, extract_time
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -425,15 +427,19 @@ def raid(bot, update, args=None):
   thisuser = refreshUsername(user_id, user_username)
 
   if chat_type == "private":
-    bot.sendMessage(chat_id=chat_id, text="La incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
+    bot.sendMessage(chat_id=chat_id, text="Las incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
     return
 
   current_raid = {}
+  group = getGroup(chat_id)
 
   try:
     bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
   except:
     pass
+
+  if isBanned(user_id):
+      return
 
   if thisuser["username"] == None:
       sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
@@ -441,7 +447,7 @@ def raid(bot, update, args=None):
       return
 
   if args == None or len(args)<3:
-    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No te he entendido!\nDebes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text, parse_mode=telegram.ParseMode.MARKDOWN)
+    sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text), parse_mode=telegram.ParseMode.MARKDOWN)
     Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
     return
 
@@ -457,7 +463,7 @@ def raid(bot, update, args=None):
       break
 
   if not "pokemon" in current_raid.keys():
-    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido el Pokémon! ¿Lo has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
+    sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text),parse_mode=telegram.ParseMode.MARKDOWN)
     Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
     return
 
@@ -466,47 +472,33 @@ def raid(bot, update, args=None):
     del args[0]
     del args[0]
 
-  m = re.match("([0-9]{1,2})[:.]?([0-9]{0,2})h?", args[0], flags=re.IGNORECASE)
-  if m != None:
-    hour = str(m.group(1))
-    minute = m.group(2) or "00"
-    if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
-        return
-  else:
-    sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
-    return
-  current_raid["time"] = "%02d:%02d" % (int(hour),int(minute))
+  current_raid["timeraid"] = parse_time(args[0], group["timezone"])
+  if current_raid["timeraid"] == None:
+      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *la hora*. ¿La has puesto bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text),parse_mode=telegram.ParseMode.MARKDOWN)
+      Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+      return
+  current_raid["time"] = extract_time(current_raid["timeraid"]);
 
-  m = re.match("([0-9]{1,2})[:.]([0-9]{1,2})h?", args[-1], flags=re.IGNORECASE)
-  if m != None:
-    hour = str(m.group(1))
-    minute = m.group(2) or "00"
-    if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
-        sent_message = bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora de finalización! ¿La has escrito bien?\nRecuerda que debes seguir el siguiente formato:\n`/raid <pokemon> <hora> <gimnasio> [horafin]`\nEjemplo: `/raid pikachu 12:00 la lechera 12:50`\n_(¡la hora de fin es opcional!)_\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % text,parse_mode=telegram.ParseMode.MARKDOWN)
-        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
-        return
-    current_raid["endtime"] = "%02d:%02d" % (int(hour),int(minute))
-    del args[-1]
-
-    try:
-        if args[-4] == "se" and args[-3] == "va" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
-            del args[-1]
-            del args[-1]
-            del args[-1]
-            del args[-1]
-        elif args[-3] == "está" and args[-2] == "hasta" and (args[-1] == "las" or args[-1] == "la"):
-            del args[-1]
-            del args[-1]
-            del args[-1]
-        elif args[-3] == "desaparece" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
-            del args[-1]
-            del args[-1]
-            del args[-1]
-    except:
-        pass
+  current_raid["timeend"] = parse_time(args[-1], group["timezone"])
+  if current_raid["timeend"] != None:
+      current_raid["endtime"] = extract_time(current_raid["timeend"]);
+      del args[-1]
+      try:
+          if args[-4] == "se" and args[-3] == "va" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
+              del args[-1]
+              del args[-1]
+              del args[-1]
+              del args[-1]
+          elif args[-3] == "está" and args[-2] == "hasta" and (args[-1] == "las" or args[-1] == "la"):
+              del args[-1]
+              del args[-1]
+              del args[-1]
+          elif args[-3] == "desaparece" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
+              del args[-1]
+              del args[-1]
+              del args[-1]
+      except:
+          pass
 
   del args[0]
   if args[0] == "en":
@@ -542,7 +534,6 @@ def raid(bot, update, args=None):
   current_raid["message"] = sent_message.message_id
   saveRaid(current_raid)
 
-  group = getGroup(chat_id)
   if current_raid["endtime"] != None:
       show_endtime = current_raid["endtime"]
   else:
@@ -726,6 +717,7 @@ def cambiarhora(bot, update, args=None):
 
     raid_id = args[0]
     raid = getRaid(raid_id)
+    group = getGroup(raid["grupo_id"])
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
@@ -734,25 +726,23 @@ def cambiarhora(bot, update, args=None):
             if raid["cancelled"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            if args[1] == raid["time"]:
+            oldtime = raid["time"]
+            oldtimeraid = raid["timeraid"]
+            raid["timeraid"] = parse_time(args[1], group["timezone"])
+            if raid["timeraid"] == None:
+                sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *la hora*. ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`" % thisuser["username"], parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            raid["time"] = extract_time(raid["timeraid"]);
+
+            if oldtime == raid["time"] or oldtimeraid == raid["timeraid"]:
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta para esa hora!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
-                m = re.match("([0-9]{1,2})[:.]?([0-9]{0,2})h?", args[1], flags=re.IGNORECASE)
-                if m != None:
-                    hour = str(m.group(1))
-                    minute = m.group(2) or "00"
-                    if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
-                        bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`", parse_mode=telegram.ParseMode.MARKDOWN)
-                    else:
-                        raid["time"] = "%02d:%02d" % (int(hour),int(minute))
-                        raid["edited"] = 1
-                        saveRaid(raid)
-                        reply_markup = get_keyboard(raid)
-                        update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
-                        bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora a las *%s* correctamente!" % raid["time"], parse_mode=telegram.ParseMode.MARKDOWN)
-                        warn_people("cambiarhora", raid, user_username, chat_id, bot)
-                else:
-                  bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`", parse_mode=telegram.ParseMode.MARKDOWN)
+                raid["edited"] = 1
+                saveRaid(raid)
+                reply_markup = get_keyboard(raid)
+                update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
+                bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora a las *%s* correctamente!" % raid["time"], parse_mode=telegram.ParseMode.MARKDOWN)
+                warn_people("cambiarhora", raid, user_username, chat_id, bot)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
@@ -777,6 +767,7 @@ def cambiarhorafin(bot, update, args=None):
 
     raid_id = args[0]
     raid = getRaid(raid_id)
+    group = getGroup(raid["grupo_id"])
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["ended"] == 1:
@@ -785,32 +776,34 @@ def cambiarhorafin(bot, update, args=None):
             if raid["cancelled"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            if args[1] == raid["endtime"]:
-                bot.sendMessage(chat_id=chat_id, text="¡La incursión ya tiene la hora de fin para esa hora!", parse_mode=telegram.ParseMode.MARKDOWN)
+            oldtime = raid["endtime"]
+            oldtimeraid = raid["timeend"]
+            if args[1] == "-":
+                raid["timeend"] = None
+                raid["endtime"] = None
+                if oldtime == raid["endtime"] or oldtimeraid == raid["timeend"]:
+                    bot.sendMessage(chat_id=chat_id, text="¡La hora de fin de la incursión ya estaba borrada!", parse_mode=telegram.ParseMode.MARKDOWN)
+                raid["edited"] = 1
+                saveRaid(raid)
+                reply_markup = get_keyboard(raid)
+                update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
+                bot.sendMessage(chat_id=chat_id, text="¡Se ha borrado la hora de fin correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
+                warn_people("borrarhorafin", raid, user_username, chat_id, bot)
             else:
-                m = re.match("([0-9]{1,2})[:.]?([0-9]{0,2})h?", args[1], flags=re.IGNORECASE)
-                if m != None or args[1] == "-":
-                    if m != None:
-                        hour = str(m.group(1))
-                        minute = m.group(2) or "00"
-                        if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59:
-                            bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`\n\nSi quieres borrar la hora de fin, pon un guión simple en lugar de la hora: `-`.", parse_mode=telegram.ParseMode.MARKDOWN)
-                            return
-                        raid["endtime"] = "%02d:%02d" % (int(hour),int(minute))
-                    else:
-                        raid["endtime"] = None
-                    raid["edited"] = 1
-                    saveRaid(raid)
-                    reply_markup = get_keyboard(raid)
-                    update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
-                    if raid["endtime"] != None:
-                        bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora de fin para las *%s* correctamente!" % raid["endtime"], parse_mode=telegram.ParseMode.MARKDOWN)
-                        warn_people("cambiarhorafin", raid, user_username, chat_id, bot)
-                    else:
-                        bot.sendMessage(chat_id=chat_id, text="¡Se ha borrado la hora de fin correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
-                        warn_people("borrarhorafin", raid, user_username, chat_id, bot)
-                else:
-                  bot.sendMessage(chat_id=chat_id, text="¡No he entendido la hora! ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`\n\nSi quieres borrar la hora de fin, pon un guión simple en lugar de la hora: `-`.", parse_mode=telegram.ParseMode.MARKDOWN)
+                raid["timeend"] = parse_time(args[1], group["timezone"])
+                if raid["timeend"] == None:
+                    sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *la hora de finalización*. ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`\n\nSi quieres borrar la hora de fin, pon un guión simple en lugar de la hora: `-`." % thisuser["username"], parse_mode=telegram.ParseMode.MARKDOWN)
+                    return
+                raid["endtime"] = extract_time(raid["timeend"]);
+                if oldtime == raid["endtime"] or oldtimeraid == raid["timeend"]:
+                    bot.sendMessage(chat_id=chat_id, text="¡La hora de fin de la incursión ya estaba puesta para esa hora!", parse_mode=telegram.ParseMode.MARKDOWN)
+                    return
+                raid["edited"] = 1
+                saveRaid(raid)
+                reply_markup = get_keyboard(raid)
+                update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
+                bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora de fin a las *%s* correctamente!" % raid["endtime"], parse_mode=telegram.ParseMode.MARKDOWN)
+                warn_people("cambiarhora", raid, user_username, chat_id, bot)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
@@ -1130,6 +1123,7 @@ dispatcher.add_handler(CommandHandler('help', start))
 dispatcher.add_handler(MessageHandler(Filters.text | Filters.photo | Filters.voice | Filters.sticker | Filters.audio | Filters.video, processMessage))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
+dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
 dispatcher.add_handler(CommandHandler('refresh', refresh))
 dispatcher.add_handler(CommandHandler('list', list))
 dispatcher.add_handler(CommandHandler('incursiones', incursiones))

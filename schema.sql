@@ -37,7 +37,8 @@ CREATE TABLE `grupos` (
   `gotitbuttons` TINYINT NOT NULL DEFAULT '0',
   `locations` TINYINT NOT NULL DEFAULT '1',
   `gymcommand` TINYINT NOT NULL DEFAULT '0',
-  `babysitter` TINYINT NOT NULL DEFAULT '0'
+  `babysitter` TINYINT NOT NULL DEFAULT '0',
+  `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -59,7 +60,9 @@ CREATE TABLE `incursiones` (
   `edited` tinyint(4) NOT NULL DEFAULT '0',
   `cancelled` TINYINT NOT NULL DEFAULT '0',
   `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `ended` TINYINT NOT NULL DEFAULT '0'
+  `ended` TINYINT NOT NULL DEFAULT '0',
+  `timeraid` timestamp NULL DEFAULT NULL,
+  `timeend` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
