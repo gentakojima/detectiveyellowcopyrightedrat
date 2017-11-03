@@ -803,7 +803,7 @@ def cambiarhorafin(bot, update, args=None):
                 reply_markup = get_keyboard(raid)
                 update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                 bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora de fin a las *%s* correctamente!" % raid["endtime"], parse_mode=telegram.ParseMode.MARKDOWN)
-                warn_people("cambiarhora", raid, user_username, chat_id, bot)
+                warn_people("cambiarhorafin", raid, user_username, chat_id, bot)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:

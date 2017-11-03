@@ -290,7 +290,7 @@ def saveRaid(raid):
             if result == None:
                 sql = "INSERT INTO grupos (`id`) VALUES (%s);"
                 cursor.execute(sql, (raid["grupo_id"]))
-            sql = "INSERT INTO incursiones (`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `timeraid`, `timeend` ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            sql = "INSERT INTO incursiones (`grupo_id`, `usuario_id`, `message`, `pokemon`, `time`, `endtime`, `gimnasio_id`, `gimnasio_text`, `timeraid`, `timeend` ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
             cursor.execute(sql, (raid["grupo_id"], raid["usuario_id"], raid["message"], raid["pokemon"], raid["time"], raid["endtime"], raid["gimnasio_id"], raid["gimnasio_text"], raid["timeraid"], raid["timeend"]))
             db.commit()
             return cursor.lastrowid
