@@ -29,7 +29,7 @@ from datetime import datetime
 from pytz import timezone
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, extract_time
+from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, egglist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -463,14 +463,9 @@ def raid(bot, update, args=None):
   if args[0] == "de":
     del args[0]
 
-  for pokemon in pokemonlist:
-    m = re.match("^%s$" % pokemon, args[0], flags=re.IGNORECASE)
-    if m != None:
-      current_raid["pokemon"] = pokemon
-      break
-
-  if not "pokemon" in current_raid.keys():
-    sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text),parse_mode=telegram.ParseMode.MARKDOWN)
+  (current_raid["pokemon"], current_raid["egg"]) = parse_pokemon(args[0])
+  if current_raid["pokemon"] == None and current_raid["egg"] == None:
+    sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n `/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text),parse_mode=telegram.ParseMode.MARKDOWN)
     Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
     return
 
@@ -553,7 +548,19 @@ def raid(bot, update, args=None):
       text_delete="\n\n❌ *Borrar incursión*:\n`/borrar %s`" % current_raid["id"]
   else:
       text_delete=""
-  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión de *%s* a las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar hora*:\n`/cambiarhora %s %s`\n\n🕒 *Cambiar hora a la que desaparece*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (current_raid["pokemon"], current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], current_raid["pokemon"], current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+
+  what_text = format_text_pokemon(current_raid["pokemon"], current_raid["egg"])
+  what_day = format_text_day(current_raid["timeraid"], group["timezone"])
+  day = extract_day(current_raid["timeraid"], group["timezone"])
+  if day == None:
+      daystr = ""
+  else:
+      daystr = "%s/" % day
+  if current_raid["pokemon"] == None:
+      pokemon = current_raid["egg"]
+  else:
+      pokemon = current_raid["pokemon"]
+  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión %s %sa las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar día/hora*:\n`/cambiarhora %s %s%s`\n\n🕒 *Cambiar hora a la que desaparece*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon/nivel*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (what_text, what_day, current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], daystr, current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], pokemon, current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
 
   if group["locations"] == 1:
       if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] != None:
@@ -741,14 +748,15 @@ def cambiarhora(bot, update, args=None):
                 return
             raid["time"] = extract_time(raid["timeraid"]);
 
-            if oldtime == raid["time"] or oldtimeraid == raid["timeraid"]:
+            if oldtimeraid.strftime("%Y-%m-%d %H:%M:%S") == raid["timeraid"]:
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta para esa hora!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 raid["edited"] = 1
                 saveRaid(raid)
                 reply_markup = get_keyboard(raid)
                 update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
-                bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora a las *%s* correctamente!" % raid["time"], parse_mode=telegram.ParseMode.MARKDOWN)
+                what_day = format_text_day(raid["timeraid"], group["timezone"])
+                bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado la hora a las *%s* %scorrectamente!" % (raid["time"], what_day), parse_mode=telegram.ParseMode.MARKDOWN)
                 warn_people("cambiarhora", raid, user_username, chat_id, bot)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
@@ -959,22 +967,24 @@ def cambiarpokemon(bot, update, args=None):
             if raid["cancelled"] == 1:
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            if args[1] == raid["pokemon"]:
-                bot.sendMessage(chat_id=chat_id, text="¡Ese ya es el Pokémon actual de la incursión!", parse_mode=telegram.ParseMode.MARKDOWN)
+
+            oldpoke = raid["pokemon"]
+            oldegg = raid["egg"]
+            (raid["pokemon"], raid["egg"]) = parse_pokemon(args[1])
+            if (raid["pokemon"] == oldpoke and oldpoke != None) or \
+                (raid["egg"] == oldegg and oldegg != None):
+                bot.sendMessage(chat_id=chat_id, text="¡Ese ya es el Pokémon/nivel actual de la incursión!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
-                for pokemon in pokemonlist:
-                    m = re.match("^%s$" % pokemon, args[1], flags=re.IGNORECASE)
-                    if m != None:
-                        raid["pokemon"] = pokemon
-                        raid["edited"] = 1
-                        saveRaid(raid)
-                        reply_markup = get_keyboard(raid)
-                        update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
-                        bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado el Pokémon a *%s* correctamente!" % raid["pokemon"], parse_mode=telegram.ParseMode.MARKDOWN)
-                        warn_people("cambiarpokemon", raid, user_username, chat_id, bot)
-                        break
+                if raid["pokemon"] != None or raid["egg"] != None:
+                    raid["edited"] = 1
+                    saveRaid(raid)
+                    reply_markup = get_keyboard(raid)
+                    update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
+                    what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
+                    bot.sendMessage(chat_id=chat_id, text="¡Se ha cambiado a incursión %s correctamente!" % what_text, parse_mode=telegram.ParseMode.MARKDOWN)
+                    warn_people("cambiarpokemon", raid, user_username, chat_id, bot)
                 else:
-                    bot.sendMessage(chat_id=chat_id, text="¡No he reconocido ese Pokémon!",parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="¡No he reconocido ese Pokémon/nivel de incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
