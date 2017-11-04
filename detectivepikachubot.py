@@ -433,6 +433,13 @@ def raid(bot, update, args=None):
   current_raid = {}
   group = getGroup(chat_id)
 
+  if group == None:
+      chat_title = message.chat.title
+      group = {}
+      group["id"] = chat_id
+      group["title"] = chat_title
+      saveGroup(group)
+
   try:
     bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
   except:

@@ -37,6 +37,8 @@ def saveGroup(group):
     logging.debug("storagemethods:saveSpreadsheet: %s" % (group))
     if "settings_message" not in group.keys():
         group["settings_message"] = None
+    if "spreadsheet" not in group.keys():
+        group["spreadsheet"] = None
     if "alerts" not in group.keys():
         group["alerts"] = 1
     if "disaggregated" not in group.keys():
