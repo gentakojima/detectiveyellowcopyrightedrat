@@ -368,11 +368,11 @@ def incursiones(bot, update):
     except:
         pass
 
-    raids = getLastRaids(chat_id, 5)
+    raids = getLastRaids(chat_id, 8)
     output = ""
     for r in raids:
         creador = getCreadorRaid(r["id"])
-        output = ("\n - `%s` %s @%s" % (r["id"], r["pokemon"], ensure_escaped(creador["username"]))) + output
+        output = ("\n▪️ `%s` %s %s @%s" % (r["id"], r["pokemon"], r["time"], ensure_escaped(creador["username"]))) + output
     output = "Últimas incursiones del grupo:" + output
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
