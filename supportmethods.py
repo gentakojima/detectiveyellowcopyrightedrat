@@ -32,6 +32,11 @@ def extract_update_info(update):
     chat_type = message.chat.type
     return (chat_id, chat_type, user_id, text, message)
 
+def send_message_timed(chat_id, text, sleep_time, bot):
+    logging.debug("supportmethods:send_message_timed: %s %s %s %s" % (chat_id, text, sleep_time, bot))
+    time.sleep(sleep_time)
+    bot.sendMessage(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.MARKDOWN)
+
 def delete_message_timed(chat_id, message_id, sleep_time, bot):
     time.sleep(sleep_time)
     delete_message(chat_id, message_id, bot)

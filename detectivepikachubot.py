@@ -29,7 +29,7 @@ from datetime import datetime
 from pytz import timezone
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone
-from supportmethods import is_admin, extract_update_info, delete_message_timed, pokemonlist, egglist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -281,6 +281,22 @@ def processLocation(bot, update):
             text_message = text_message + "\n\nPara añadir una alerta para alguno de estos gimnasios, envíame el comando `/addalert` seguido del identificador numérico.\n\nPor ejemplo:\n`/addalert %s`" % example_id
             bot.sendMessage(chat_id=chat_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
 
+def joinedChat(bot, update):
+    logging.debug("detectivepikachubot:joinedChat: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
+    try:
+        new_chat_member = message.new_chat_member
+        if new_chat_member.username == 'detectivepikachubot' and chat_type != "private":
+            chat_title = message.chat.title
+            chat_id = message.chat.id
+            message_text = "¡Hola a todos los miembros de *%s*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando /help para enteraros de todas las funciones." % ensure_escaped(chat_title)
+            Thread(target=send_message_timed, args=(chat_id, message_text, 3, bot)).start()
+    except:
+        pass
+    return
+
+
 def processMessage(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
@@ -318,6 +334,10 @@ def settings(bot, update):
         pass
 
     group = getGroup(chat_id)
+    if group == None:
+        saveGroup({"id":chat_id, "title":message.chat.title})
+        group = getGroup(chat_id)
+
     if group["settings_message"] != None:
         try:
             bot.deleteMessage(chat_id=chat_id,message_id=group["settings_message"])
@@ -434,11 +454,8 @@ def raid(bot, update, args=None):
   group = getGroup(chat_id)
 
   if group == None:
-      chat_title = message.chat.title
-      group = {}
-      group["id"] = chat_id
-      group["title"] = chat_title
-      saveGroup(group)
+      bot.sendMessage(chat_id=chat_id, text="Antes de poder crear incursiones, un administrador tiene que configurarme con `/settings`.", parse_mode=telegram.ParseMode.MARKDOWN)
+      return
 
   try:
     bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
@@ -1138,6 +1155,7 @@ def raidbutton(bot, update):
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
 dispatcher.add_handler(MessageHandler(Filters.text | Filters.photo | Filters.voice | Filters.sticker | Filters.audio | Filters.video, processMessage))
+dispatcher.add_handler(MessageHandler(Filters.status_update, joinedChat))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
