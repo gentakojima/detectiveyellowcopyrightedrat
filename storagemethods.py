@@ -41,6 +41,8 @@ def saveGroup(group):
         group["settings_message"] = None
     if "spreadsheet" not in group.keys():
         group["spreadsheet"] = None
+    if "talkgroup" not in group.keys():
+        group["talkgroup"] = None
     if "alerts" not in group.keys():
         group["alerts"] = 1
     if "disaggregated" not in group.keys():
@@ -65,15 +67,15 @@ def saveGroup(group):
         group["timezone"] = 0
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, spreadsheet) VALUES (%s, %s, %s) \
-        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s;"
-        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["babysitter"], group["timezone"]))
+        ON DUPLICATE KEY UPDATE title = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s, talkgroup = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["spreadsheet"], group["title"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["babysitter"], group["timezone"], group["talkgroup"]))
     db.commit()
 
 def getGroup(group_id):
     global db
     logging.debug("storagemethods:getGroup: %s" % (group_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timezone` FROM `grupos` WHERE `id`=%s"
+        sql = "SELECT `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `talkgroup`, `timezone` FROM `grupos` WHERE `id`=%s"
         cursor.execute(sql, (group_id))
         result = cursor.fetchone()
         return result
@@ -82,7 +84,7 @@ def getGroupsByUser(user_id):
     global db
     logging.debug("storagemethods:getGroupsByUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`,`locations`,`gymcommand`,`raidcommand`,`babysitter`,`timezone` FROM `grupos` \
+        sql = "SELECT `grupos`.`id` as `id`,`title`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`,`locations`,`gymcommand`,`raidcommand`,`babysitter`,`talkgroup`,`timezone` FROM `grupos` \
         LEFT JOIN incursiones ON incursiones.grupo_id = grupos.id \
         RIGHT JOIN voy ON voy.incursion_id = incursiones.id \
         WHERE voy.usuario_id = %s \

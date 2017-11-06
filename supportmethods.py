@@ -314,9 +314,9 @@ def get_settings_keyboard(chat_id):
     else:
         raidcommand_text = "▪️ Comando /raid"
     if group["babysitter"] == 1:
-        babysitter_text = "✅ Modo niñero (BETA)"
+        babysitter_text = "✅ Modo niñero"
     else:
-        babysitter_text = "▪️ Modo niñero (BETA)"
+        babysitter_text = "▪️ Modo niñero"
     settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
     [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
     [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]

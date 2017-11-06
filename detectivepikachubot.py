@@ -96,6 +96,38 @@ def settimezone(bot, update, args=None):
     else:
         bot.sendMessage(chat_id=chat_id, text="❌ No se ha encontrado ninguna zona horaria válida con ese nombre.", parse_mode=telegram.ParseMode.MARKDOWN)
 
+def settalkgroup(bot, update, args=None):
+    logging.debug("detectivepikachubot:settalkgroup: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    chat_title = message.chat.title
+
+    if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
+        return
+
+    if chat_type == "private":
+        bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
+        return
+
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+    except:
+        pass
+
+    if args == None or len(args)!=1 or (args[0] != "-" and (len(args[0])<3 or len(args[0])>60 or re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$",args[0]) == None) ):
+        bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme un alias de grupo por parámetro, por ejemplo `@pokemongobadajoz`.", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    group = getGroup(chat_id)
+    if args[0] != "-":
+        group["talkgroup"] = args[0].replace("@","")
+        saveGroup(group)
+        bot.sendMessage(chat_id=chat_id, text="👌 Establecido grupo de charla a @%s." % ensure_escaped(group["talkgroup"]), parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        group["talkgroup"] = None
+        saveGroup(group)
+        bot.sendMessage(chat_id=chat_id, text="👌 Eliminada la referencia al grupo de charla.", parse_mode=telegram.ParseMode.MARKDOWN)
+
+
 def setspreadsheet(bot, update, args=None):
   logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -316,10 +348,14 @@ def processMessage(bot, update):
         group = getGroup(chat_id)
         if group != None and group["babysitter"] == 1 and not is_admin(chat_id, user_id, bot):
             delete_message(chat_id, message.message_id, bot)
-            if user_username != None:
-                text = "@%s en este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(user_username))
+            if group["talkgroup"] != None:
+                text_talkgroup="\n\nPara hablar puedes utilizar el grupo @%s." % ensure_escaped(group["talkgroup"])
             else:
-                text = "En este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.\n\n_(Este mensaje se borrará en unos segundos)_"
+                text_talkgroup="";
+            if user_username != None:
+                text = "@%s en este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.%s\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(user_username), text_talkgroup)
+            else:
+                text = "En este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.%s\n\n_(Este mensaje se borrará en unos segundos)_" % text_talkgroup
             sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
             Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot)).start()
     return
@@ -1219,6 +1255,7 @@ dispatcher.add_handler(MessageHandler(Filters.status_update, joinedChat))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
+dispatcher.add_handler(CommandHandler('settalkgroup', settalkgroup, pass_args=True))
 dispatcher.add_handler(CommandHandler('refresh', refresh))
 dispatcher.add_handler(CommandHandler('list', list))
 dispatcher.add_handler(CommandHandler('incursiones', incursiones))
