@@ -55,6 +55,7 @@ CREATE TABLE `incursiones` (
   `time` varchar(5) NOT NULL,
   `endtime` varchar(5) DEFAULT NULL,
   `pokemon` varchar(20) NOT NULL,
+  `egg` enum('N1', 'N2', 'N3', 'N4', 'N5', 'EX') DEFAULT NULL,
   `gimnasio_text` varchar(60) DEFAULT NULL,
   `message` int(11) DEFAULT NULL,
   `edited` tinyint(4) NOT NULL DEFAULT '0',
