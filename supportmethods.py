@@ -306,14 +306,20 @@ def get_settings_keyboard(chat_id):
     else:
         locations_text = "▪️ Ubicaciones"
     if group["gymcommand"] == 1:
-        gymcommand_text = "✅ Comando «/gym»"
+        gymcommand_text = "✅ Comando /gym"
     else:
-        gymcommand_text = "▪️ Comando «/gym»"
+        gymcommand_text = "▪️ Comando /gym"
+    if group["raidcommand"] == 1:
+        raidcommand_text = "✅ Comando /raid"
+    else:
+        raidcommand_text = "▪️ Comando /raid"
     if group["babysitter"] == 1:
         babysitter_text = "✅ Modo niñero (BETA)"
     else:
         babysitter_text = "▪️ Modo niñero (BETA)"
-    settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
+    settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
+    [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
+    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 

@@ -440,14 +440,19 @@ def gym(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     group = getGroup(chat_id)
 
-    if chat_type != "channel" and isBanned(user_id):
-        return
-
     if chat_type == "private":
         bot.sendMessage(chat_id=chat_id, text="El comando de buscar gimnasios solo funcionan en canales y grupos. Si quieres probarlo, puedes pasarte por @detectivepikachuayuda.")
         return
 
+    try:
+      bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
+    except:
+      pass
+
     if chat_type != "channel" and (group["gymcommand"] == 0 and not is_admin(chat_id, user_id, bot)):
+        return
+
+    if chat_type != "channel" and isBanned(user_id):
         return
 
     gym_text = ""
@@ -500,6 +505,9 @@ def raid(bot, update, args=None):
     bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
   except:
     pass
+
+  if chat_type != "channel" and (group["raidcommand"] == 0 and not is_admin(chat_id, user_id, bot)):
+      return
 
   if chat_type != "channel" and isBanned(user_id):
       return
@@ -1183,7 +1191,7 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter"}
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter"}
 
   for k in settings:
       if data==k:

@@ -37,6 +37,7 @@ CREATE TABLE `grupos` (
   `gotitbuttons` TINYINT NOT NULL DEFAULT '0',
   `locations` TINYINT NOT NULL DEFAULT '1',
   `gymcommand` TINYINT NOT NULL DEFAULT '0',
+  `raidcommand` TINYINT NOT NULL DEFAULT '1',
   `babysitter` TINYINT NOT NULL DEFAULT '0',
   `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
