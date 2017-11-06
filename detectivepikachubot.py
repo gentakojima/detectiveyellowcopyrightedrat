@@ -113,15 +113,18 @@ def settalkgroup(bot, update, args=None):
     except:
         pass
 
-    if args == None or len(args)!=1 or (args[0] != "-" and (len(args[0])<3 or len(args[0])>60 or re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$",args[0]) == None) ):
-        bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme un alias de grupo por parámetro, por ejemplo `@pokemongobadajoz`.", parse_mode=telegram.ParseMode.MARKDOWN)
+    if args == None or len(args)!=1 or (args[0] != "-" and (len(args[0])<3 or len(args[0])>60 or re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$|https://t\.me/joinchat/[a-zA-Z0-9]+$",args[0]) == None) ):
+        bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme por parámetro un alias de grupo o un enlace de `t.me` de un grupo privado, por ejemplo `@pokemongobadajoz` o `https://t.me/joinchat/XXXXERK2ZfB3ntXXSiWUx`.", parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     group = getGroup(chat_id)
     if args[0] != "-":
         group["talkgroup"] = args[0].replace("@","")
         saveGroup(group)
-        bot.sendMessage(chat_id=chat_id, text="👌 Establecido grupo de charla a @%s." % ensure_escaped(group["talkgroup"]), parse_mode=telegram.ParseMode.MARKDOWN)
+        if re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$",args[0]) != None:
+            bot.sendMessage(chat_id=chat_id, text="👌 Establecido grupo de charla a @%s." % ensure_escaped(group["talkgroup"]), parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            bot.sendMessage(chat_id=chat_id, text="👌 Establecido grupo de charla a %s." % ensure_escaped(group["talkgroup"]), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         group["talkgroup"] = None
         saveGroup(group)
@@ -349,7 +352,10 @@ def processMessage(bot, update):
         if group != None and group["babysitter"] == 1 and not is_admin(chat_id, user_id, bot):
             delete_message(chat_id, message.message_id, bot)
             if group["talkgroup"] != None:
-                text_talkgroup="\n\nPara hablar puedes utilizar el grupo @%s." % ensure_escaped(group["talkgroup"])
+                if re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$", group["talkgroup"]) != None:
+                    text_talkgroup="\n\nPara hablar puedes utilizar el grupo @%s." % ensure_escaped(group["talkgroup"])
+                else:
+                    text_talkgroup="\n\nPara hablar puedes utilizar el grupo %s." % ensure_escaped(group["talkgroup"])
             else:
                 text_talkgroup="";
             if user_username != None:
