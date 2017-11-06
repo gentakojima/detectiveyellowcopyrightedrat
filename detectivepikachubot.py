@@ -167,7 +167,8 @@ def refresh(bot, update, args=None):
           bot.sendMessage(chat_id=chat_id, text="❌ ¡No se permiten más de 3000 gimnasios por grupo!")
           return
       if len(row) != 4:
-          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! La fila %s no tiene las 4 columnas requeridas." % counter+1)
+          rownumber = counter + 1
+          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! La fila %s no tiene las 4 columnas requeridas." % rownumber)
           return
       names = row[3].split(",")
       latitude = str(row[1]).replace(",",".")
@@ -175,7 +176,8 @@ def refresh(bot, update, args=None):
       m = re.search('^-?[0-9]+.[0-9]+$', latitude, flags=re.IGNORECASE)
       m2 = re.search('^-?[0-9]+.[0-9]+$', longitude, flags=re.IGNORECASE)
       if m == None or m2 == None:
-        bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! El formato de las coordenadas en la fila %s es incorrecto. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas." % counter+1)
+        rownumber = counter + 1
+        bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! El formato de las coordenadas en la fila %s es incorrecto. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas." % (rownumber))
         return
       for i,r in enumerate(names):
         names[i] = names[i].strip()
