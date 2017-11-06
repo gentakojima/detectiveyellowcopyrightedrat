@@ -352,6 +352,9 @@ def channelCommands(bot, update):
             gym(bot, update, args)
         elif command == "raid":
             raid(bot, update, args)
+        elif command == "list":
+            list(bot, update)
+
 
 
 def settings(bot, update):
@@ -398,7 +401,7 @@ def list(bot, update):
   except:
       pass
 
-  if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
+  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
     return
 
   gyms = getPlaces(chat_id)
