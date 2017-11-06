@@ -521,7 +521,7 @@ def endOldRaids():
     logging.debug("storagemethods:endOldRaids")
     with db.cursor() as cursor:
         try:
-            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 AND pokemon NOT IN ('Mewtwo', 'Ho-Oh', 'Mew', 'Celebi') AND egg NOT IN ('EX') LIMIT 0,10"
+            sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 3 HOUR) AND ended = 0 AND (pokemon NOT IN ('Mewtwo', 'Ho-Oh', 'Mew', 'Celebi') OR pokemon is NULL) AND (egg NOT IN ('EX') OR egg IS NULL) LIMIT 0,10"
             cursor.execute(sql)
             result1 = cursor.fetchall()
             sql = "SELECT `id` FROM `incursiones` WHERE addedtime < (NOW() - INTERVAL 9 DAY) AND ended = 0 AND (pokemon IN ('Mewtwo', 'Ho-Oh', 'Mew', 'Celebi') OR egg IN ('EX')) LIMIT 0,10"
