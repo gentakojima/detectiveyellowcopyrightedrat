@@ -49,7 +49,7 @@ CREATE TABLE `grupos` (
 
 CREATE TABLE `incursiones` (
   `id` int(11) NOT NULL,
-  `usuario_id` bigint(20) NOT NULL,
+  `usuario_id` bigint(20) DEFAULT NULL,
   `grupo_id` bigint(20) NOT NULL,
   `gimnasio_id` int(11) DEFAULT NULL,
   `time` varchar(5) NOT NULL,

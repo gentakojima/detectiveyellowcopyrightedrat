@@ -29,7 +29,7 @@ from datetime import datetime
 from pytz import timezone
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone
-from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, end_old_raids, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, end_old_raids, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -101,7 +101,7 @@ def setspreadsheet(bot, update, args=None):
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   chat_title = message.chat.title
 
-  if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
+  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
     return
 
   if chat_type == "private":
@@ -119,7 +119,7 @@ def setspreadsheet(bot, update, args=None):
 
   m = re.search('docs.google.com/.*spreadsheets/d/([a-zA-Z0-9_-]+)', args[0], flags=re.IGNORECASE)
   if m == None:
-    bot.sendMessage(chat_id=update.message.chat_id, text="❌ Vaya, no he reconocido esa URL... %s" % args[0])
+    bot.sendMessage(chat_id=chat_id, text="❌ Vaya, no he reconocido esa URL... %s" % args[0])
   else:
     spreadsheet_id = m.group(1)
     group = getGroup(chat_id)
@@ -129,14 +129,14 @@ def setspreadsheet(bot, update, args=None):
         group["title"] = chat_title
         group["spreadsheet"] = spreadsheet_id
     saveGroup(group)
-    bot.sendMessage(chat_id=update.message.chat_id, text="👌 Establecida spreadsheet con ID %s.\n\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios." % spreadsheet_id )
+    bot.sendMessage(chat_id=chat_id, text="👌 Establecida spreadsheet con ID %s.\n\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios." % spreadsheet_id )
 
 def refresh(bot, update, args=None):
   logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   chat_title = message.chat.title
 
-  if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
+  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
     return
 
   if chat_type == "private":
@@ -153,7 +153,7 @@ def refresh(bot, update, args=None):
     bot.sendMessage(chat_id=chat_id, text="❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/setspreadsheet`", parse_mode=telegram.ParseMode.MARKDOWN)
     return
 
-  sent_message = bot.sendMessage(chat_id=update.message.chat_id, text="🌎 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
+  sent_message = bot.sendMessage(chat_id=chat_id, text="🌎 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
   Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
 
   response = requests.get("https://docs.google.com/spreadsheet/ccc?key=%s&output=csv" % grupo["spreadsheet"] )
@@ -164,10 +164,10 @@ def refresh(bot, update, args=None):
     counter = 0
     for row in csvreader:
       if counter > 3000:
-          bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se permiten más de 3000 gimnasios por grupo!")
+          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se permiten más de 3000 gimnasios por grupo!")
           return
       if len(row) != 4:
-          bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido cargar los gimnasios! Parece que hay al menos alguna fila sin las 4 columnas requeridas.")
+          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! La fila %s no tiene las 4 columnas requeridas." % counter+1)
           return
       names = row[3].split(",")
       latitude = str(row[1]).replace(",",".")
@@ -175,7 +175,7 @@ def refresh(bot, update, args=None):
       m = re.search('^-?[0-9]+.[0-9]+$', latitude, flags=re.IGNORECASE)
       m2 = re.search('^-?[0-9]+.[0-9]+$', longitude, flags=re.IGNORECASE)
       if m == None or m2 == None:
-        bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido cargar los gimnasios! Parece que hay algún problema con el formato de las coordenadas. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas.")
+        bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! El formato de las coordenadas en la fila %s es incorrecto. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas." % counter+1)
         return
       for i,r in enumerate(names):
         names[i] = names[i].strip()
@@ -189,13 +189,13 @@ def refresh(bot, update, args=None):
       saveGroup(grupo)
       if savePlaces(chat_id, places):
           places = getPlaces(grupo["id"])
-          bot.sendMessage(chat_id=update.message.chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
+          bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
       else:
-          bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre")
+          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre.")
     else:
-      bot.sendMessage(chat_id=update.message.chat_id, text="❌ ¡No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto?")
+      bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto? Ten en cuenta que para que funcione, debe haber al menos 2 gimnasios en el documento.")
   else:
-    bot.sendMessage(chat_id=update.message.chat_id, text="❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?")
+    bot.sendMessage(chat_id=chat_id, text="❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?")
 
 def registerOak(bot, update):
     logging.debug("detectivepikachubot:registerOak: %s %s" % (bot, update))
@@ -299,6 +299,10 @@ def joinedChat(bot, update):
 
 def processMessage(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if chat_type == "channel":
+        return
+
     user_username = message.from_user.username
 
     if isBanned(user_id):
@@ -318,6 +322,36 @@ def processMessage(bot, update):
             Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot)).start()
     return
 
+def channelCommands(bot, update):
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if chat_type != "channel":
+        return
+
+    t = "Ten en cuenta que muchas funciones todavía no funcionan en canales, solo en grupos. Estamos trabajando en ello."
+    bot.sendMessage(chat_id=chat_id, text=t, parse_mode=telegram.ParseMode.MARKDOWN)
+
+    try:
+        args = re.sub(r"^/[a-z0-9_]+", "", text).strip().split(" ")
+    except:
+        args = None
+    m = re.match("/([a-z0-9_]+)", text)
+    if m != None:
+        command = m.group(1)
+        if command == "setspreadsheet":
+            setspreadsheet(bot, update, args)
+        elif command == "settimezone":
+            settimezone(bot, update, args)
+        elif command == "refresh":
+            refresh(bot, update, args)
+        elif command == "settings":
+            settings(bot, update)
+        elif command == "gym":
+            gym(bot, update, args)
+        elif command == "raid":
+            raid(bot, update, args)
+
+
 def settings(bot, update):
     logging.debug("detectivepikachubot:settings: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -325,7 +359,7 @@ def settings(bot, update):
     if chat_type == "private":
       bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
       return
-    if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
+    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
       return
 
     try:
@@ -399,18 +433,16 @@ def incursiones(bot, update):
 def gym(bot, update, args=None):
     logging.debug("detectivepikachubot:gym: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    user_username = message.from_user.username
-    thisuser = refreshUsername(user_id, user_username)
     group = getGroup(chat_id)
 
-    if isBanned(user_id):
+    if chat_type != "channel" and isBanned(user_id):
         return
 
     if chat_type == "private":
         bot.sendMessage(chat_id=chat_id, text="El comando de buscar gimnasios solo funcionan en canales y grupos. Si quieres probarlo, puedes pasarte por @detectivepikachuayuda.")
         return
 
-    if group["gymcommand"] == 0 and not is_admin(chat_id, user_id, bot):
+    if chat_type != "channel" and (group["gymcommand"] == 0 and not is_admin(chat_id, user_id, bot)):
         return
 
     gym_text = ""
@@ -443,8 +475,10 @@ def gym(bot, update, args=None):
 def raid(bot, update, args=None):
   logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-  user_username = message.from_user.username
-  thisuser = refreshUsername(user_id, user_username)
+
+  if chat_type != "channel":
+    user_username = message.from_user.username
+    thisuser = refreshUsername(user_id, user_username)
 
   if chat_type == "private":
     bot.sendMessage(chat_id=chat_id, text="Las incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
@@ -462,27 +496,36 @@ def raid(bot, update, args=None):
   except:
     pass
 
-  if isBanned(user_id):
+  if chat_type != "channel" and isBanned(user_id):
       return
 
-  if thisuser["username"] == None:
+  if chat_type != "channel" and thisuser["username"] == None:
       sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
       Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
       return
 
   if args == None or len(args)<3:
-    sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text), parse_mode=telegram.ParseMode.MARKDOWN)
+    if chat_type != "channel":
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text), parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text), parse_mode=telegram.ParseMode.MARKDOWN)
     Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
     return
 
-  current_raid["username"] = thisuser["username"]
+  if chat_type != "channel":
+    current_raid["username"] = thisuser["username"]
+  else:
+    current_raid["username"] = None
 
   if args[0] == "de":
     del args[0]
 
   (current_raid["pokemon"], current_raid["egg"]) = parse_pokemon(args[0])
   if current_raid["pokemon"] == None and current_raid["egg"] == None:
-    sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n `/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text),parse_mode=telegram.ParseMode.MARKDOWN)
+    if chat_type != "channel":
+      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n `/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text),parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n `/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text),parse_mode=telegram.ParseMode.MARKDOWN)
     Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
     return
 
@@ -493,7 +536,10 @@ def raid(bot, update, args=None):
 
   current_raid["timeraid"] = parse_time(args[0], group["timezone"])
   if current_raid["timeraid"] == None:
-      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *la hora*. ¿La has puesto bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text),parse_mode=telegram.ParseMode.MARKDOWN)
+      if chat_type != "channel":
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *la hora*. ¿La has puesto bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (thisuser["username"], text),parse_mode=telegram.ParseMode.MARKDOWN)
+      else:
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No he entendido *la hora*. ¿La has puesto bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text),parse_mode=telegram.ParseMode.MARKDOWN)
       Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
       return
   current_raid["time"] = extract_time(current_raid["timeraid"]);
@@ -566,23 +612,24 @@ def raid(bot, update, args=None):
   else:
       text_delete=""
 
-  what_text = format_text_pokemon(current_raid["pokemon"], current_raid["egg"])
-  what_day = format_text_day(current_raid["timeraid"], group["timezone"])
-  day = extract_day(current_raid["timeraid"], group["timezone"])
-  if day == None:
-      daystr = ""
-  else:
-      daystr = "%s/" % day
-  if current_raid["pokemon"] == None:
-      pokemon = current_raid["egg"]
-  else:
-      pokemon = current_raid["pokemon"]
-  bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión %s %sa las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar día/hora*:\n`/cambiarhora %s %s%s`\n\n🕒 *Cambiar hora a la que desaparece*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon/nivel*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (what_text, what_day, current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], daystr, current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], pokemon, current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+  if chat_type != "channel":
+      what_text = format_text_pokemon(current_raid["pokemon"], current_raid["egg"])
+      what_day = format_text_day(current_raid["timeraid"], group["timezone"])
+      day = extract_day(current_raid["timeraid"], group["timezone"])
+      if day == None:
+          daystr = ""
+      else:
+          daystr = "%s/" % day
+      if current_raid["pokemon"] == None:
+          pokemon = current_raid["egg"]
+      else:
+          pokemon = current_raid["pokemon"]
+      bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión %s %sa las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar día/hora*:\n`/cambiarhora %s %s%s`\n\n🕒 *Cambiar hora a la que desaparece*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon/nivel*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (what_text, what_day, current_raid["time"], current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], daystr, current_raid["time"], current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], pokemon, current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
 
   if group["locations"] == 1:
       if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] != None:
           send_alerts(current_raid, bot)
-      else:
+      elif chat_type != "channel":
           if group["alerts"] == 1:
                text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
           else:
@@ -1181,10 +1228,16 @@ dispatcher.add_handler(CommandHandler('addalert', addalert, pass_args=True))
 dispatcher.add_handler(CommandHandler('delalert', delalert, pass_args=True))
 dispatcher.add_handler(CommandHandler('clearalerts', clearalerts))
 dispatcher.add_handler(CallbackQueryHandler(raidbutton))
+# Channel support
+dispatcher.add_handler(MessageHandler(Filters.command, channelCommands))
 
+
+j = updater.job_queue
 def callback_oldraids(bot, job):
     Thread(target=end_old_raids, args=(bot,)).start()
-j = updater.job_queue
-job_minute = j.run_repeating(callback_oldraids, interval=60, first=5)
+job1 = j.run_repeating(callback_oldraids, interval=60, first=5)
+#def callback_update_raids_status(bot, job):
+#    Thread(target=update_raids_status, args=(bot,)).start()
+#job2 = j.run_repeating(callback_update_raids_status, interval=120, first=15)
 
 updater.start_polling()

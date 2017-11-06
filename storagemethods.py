@@ -5,6 +5,8 @@ import types
 from os.path import expanduser
 import pymysql.cursors
 from pymysql.err import InterfaceError, IntegrityError
+from datetime import datetime
+from pytz import timezone
 
 configdir = expanduser("~") + "/.config/detectivepikachu"
 configfile = configdir + "/config.ini"
@@ -542,3 +544,30 @@ def endOldRaids():
         except:
             refreshDb()
             return []
+
+def updateRaidsStatus():
+    global db
+    logging.debug("storagemethods:updateRaidsStatus")
+    with db.cursor() as cursor:
+        raidstoupdate = []
+        #try:
+        # Set raids as started
+        sql = "SELECT `incursiones`.`id` AS `id`, `timeraid`, `timezone` FROM `incursiones` LEFT JOIN grupos ON `incursiones`.`grupo_id` = `grupos`.`id` WHERE status = 'waiting' and timeraid > 0"
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        for r in results:
+            logging.debug("storagemethods:updateRaidsStatus comparing raid %s..." % r["id"])
+            try:
+                raid_datetime = datetime.strptime(r["timeraid"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(r["timezone"]))
+                now_datetime = datetime.now(timezone(r["timezone"]))
+            except:
+                logging.debug("storagemethods:updateRaidsStatus Exception parsing time")
+            try:
+                if raid_datetime < now_datetime:
+                    logging.debug("storagemethods:updateRaidsStatus marking raid %s as started" % r["id"])
+                    raidstoupdate.append(r)
+            except:
+                logging.debug("storagemethods:updateRaidsStatus Exception comparing time")
+        #except:
+        #    refreshDb()
+        return raidstoupdate
