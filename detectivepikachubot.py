@@ -369,12 +369,6 @@ def processMessage(bot, update):
 def channelCommands(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
-    if chat_type != "channel":
-        return
-
-    t = "Ten en cuenta que muchas funciones todavía no funcionan en canales, solo en grupos. Estamos trabajando en ello."
-    bot.sendMessage(chat_id=chat_id, text=t, parse_mode=telegram.ParseMode.MARKDOWN)
-
     try:
         args = re.sub(r"^/[a-z0-9_]+", "", text).strip().split(" ")
     except:
@@ -396,6 +390,9 @@ def channelCommands(bot, update):
             raid(bot, update, args)
         elif command == "list":
             list(bot, update)
+        else:
+            # Default to process normal message for babysitter mode
+            processMessage(bot,update)
 
 
 
@@ -1252,12 +1249,9 @@ def raidbutton(bot, update):
               saveGroup(group)
               update_settings_message(chat_id, bot)
 
-
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
-dispatcher.add_handler(MessageHandler(Filters.text | Filters.photo | Filters.voice | Filters.sticker | Filters.audio | Filters.video, processMessage))
-dispatcher.add_handler(MessageHandler(Filters.status_update, joinedChat))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
@@ -1284,8 +1278,11 @@ dispatcher.add_handler(CommandHandler('addalert', addalert, pass_args=True))
 dispatcher.add_handler(CommandHandler('delalert', delalert, pass_args=True))
 dispatcher.add_handler(CommandHandler('clearalerts', clearalerts))
 dispatcher.add_handler(CallbackQueryHandler(raidbutton))
-# Channel support
+# Channel support and unknown commands
 dispatcher.add_handler(MessageHandler(Filters.command, channelCommands))
+# Text and welcome message
+dispatcher.add_handler(MessageHandler(Filters.text | Filters.photo | Filters.voice | Filters.sticker | Filters.audio | Filters.video, processMessage))
+dispatcher.add_handler(MessageHandler(Filters.status_update, joinedChat))
 
 
 j = updater.job_queue
