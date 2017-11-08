@@ -232,19 +232,19 @@ def error_callback(bot, update, error):
     try:
         raise error
     except Unauthorized:
-        logging.debug("TELEGRAM ERROR: Unauthorized - %s" % update)
+        logging.debug("TELEGRAM ERROR: Unauthorized - %s" % error)
     except BadRequest:
-        logging.debug("TELEGRAM ERROR: Bad Request - %s" % update)
+        logging.debug("TELEGRAM ERROR: Bad Request - %s" % error)
     except TimedOut:
-        logging.debug("TELEGRAM ERROR: Slow connection problem - %s" % update)
+        logging.debug("TELEGRAM ERROR: Slow connection problem - %s" % error)
     except NetworkError:
-        logging.debug("TELEGRAM ERROR: Other connection problems - %s" % update)
+        logging.debug("TELEGRAM ERROR: Other connection problems - %s" % error)
     except ChatMigrated as e:
-        logging.debug("TELEGRAM ERROR: Chat ID migrated?! - %s" % update)
+        logging.debug("TELEGRAM ERROR: Chat ID migrated?! - %s" % error)
     except TelegramError:
-        logging.debug("TELEGRAM ERROR: Other error - %s" % update)
+        logging.debug("TELEGRAM ERROR: Other error - %s" % error)
     except:
-        logging.debug("TELEGRAM ERROR: Unknown - %s" % update)
+        logging.debug("TELEGRAM ERROR: Unknown - %s" % error)
 
 def warn_people(warntype, raid, user_username, chat_id, bot):
     logging.debug("supportmethods:warn_people")
