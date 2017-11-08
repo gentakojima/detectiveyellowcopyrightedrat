@@ -6,6 +6,7 @@ import logging
 from threading import Thread
 import telegram
 from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
+from Levenshtein import distance
 
 from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, endOldRaids, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
@@ -380,6 +381,11 @@ def parse_pokemon(pokestr):
       if m != None:
         ret_pok = pokemon
         break
+    if ret_pok == None:
+        for pokemon in pokemonlist:
+            if distance(pokestr, pokemon) < 3:
+                ret_pok = pokemon
+                break
 
     if ret_pok == None:
         for egg in egglist:
