@@ -1044,7 +1044,10 @@ def reflotar(bot, update, args=None):
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden reflotar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
 
-            bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+            try:
+                bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+            except Exception as e:
+                logging.debug("detectivepikachubot:reflotar: error borrando post antiguo %s" % raid["message"])
             text = format_message(raid)
             reply_markup = get_keyboard(raid)
             sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
