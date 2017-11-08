@@ -46,7 +46,7 @@ if not os.path.exists(configdir):
   os.makedirs(configdir)
 if not os.path.exists(configfile):
   f = open(configfile, "w")
-  f.write("[database]\nhost=localhost\nport=3306\nuser=detectivepikachu\npassword=detectivepikachu\nschema=detectivepikachu\n[telegram]\ntoken=xxx\n[googlemaps]\nkey=xxx\n")
+  f.write("[database]\nhost=localhost\nport=3306\nuser=detectivepikachu\npassword=detectivepikachu\nschema=detectivepikachu\n[telegram]\ntoken=xxx\nbotalias=detectivepikachubot\nbothelp=http://telegra.ph/Detective-Pikachu-09-28\n[googlemaps]\nkey=xxx\n")
   f.close()
   print("Se acaba de crear el fichero de configuración en «»%s».\nComprueba la configuración y vuelve a ejecutarme." % configfile)
   exit(1)
@@ -62,7 +62,7 @@ gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
 
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
-    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='http://telegra.ph/Detective-Pikachu-09-28'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame a @detectivepikachubot la respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @detectivepikachubot el comando <code>/alerts</code>.", parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='%s'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame a @%s la respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @%s el comando <code>/alerts</code>." % (config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"]), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def settimezone(bot, update, args=None):
     logging.debug("detectivepikachubot:settimezone: %s %s %s" % (bot, update, args))
@@ -1250,7 +1250,7 @@ def raidbutton(bot, update):
         else:
           bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
       except:
-        bot.answerCallbackQuery(text="Para que te pueda enviar la ubicación, debes abrir un privado antes con @detectivepikachubot y pulsar en 'Iniciar'", callback_query_id=update.callback_query.id, show_alert="true")
+        bot.answerCallbackQuery(text="Para que te pueda enviar la ubicación, debes abrir un privado antes con @%s y pulsar en 'Iniciar'" % config["telegram"]["botalias"], callback_query_id=update.callback_query.id, show_alert="true")
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
 
