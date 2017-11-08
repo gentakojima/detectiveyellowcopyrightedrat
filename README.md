@@ -4,7 +4,7 @@ A Telegram Bot to create raids and show gym locations for Pokémon GO. Last vers
 
 ## Requirements
 
-Requires Python 3,4+ and a MySQL 5.5+ or MariaDB database.
+Requires Python 3.4+ and a MySQL 5.5+ or MariaDB database.
 
 To install the required Python libraries, just run:
 
@@ -20,7 +20,9 @@ After the first run, an example configuration file will be written in `~/.config
 * `telegram` to configure the Telegram bot Token
 * `googlemaps` to configure the Google Maps API key
 
-The database should be initialized manually with the contents of `schema.sql`.
+The database should be initialized manually with the contents of `schema.sql`. The user must have access to the application schema and read-only access to the built-in `mysql` schema.
+
+You must load the timezone info into the `mysql` schema. This is usually done by the script `mysql_tzinfo_to_sql` included in MySQL distributions. Look at [the MySQL manual](https://dev.mysql.com/doc/refman/5.5/en/mysql-tzinfo-to-sql.html) for more details.
 
 After all that hard work, you should be up and running!
 
