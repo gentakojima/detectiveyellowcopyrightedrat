@@ -181,13 +181,14 @@ def format_text_pokemon(pokemon, egg):
     return what_text
 
 def format_text_day(timeraid, tzone):
+    logging.debug("supportmethods:format_text_day %s %s" % (timeraid, tzone))
     try:
         raid_datetime = datetime.strptime(timeraid,"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(tzone))
     except:
         raid_datetime = timeraid.replace(tzinfo=timezone(tzone))
     now_datetime = datetime.now(timezone(tzone))
     difftime = raid_datetime - now_datetime
-    if difftime.seconds > (3600*16):
+    if difftime.total_seconds() > (3600*16):
         weekdays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
         what_day = "el *%s día %s* " % (weekdays[raid_datetime.weekday()], raid_datetime.day)
     else:

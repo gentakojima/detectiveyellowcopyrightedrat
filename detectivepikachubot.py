@@ -701,11 +701,11 @@ def raid(bot, update, args=None):
           bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _%s_\n\nDebes cambiarlo por un gimnasio reconocido para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto del final:\n\n`/cambiargimnasio %s %s`\n\nSi no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente." % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
   raid_difftime = raid_datetime - now_datetime
-  if raid_difftime.seconds < 900:
+  if raid_difftime.total_seconds() < 900:
     suggested_datetime = raid_datetime + timedelta(minutes = 20)
     suggested_datetime_str = suggested_datetime.strftime("%Y-%m-%d %H:%M:%S")
     suggested_time = extract_time(suggested_datetime_str)
-    bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Has creado la incursión para dentro de muy poco tiempo, *solo faltan %s minutos*. ¿Quizás prefieras cambiarla para más tarde para que se pueda unir más gente? Para hacerlo, pon aquí este comando:\n\n`/cambiarhora %s %s`" % (int(raid_difftime.seconds/60), current_raid["id"], suggested_time), parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Has creado la incursión para dentro de muy poco tiempo, *solo faltan %s minutos*. ¿Quizás prefieras cambiarla para más tarde para que se pueda unir más gente? Para hacerlo, pon aquí este comando:\n\n`/cambiarhora %s %s`" % (int(raid_difftime.total_seconds()/60), current_raid["id"], suggested_time), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def alerts(bot, update, args=None):
     logging.debug("detectivepikachubot:alerts: %s %s %s" % (bot, update, args))
