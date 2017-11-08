@@ -575,9 +575,9 @@ def raid(bot, update, args=None):
   (current_raid["pokemon"], current_raid["egg"]) = parse_pokemon(args[0])
   if current_raid["pokemon"] == None and current_raid["egg"] == None:
     if chat_type != "channel":
-      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n `/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
+      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n`/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
     else:
-      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n `/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text),parse_mode=telegram.ParseMode.MARKDOWN)
+      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n`/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text),parse_mode=telegram.ParseMode.MARKDOWN)
     Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
     return
 
@@ -595,6 +595,18 @@ def raid(bot, update, args=None):
       Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
       return
   current_raid["time"] = extract_time(current_raid["timeraid"]);
+
+  raid_datetime = datetime.strptime(current_raid["timeraid"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(group["timezone"]))
+  now_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"]))
+  if raid_datetime < now_datetime:
+      now_datetime_str = now_datetime.strftime("%Y-%m-%d %H:%M:%S")
+      now_time = extract_time(now_datetime_str)
+      if chat_type != "channel":
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s si no he entendido mal quieres poner la incursión a las *%s*, pero ya son las *%s*. ¿Has puesto bien la hora?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), current_raid["time"], now_time, text),parse_mode=telegram.ParseMode.MARKDOWN)
+      else:
+        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ Si no he entendido mal quieres poner la incursión a las *%s*, pero ya son las *%s*. ¿Has puesto bien la hora?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (current_raid["time"], now_time, text),parse_mode=telegram.ParseMode.MARKDOWN)
+      Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+      return
 
   current_raid["timeend"] = parse_time(args[-1], group["timezone"])
   if current_raid["timeend"] != None:
@@ -905,6 +917,14 @@ def cambiarhora(bot, update, args=None):
                 sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *la hora*. ¿La has escrito bien?\nDebe seguir el formato `hh:mm`.\nEjemplo: `12:15`" % thisuser["username"], parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             raid["time"] = extract_time(raid["timeraid"]);
+
+            raid_datetime = datetime.strptime(raid["timeraid"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(group["timezone"]))
+            now_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"]))
+            if raid_datetime < now_datetime:
+                now_datetime_str = now_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                now_time = extract_time(now_datetime_str)
+                bot.sendMessage(chat_id=chat_id, text="Si no he entendido mal quieres cambiar la incursión para las *%s*, pero ya son las *%s*. ¿Has puesto bien la hora?" % (raid["time"], now_time),parse_mode=telegram.ParseMode.MARKDOWN)
+                return
 
             if oldtimeraid.strftime("%Y-%m-%d %H:%M:%S") == raid["timeraid"]:
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta para esa hora!", parse_mode=telegram.ParseMode.MARKDOWN)

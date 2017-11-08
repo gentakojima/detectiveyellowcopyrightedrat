@@ -430,7 +430,7 @@ def parse_time(st, tz):
 
 def extract_time(formatted_datetime):
     logging.debug("supportmethods:extract_time %s" % formatted_datetime)
-    m = re.search("([0-9]{1,2}):([0-9]{0,2}):00", formatted_datetime, flags=re.IGNORECASE)
+    m = re.search("([0-9]{1,2}):([0-9]{0,2}):[0-9]{0,2}", formatted_datetime, flags=re.IGNORECASE)
     if m != None:
         extracted_time = "%02d:%02d" % (int(m.group(1)), int(m.group(2)))
         logging.debug("supportmethods::extract_time extracted %s" % extracted_time)
