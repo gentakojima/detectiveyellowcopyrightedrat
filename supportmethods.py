@@ -216,7 +216,17 @@ def end_old_raids(bot):
 def update_raids_status(bot):
     logging.debug("supportmethods:update_raids_status")
     raids = updateRaidsStatus()
-    logging.debug(raids)
+    for raid in raids:
+        logging.debug(raid)
+        r = getRaid(raid["id"])
+        logging.debug("Updating message for raid ID %s" % (raid["id"]))
+        try:
+            reply_markup = get_keyboard(r)
+            updated = update_message(r["grupo_id"], r["message"], reply_markup, bot)
+            logging.debug(updated)
+        except Exception as e:
+            logging.debug("supportmethods:update_raids_status error: %s" % str(e))
+    time.sleep(0.01)
 
 def error_callback(bot, update, error):
     try:
@@ -327,14 +337,17 @@ def get_settings_keyboard(chat_id):
 
 def get_keyboard(raid):
     group = getGroup(raid["grupo_id"])
-    keyboard_row1 = [InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')]
-    keyboard_row2 = [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy')]
-    if group["latebutton"] == 1:
-        keyboard_row2.append(InlineKeyboardButton("🕒 ¡Llego tarde!", callback_data='llegotarde'))
-    if raid["gimnasio_id"] != None:
-        keyboard_row2.append(InlineKeyboardButton("🌎 Ubicación", callback_data='ubicacion'))
-    keyboard = [keyboard_row1, keyboard_row2]
-    if group != None and group["gotitbuttons"] == 1:
+    if raid["status"] == "started" or raid["status"] == "waiting":
+        keyboard_row1 = [InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')]
+        keyboard_row2 = [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy')]
+        if group["latebutton"] == 1:
+            keyboard_row2.append(InlineKeyboardButton("🕒 ¡Llego tarde!", callback_data='llegotarde'))
+        if raid["gimnasio_id"] != None:
+            keyboard_row2.append(InlineKeyboardButton("🌎 Ubicación", callback_data='ubicacion'))
+        keyboard = [keyboard_row1, keyboard_row2]
+    else:
+        keyboard = []
+    if group != None and group["gotitbuttons"] == 1 and (raid["status"] == "started" or raid["status"] == "ended"):
         keyboard.append([InlineKeyboardButton("👍 ¡Lo tengo!", callback_data='lotengo'), InlineKeyboardButton("👎 ¡Ha escapado!", callback_data='escapou')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup

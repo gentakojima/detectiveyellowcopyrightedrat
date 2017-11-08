@@ -814,17 +814,56 @@ def cancelar(bot, update, args=None):
     raid = getRaid(raid_id)
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
-            if cancelRaid(raid_id):
-                if raid["ended"] == 1:
-                    bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
-                    return
+            response = cancelRaid(raid_id)
+            if response == True:
                 update_message(raid["grupo_id"], raid["message"], None, bot)
                 bot.sendMessage(chat_id=chat_id, text="¡Has cancelado la incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
                 warn_people("cancelar", raid, user_username, chat_id, bot)
-            else:
-                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ya estaba cancelada!",parse_mode=telegram.ParseMode.MARKDOWN)
+            elif response == "already_cancelled":
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ya estaba cancelada!", parse_mode=telegram.ParseMode.MARKDOWN)
+            elif response == "already_deleted":
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ha sido borrada y ya no se puede cancelar!", parse_mode=telegram.ParseMode.MARKDOWN)
+            elif response == "too_old":
+                bot.sendMessage(chat_id=chat_id, text="¡No se pueden cancelar incursiones tan antiguas!",parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para cancelar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
+
+def borrar(bot, update, args=None):
+    logging.debug("detectivepikachubot:borrar: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
+    thisuser = refreshUsername(user_id, user_username)
+
+    if isBanned(user_id):
+        return
+
+    if edit_check_private(chat_id, chat_type, user_username, "borrar", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
+        return
+
+    raid_id = args[0]
+    if not str(raid_id).isnumeric():
+        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    raid = getRaid(raid_id)
+    group = getGroup(raid["grupo_id"])
+    if raid != None:
+        if is_admin(raid["grupo_id"], user_id, bot) or (group["candelete"] == 1 and raid["usuario_id"] == user_id):
+            response = deleteRaid(raid["id"])
+            if response == True:
+                warn_people("borrar", raid, user_username, chat_id, bot)
+                bot.sendMessage(chat_id=chat_id, text="Se ha borrado la incursión correctamente.",parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+            elif response == "already_deleted":
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ha sido borrada previamente!", parse_mode=telegram.ParseMode.MARKDOWN)
+            elif response == "too_old":
+                bot.sendMessage(chat_id=chat_id, text="¡No se pueden borrar incursiones tan antiguas!",parse_mode=telegram.ParseMode.MARKDOWN)
+
+        else:
+            bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para borrar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
@@ -850,11 +889,14 @@ def cambiarhora(bot, update, args=None):
     group = getGroup(raid["grupo_id"])
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
-            if raid["ended"] == 1:
+            if raid["ended"] == 1 or raid["status"] == "old":
                 bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            if raid["cancelled"] == 1:
+            if raid["cancelled"] == 1 or raid["status"] == "cancelled":
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            if raid["status"] == "deleted":
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ha sido borrada y ya no se puede editar!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             oldtime = raid["time"]
             oldtimeraid = raid["timeraid"]
@@ -868,6 +910,7 @@ def cambiarhora(bot, update, args=None):
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta para esa hora!", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 raid["edited"] = 1
+                raid["status"] = "waiting"
                 saveRaid(raid)
                 reply_markup = get_keyboard(raid)
                 update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
@@ -901,11 +944,14 @@ def cambiarhorafin(bot, update, args=None):
     group = getGroup(raid["grupo_id"])
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
-            if raid["ended"] == 1:
+            if raid["ended"] == 1 or raid["status"] == "old":
                 bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            if raid["cancelled"] == 1:
+            if raid["cancelled"] == 1 or raid["status"] == "cancelled":
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            if raid["status"] == "deleted":
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ha sido borrada y ya no se puede editar!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             oldtime = raid["endtime"]
             oldtimeraid = raid["timeend"]
@@ -967,11 +1013,14 @@ def cambiargimnasio(bot, update, args=None):
     group = getGroup(raid["grupo_id"])
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
-            if raid["ended"] == 1:
+            if raid["ended"] == 1 or raid["status"] == "old":
                 bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            if raid["cancelled"] == 1:
+            if raid["cancelled"] == 1 or raid["status"] == "cancelled":
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            if raid["status"] == "deleted":
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ha sido borrada y ya no se puede editar!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             if new_gymtext == raid["gimnasio_text"]:
                 bot.sendMessage(chat_id=chat_id, text="¡La incursión ya está puesta en ese gimnasio!", parse_mode=telegram.ParseMode.MARKDOWN)
@@ -1037,11 +1086,14 @@ def reflotar(bot, update, args=None):
     group = getGroup(raid["grupo_id"])
     if raid != None:
         if is_admin(raid["grupo_id"], user_id, bot) or (group["refloat"] == 1 and raid["usuario_id"] == user_id):
-            if raid["ended"] == 1:
+            if raid["ended"] == 1 or raid["status"] == "old":
                 bot.sendMessage(chat_id=chat_id, text="No se puede reflotar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            if raid["cancelled"] == 1:
+            if raid["cancelled"] == 1 or raid["status"] == "cancelled":
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden reflotar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            if raid["status"] == "deleted":
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ha sido borrada y ya no se puede reflotar!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
 
             try:
@@ -1080,11 +1132,14 @@ def cambiarpokemon(bot, update, args=None):
     raid = getRaid(raid_id)
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
-            if raid["ended"] == 1:
+            if raid["ended"] == 1 or raid["status"] == "old":
                 bot.sendMessage(chat_id=chat_id, text="No se puede editar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
-            if raid["cancelled"] == 1:
+            if raid["cancelled"] == 1 or raid["status"] == "cancelled":
                 bot.sendMessage(chat_id=chat_id, text="¡No se pueden editar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            if raid["status"] == "deleted":
+                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ha sido borrada y ya no se puede editar!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
 
             oldpoke = raid["pokemon"]
@@ -1106,40 +1161,6 @@ def cambiarpokemon(bot, update, args=None):
                     bot.sendMessage(chat_id=chat_id, text="¡No he reconocido ese Pokémon/nivel de incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para editar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
-    else:
-        bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
-
-def borrar(bot, update, args=None):
-    logging.debug("detectivepikachubot:borrar: %s %s" % (bot, update))
-    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    user_username = message.from_user.username
-    thisuser = refreshUsername(user_id, user_username)
-
-    if isBanned(user_id):
-        return
-
-    if edit_check_private(chat_id, chat_type, user_username, "borrar", bot) == False:
-        delete_message(chat_id, message.message_id, bot)
-        return
-
-    raid_id = args[0]
-    if not str(raid_id).isnumeric():
-        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!\nCopia y pega el comando que recibiste por privado y no elimines el identificador numérico de la incursión.",parse_mode=telegram.ParseMode.MARKDOWN)
-        return
-
-    raid = getRaid(raid_id)
-    group = getGroup(raid["grupo_id"])
-    if raid != None:
-        if is_admin(raid["grupo_id"], user_id, bot) or (group["candelete"] == 1 and raid["usuario_id"] == user_id):
-            if raid["ended"] == 1:
-                bot.sendMessage(chat_id=chat_id, text="No se puede borrar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
-                return
-            warn_people("borrar", raid, user_username, chat_id, bot)
-            if deleteRaid(raid["id"]):
-                bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
-                bot.sendMessage(chat_id=chat_id, text="Se ha borrado la incursión correctamente.",parse_mode=telegram.ParseMode.MARKDOWN)
-        else:
-            bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para borrar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
@@ -1292,8 +1313,8 @@ j = updater.job_queue
 def callback_oldraids(bot, job):
     Thread(target=end_old_raids, args=(bot,)).start()
 job1 = j.run_repeating(callback_oldraids, interval=60, first=5)
-#def callback_update_raids_status(bot, job):
-#    Thread(target=update_raids_status, args=(bot,)).start()
-#job2 = j.run_repeating(callback_update_raids_status, interval=120, first=15)
+def callback_update_raids_status(bot, job):
+    Thread(target=update_raids_status, args=(bot,)).start()
+job2 = j.run_repeating(callback_update_raids_status, interval=60, first=8)
 
 updater.start_polling()
