@@ -187,7 +187,7 @@ def format_text_day(timeraid, tzone):
         raid_datetime = timeraid.replace(tzinfo=timezone(tzone))
     now_datetime = datetime.now(timezone(tzone))
     difftime = raid_datetime - now_datetime
-    if difftime.days > 1:
+    if difftime.seconds > (3600*16):
         weekdays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
         what_day = "el *%s día %s* " % (weekdays[raid_datetime.weekday()], raid_datetime.day)
     else:
