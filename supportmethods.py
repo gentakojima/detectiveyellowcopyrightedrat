@@ -8,7 +8,7 @@ import telegram
 from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
 from Levenshtein import distance
 
-from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, endOldRaids, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus
+from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
@@ -94,7 +94,7 @@ def send_alerts(raid, bot):
         what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
         what_day = format_text_day(raid["timeraid"], group["timezone"])
         for alert in alerts:
-            bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una incursión %s en *%s* %sa las *%s* en el grupo _%s_.\n\n_Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando_ `/clearalerts`" % (what_text, raid["gimnasio_text"], what_day, raid["time"], group["title"]), parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una incursión %s en *%s* %sa las *%s* en el grupo _%s_.\n\n_Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando_ `/clearalerts`" % (what_text, raid["gimnasio_text"], what_day, extract_time(raid["timeraid"]), group["title"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def update_message(chat_id, message_id, reply_markup, bot):
     logging.debug("supportmethods:update_message: %s %s %s" % (chat_id, message_id, reply_markup))
@@ -112,8 +112,8 @@ def format_message(raid):
         text_edited=" _(editada)_"
     else:
         text_edited=""
-    if "endtime" in raid.keys() and raid["endtime"] != None:
-        text_endtime="\n_Desaparece a las %s_" % raid["endtime"]
+    if "timeend" in raid.keys() and raid["timeend"] != None:
+        text_endtime="\n_Desaparece a las %s_" % extract_time(raid["timeend"])
     else:
         text_endtime=""
     if group["locations"] == 1:
@@ -129,8 +129,8 @@ def format_message(raid):
         created_text = "\nCreada por @%s%s" % (ensure_escaped(creador["username"]), text_edited)
     else:
         created_text = ""
-    text = "Incursión %s %sa las *%s* en %s*%s*%s%s\n" % (what_text, what_day, raid["time"], gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
-    if "cancelled" in raid.keys() and raid["cancelled"] == 1:
+    text = "Incursión %s %sa las *%s* en %s*%s*%s%s\n" % (what_text, what_day, extract_time(raid["timeraid"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
+    if raid["status"] == "cancelled":
         text = text + "❌ *Incursión cancelada*"
     else:
         if group["disaggregated"] == 1:
@@ -139,7 +139,7 @@ def format_message(raid):
         else:
             numgente = count_people(gente)
             text = text + "%s entrenadores apuntados:" % numgente
-    if (not "cancelled" in raid.keys() or raid["cancelled"] == 0) and gente != None:
+    if raid["status"] != "cancelled" and gente != None:
         for user in gente:
             if user["plus"] != None and user["plus"]>0:
                 plus_text = " +%i" % user["plus"]
@@ -200,21 +200,6 @@ def ensure_escaped(username):
         username = username.replace("_","\\_")
     return username
 
-def end_old_raids(bot):
-    logging.debug("supportmethods:end_old_raids")
-    raids = endOldRaids()
-    logging.debug(raids)
-    for raid in raids:
-        logging.debug(raid)
-        r = getRaid(raid["id"])
-        logging.debug("Updating message for raid ID %s" % (raid["id"]))
-        try:
-            updated = update_message(r["grupo_id"], r["message"], None, bot)
-            logging.debug(updated)
-        except:
-            pass
-        time.sleep(0.5)
-
 def update_raids_status(bot):
     logging.debug("supportmethods:update_raids_status")
     raids = updateRaidsStatus()
@@ -261,23 +246,23 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
             continue
         try:
             if warntype == "cancelar":
-                text = "❌ @%s ha *cancelado* la incursión de %s a las %s en %s" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], ensure_escaped(raid["gimnasio_text"]))
+                text = "❌ @%s ha *cancelado* la incursión de %s a las %s en %s" % (ensure_escaped(user_username), raid["pokemon"], extract_time(raid["timeraid"]), ensure_escaped(raid["gimnasio_text"]))
             elif warntype == "borrar":
-                text = "🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], ensure_escaped(raid["gimnasio_text"]))
+                text = "🚫 @%s ha *borrado* la incursión de %s a las %s en %s" % (ensure_escaped(user_username), raid["pokemon"], extract_time(raid["timeraid"]), ensure_escaped(raid["gimnasio_text"]))
             elif warntype == "cambiarhora":
                 text_day = format_text_day(raid["timeraid"], group["timezone"])
                 if text_day != "":
                     text_day = " " + text_day
-                text = "⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*%s" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), raid["time"], text_day)
+                text = "⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*%s" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), extract_time(raid["timeraid"]), text_day)
             elif warntype == "cambiarhorafin":
-                text = "⚠️ @%s ha cambiado la hora a la que se termina la incursión de %s en %s a las *%s* (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), raid["endtime"], raid["time"])
+                text = "⚠️ @%s ha cambiado la hora a la que se termina la incursión de %s en %s a las *%s* (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), raid["endtime"], extract_time(raid["timeraid"]))
             elif warntype == "borrarhorafin":
-                text = "⚠️ @%s ha borrado la hora a la que se termina la incursión de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), raid["time"])
+                text = "⚠️ @%s ha borrado la hora a la que se termina la incursión de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), extract_time(raid["timeraid"]))
             elif warntype == "cambiargimnasio":
-                text = "⚠️ @%s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (ensure_escaped(user_username), raid["pokemon"], raid["time"], ensure_escaped(raid["gimnasio_text"]))
+                text = "⚠️ @%s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (ensure_escaped(user_username), raid["pokemon"], extract_time(raid["timeraid"]), ensure_escaped(raid["gimnasio_text"]))
             elif warntype == "cambiarpokemon":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"])
-                text = "⚠️ @%s ha cambiado la incursión para las %s en %s a incursión %s" % (ensure_escaped(user_username), raid["time"], ensure_escaped(raid["gimnasio_text"]), text_pokemon)
+                text = "⚠️ @%s ha cambiado la incursión para las %s en %s a incursión %s" % (ensure_escaped(user_username), extract_time(raid["timeraid"]), ensure_escaped(raid["gimnasio_text"]), text_pokemon)
             bot.sendMessage(chat_id=p["id"], text=text, parse_mode=telegram.ParseMode.MARKDOWN)
             warned.append(p["username"])
         except Exception as e:
@@ -437,6 +422,8 @@ def parse_time(st, tz):
 
 def extract_time(formatted_datetime):
     logging.debug("supportmethods:extract_time %s" % formatted_datetime)
+    if not isinstance(formatted_datetime,str):
+        formatted_datetime = formatted_datetime.strftime("%Y-%m-%d %H:%M:%S")
     m = re.search("([0-9]{1,2}):([0-9]{0,2}):[0-9]{0,2}", formatted_datetime, flags=re.IGNORECASE)
     if m != None:
         extracted_time = "%02d:%02d" % (int(m.group(1)), int(m.group(2)))
