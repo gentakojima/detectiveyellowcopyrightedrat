@@ -509,7 +509,7 @@ def deleteRaid(raid_id):
         raid = getRaid(raid_id)
         if raid["status"] == "deleted":
             return "already_deleted"
-        elif raid["ended"] == 1 or raid["status"] == "old":
+        elif raid["status"] == "old" or raid["status"] == "ended":
             return "too_old"
         else:
             sql = "UPDATE incursiones SET `status`='deleted' WHERE id=%s;"
@@ -524,7 +524,7 @@ def cancelRaid(raid_id):
         raid = getRaid(raid_id)
         if raid["cancelled"] == 1 or raid["status"] == "cancelled":
             return "already_cancelled"
-        elif raid["ended"] == 1 or raid["status"] == "old":
+        elif raid["status"] == "old" or raid["status"] == "ended":
             return "too_old"
         elif raid["status"] == "deleted":
             return "already_deleted"
