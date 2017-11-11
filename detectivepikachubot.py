@@ -4,8 +4,9 @@
 #
 # Command list for @botfather
 # help - Muestra la ayuda
-# raid - Crea una incursión nueva
-# alerts - Configura alertas de incursiones
+# raid - Crea una incursión nueva (en grupo)
+# alerts - Configura alertas de incursiones (en privado)
+# raids - Muestra incursiones activas (en privado)
 #
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, Filters
@@ -28,7 +29,7 @@ from unidecode import unidecode
 from datetime import datetime, timedelta
 from pytz import timezone
 
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, end_old_raids, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon
 
 def cleanup(signum, frame):
@@ -453,25 +454,46 @@ def list(bot, update):
     output = output + ("\n - %s" % p["desc"])
   bot.sendMessage(chat_id=chat_id, text=output)
 
-def incursiones(bot, update):
-    logging.debug("detectivepikachubot:incursiones: %s %s" % (bot, update))
+def raids(bot, update):
+    logging.debug("detectivepikachubot:raids: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    if chat_type == "private":
-        bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
-        return
-    if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
-        return
-    try:
-        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-    except:
-        pass
+    user_username = message.from_user.username
 
-    raids = getLastRaids(chat_id, 8)
-    output = ""
-    for r in raids:
-        creador = getCreadorRaid(r["id"])
-        output = ("\n▪️ `%s` %s %s @%s" % (r["id"], r["pokemon"], r["time"], ensure_escaped(creador["username"]))) + output
-    output = "Últimas incursiones del grupo:" + output
+    if edit_check_private(chat_id, chat_type, user_username, "raids", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
+        return
+
+    raids = getActiveRaidsforUser(user_id)
+    if len(raids) > 0:
+        output = "🐲 Estas son las incursiones activas en los grupos en los que participas activamente:\n"
+        for r in raids:
+            creador = getCreadorRaid(r["id"])
+            group = getGrupoRaid(r["id"])
+            gym_emoji = created_text = identifier_text = ""
+            if group["locations"] == 1:
+                if "gimnasio_id" in r.keys() and r["gimnasio_id"] != None:
+                    gym_emoji="🌎"
+                else:
+                    gym_emoji="❓"
+            if r["pokemon"] != None:
+                what_text = "*%s*" % r["pokemon"]
+            else:
+                what_text= r["egg"].replace("N","*Nivel ").replace("EX","*EX") + "*"
+            what_day = format_text_day(r["timeraid"], group["timezone"])
+            if creador["username"] != None:
+                created_text = " por @%s" % (ensure_escaped(creador["username"]))
+            if is_admin(r["grupo_id"], user_id, bot):
+                identifier_text = " (id `%s`)" % r["id"]
+            if r["status"] == "waiting":
+                raid_emoji = "🕒"
+            elif r["status"] == "started":
+                raid_emoji = "💥"
+            else:
+                raid_emoji = "✌"
+            text = "\n%s %s %sa las *%s* en %s*%s*%s%s - Grupo %s" % (raid_emoji, what_text, what_day, r["time"], gym_emoji, r["gimnasio_text"], created_text, identifier_text, group["title"])
+            output = output + text
+    else:
+        output = "🐲 No hay incursiones activas en los grupos en los que has participado recientemente"
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def gym(bot, update, args=None):
@@ -1309,7 +1331,8 @@ dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True
 dispatcher.add_handler(CommandHandler('settalkgroup', settalkgroup, pass_args=True))
 dispatcher.add_handler(CommandHandler('refresh', refresh))
 dispatcher.add_handler(CommandHandler('list', list))
-dispatcher.add_handler(CommandHandler('incursiones', incursiones))
+dispatcher.add_handler(CommandHandler('incursiones', raids))
+dispatcher.add_handler(CommandHandler('raids', raids))
 dispatcher.add_handler(CommandHandler('settings', settings))
 # Commands related to raids
 dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))

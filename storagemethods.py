@@ -93,6 +93,30 @@ def getGroupsByUser(user_id):
         result = cursor.fetchall()
         return result
 
+def getActiveRaidsforUser(user_id):
+    global db
+    logging.debug("storagemethods:getActiveRaidsforUser: %s" % (user_id))
+    with db.cursor() as cursor:
+        sql = "SELECT * \
+        FROM incursiones \
+        WHERE status IN ('started', 'waiting', `ended`) \
+            AND addedtime > 0 \
+            AND timeraid > 0 \
+            AND grupo_id IN ( \
+                SELECT `grupos`.`id` AS id \
+                FROM `incursiones` \
+                LEFT JOIN grupos ON incursiones.grupo_id = grupos.id \
+                RIGHT JOIN voy ON voy.incursion_id = incursiones.id \
+                WHERE grupos.testgroup = 0 \
+                AND voy.usuario_id = %s \
+                AND incursiones.addedtime>(DATE_SUB(NOW(),INTERVAL 1 MONTH)) \
+                GROUP BY grupos.id \
+            ) \
+            ORDER BY incursiones.timeraid ASC"
+        cursor.execute(sql, (user_id))
+        result = cursor.fetchall()
+        return result
+
 def savePlaces(group_id, places):
     global db
     logging.debug("storagemethods:savePlaces: %s %s" % (group_id, places))
@@ -365,6 +389,15 @@ def getCreadorRaid(raid_id):
     logging.debug("storagemethods:getCreadorRaid: %s" % (raid_id))
     with db.cursor() as cursor:
         sql = "SELECT `usuarios`.`id` AS `id`, `username` FROM `incursiones` LEFT JOIN `usuarios` ON `usuarios`.`id` = `incursiones`.`usuario_id` WHERE `incursiones`.`id`=%s"
+        cursor.execute(sql, (raid_id))
+        result = cursor.fetchone()
+        return result
+
+def getGrupoRaid(raid_id):
+    global db
+    logging.debug("storagemethods:getGrupoRaid: %s" % (raid_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `grupos`.`id` AS `id`, `grupos`.`title` AS `title`, `grupos`.`locations` AS `locations`, `grupos`.`timezone` AS `timezone` FROM `incursiones` LEFT JOIN `grupos` ON `grupos`.`id` = `incursiones`.`grupo_id` WHERE `incursiones`.`id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
         return result
