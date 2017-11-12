@@ -9,7 +9,13 @@ Requires Python 3.4+ and a MySQL 5.5+ or MariaDB database.
 To install the required Python libraries, just run:
 
 ```bash
-pip3 install -r requirements.txt
+sudo pip3 install -r requirements.txt
+```
+
+The system package `tesseract-ocr` is also required. To install it in Debian-based systems, just run:
+
+```bash
+sudo apt-get install tesseract-ocr
 ```
 
 ## Configuration

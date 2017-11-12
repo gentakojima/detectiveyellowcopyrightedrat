@@ -4,4 +4,7 @@ python-telegram-bot
 unidecode
 pytz
 python-levenshtein
+pytesseract
+opencv-python
+scikit-image
 

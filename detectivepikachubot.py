@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.3
+#!/usr/bin/env python3.4
 # -*- coding: UTF-8 -*-
 
 #
@@ -28,9 +28,11 @@ from threading import Thread
 from unidecode import unidecode
 from datetime import datetime, timedelta
 from pytz import timezone
+import tempfile
+import urllib.request
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid
-from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -347,7 +349,22 @@ def processMessage(bot, update):
         return
 
     if chat_type == "private":
-        registerOak(bot, update)
+        # Is this an image?
+        if hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
+            return # FIXME disabled for now
+            photo = bot.get_file(update.message.photo[-1]["file_id"])
+            logging.debug("Downloading file %s" % photo)
+            filename = "photos/profile-%s.jpg" % user_id
+            urllib.request.urlretrieve(photo["file_path"], filename)
+            try:
+                (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name) = parse_profile_image(filename)
+                text = "Información reconocida:\n - Nombre de entrenador: %s\n - Nivel: %s\n - Equipo: %s\n - Pokémon: %s\n - Nombre del Pokémon: %s" % (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name)
+            except Exception as e:
+                text = "Error reconociendo el perfil: %s" % str(e)
+            bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
+        # Is this a forwarded message from Oak?
+        if text != None and len(text) > 0:
+            registerOak(bot, update)
     else:
         group = getGroup(chat_id)
         if group != None and group["babysitter"] == 1 and not is_admin(chat_id, user_id, bot):

@@ -7,6 +7,13 @@ from threading import Thread
 import telegram
 from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
 from Levenshtein import distance
+import cv2
+import tempfile
+import os
+import numpy as np
+import pytesseract
+from PIL import Image, ImageOps
+from skimage.measure import compare_ssim as ssim
 
 from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
@@ -444,3 +451,131 @@ def extract_day(timeraid, tzone):
         return raid_datetime.day
     else:
         return None
+
+def parse_profile_image(filename):
+    logging.debug("supportmethods:parse_profile_image %s" % filename)
+
+    new_file, tmpfilename = tempfile.mkstemp(suffix=".png")
+    os.close(new_file)
+
+    # Load possible pokemons
+    possible_pokemons = ["chikorita","machop","growlithe","diglett","spinarak","magikarp","ditto"]
+    pokemons = {}
+    for i in possible_pokemons:
+        p = cv2.imread("pokemonimgs/%s.png" % i)
+        p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
+        p = cv2.resize(p, (60,60))
+        pokemons[i] = { "model":p }
+
+    # Load the full image
+    image = cv2.imread(filename)
+    height, width, _ = image.shape
+    aspect_ratio = height/width
+
+    # Raise error for unsupported aspect ratios
+    if aspect_ratio <= 1.74 or aspect_ratio >= 1.88:
+        raise Exception("Aspect ratio not supported")
+
+    # Crop large bars
+    bottombar_img = image[int(height-height/14):int(height),int(0):int(width)] # y1:y2,x1:x2
+    bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
+    if bottombar_gray.mean() < 40:
+        image = image[int(0):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
+        height, width, _ = image.shape
+
+    # Crop small bars
+    bottombar_img = image[int(height-height/17):int(height),int(0):int(width)] # y1:y2,x1:x2
+    bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
+    if bottombar_gray.mean() < 40:
+        image = image[int(0):int(height-height/17),int(0):int(width)] # y1:y2,x1:x2
+        height, width, _ = image.shape
+
+    # Extract Team
+    team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
+    boundaries = {
+        "red": ([0, 0, 150], [70, 20, 255]),
+        "blue": ([200, 90, 0], [255, 130, 20]),
+        "yellow": ([0, 190, 200], [20, 215, 255])
+    }
+    chosen_color = None
+    values = {}
+    for color in boundaries:
+        # create NumPy arrays from the boundaries
+        lower = np.array(boundaries[color][0], dtype = "uint8")
+        upper = np.array(boundaries[color][1], dtype = "uint8")
+
+        # find the colors within the specified boundaries and apply
+        # the mask
+        mask = cv2.inRange(team1_img, lower, upper)
+        output = cv2.bitwise_and(team1_img, team1_img, mask = mask)
+
+        values[color] = output.mean()
+        logging.debug("supportmethods:parse_profile_image: Mean value for color %s: %s" %(color,values[color]))
+
+        if chosen_color == None or values[color] > values[chosen_color]:
+            chosen_color = color
+    logging.debug("supportmethods:parse_profile_image: Chosen color: %s" % chosen_color)
+
+    # Extract and OCR trainer and Pokémon name
+    nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+2*width/5)] # y1:y2,x1:x2
+    if chosen_color == "yellow":
+        min_thres = 170
+    elif chosen_color == "red":
+        nick1_img[:, :, 2] = 0
+        min_thres = 50
+    elif chosen_color == "blue":
+        nick1_img[:, :, 0] = 0
+        min_thres = 110
+    nick1_gray = cv2.cvtColor(nick1_img, cv2.COLOR_BGR2GRAY)
+    ret,nick1_gray = cv2.threshold(nick1_gray,min_thres,255,cv2.THRESH_BINARY)
+    cv2.imwrite(tmpfilename, nick1_gray)
+    text = pytesseract.image_to_string(Image.open(tmpfilename))
+    trainer_name = re.sub(r'\n+.*$','',text)
+    trainer_name = trainer_name.replace(" ","").replace("|","l")
+    pokemon_name = re.sub(r'^.*\n+(y|and)[ ]?','',text)
+    logging.debug("supportmethods:parse_profile_image: Trainer name: %s" % trainer_name)
+    logging.debug("supportmethods:parse_profile_image: Pokemon name: %s" % pokemon_name)
+
+    # Extract and OCR level
+    if aspect_ratio < 1.78:
+        level1_img = image[int(height/2+2*height/13):int(height-height/4-height/22),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
+    else:
+        level1_img = image[int(height/2+height/8):int(height-height/4-height/16),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
+
+    if chosen_color == "yellow":
+        min_thres = 170
+    elif chosen_color == "red":
+        level1_img[:, :, 2] = 0
+        min_thres = 50
+    elif chosen_color == "blue":
+        level1_img[:, :, 0] = 0
+        min_thres = 130
+    level1_gray = cv2.cvtColor(level1_img, cv2.COLOR_BGR2GRAY)
+    ret,level1_gray = cv2.threshold(level1_gray,min_thres,255,cv2.THRESH_BINARY)
+    cv2.imwrite(tmpfilename, level1_gray)
+    level = pytesseract.image_to_string(Image.open(tmpfilename))
+    logging.debug("supportmethods:parse_profile_image: Level: %s" % level)
+
+    # Extract Pokemon
+    if aspect_ratio < 1.78:
+        pokemon_img = image[int(height/3):int(height-height/3),int(width/8):int(width/2)] # y1:y2,x1:x2
+    else:
+        pokemon_img = image[int(height/3-height/42):int(height-height/3-height/42),int(width/8):int(width/2)] # y1:y2,x1:x2
+    pokemon_gray = cv2.cvtColor(pokemon_img, cv2.COLOR_BGR2GRAY)
+    pokemon_gray = cv2.resize(pokemon_gray, (60,60))
+
+    # Test extracted pokemon against possible pokemons
+    chosen_pokemon = None
+    chosen_similarity = 0.0
+    for i in possible_pokemons:
+        pokemons[i]["similarity"] = ssim(pokemons[i]["model"], pokemon_gray)
+        logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (i,pokemons[i]["similarity"]))
+        if pokemons[i]["similarity"] > 0.7 and \
+           (chosen_pokemon == None or chosen_similarity < pokemons[i]["similarity"]):
+           chosen_pokemon = i
+           chosen_similarity = pokemons[i]["similarity"]
+    logging.debug("supportmethods:parse_profile_image: Chosen Pokemon: %s" % chosen_pokemon)
+
+    # Cleanup and return
+    os.remove(tmpfilename)
+    return (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name)
