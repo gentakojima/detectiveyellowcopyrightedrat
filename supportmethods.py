@@ -264,7 +264,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
                     text_day = " " + text_day
                 text = "⚠️ @%s ha cambiado la hora de la incursión de %s en %s para las *%s*%s" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), extract_time(raid["timeraid"]), text_day)
             elif warntype == "cambiarhorafin":
-                text = "⚠️ @%s ha cambiado la hora a la que se termina la incursión de %s en %s a las *%s* (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), raid["endtime"], extract_time(raid["timeraid"]))
+                text = "⚠️ @%s ha cambiado la hora a la que se termina la incursión de %s en %s a las *%s* (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
             elif warntype == "borrarhorafin":
                 text = "⚠️ @%s ha borrado la hora a la que se termina la incursión de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (ensure_escaped(user_username), raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), extract_time(raid["timeraid"]))
             elif warntype == "cambiargimnasio":
