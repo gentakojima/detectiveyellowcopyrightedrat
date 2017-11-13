@@ -494,9 +494,9 @@ def parse_profile_image(filename):
     # Extract Team
     team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
     boundaries = {
-        "red": ([0, 0, 150], [70, 20, 255]),
-        "blue": ([200, 90, 0], [255, 130, 20]),
-        "yellow": ([0, 190, 200], [20, 215, 255])
+        "Rojo": ([0, 0, 150], [70, 20, 255]),
+        "Azul": ([200, 90, 0], [255, 130, 20]),
+        "Amarillo": ([0, 190, 200], [20, 215, 255])
     }
     chosen_color = None
     values = {}
@@ -519,12 +519,12 @@ def parse_profile_image(filename):
 
     # Extract and OCR trainer and Pokémon name
     nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+2*width/5)] # y1:y2,x1:x2
-    if chosen_color == "yellow":
+    if chosen_color == "Amarillo":
         min_thres = 170
-    elif chosen_color == "red":
+    elif chosen_color == "Rojo":
         nick1_img[:, :, 2] = 0
         min_thres = 50
-    elif chosen_color == "blue":
+    elif chosen_color == "Azul":
         nick1_img[:, :, 0] = 0
         min_thres = 110
     nick1_gray = cv2.cvtColor(nick1_img, cv2.COLOR_BGR2GRAY)
@@ -543,12 +543,12 @@ def parse_profile_image(filename):
     else:
         level1_img = image[int(height/2+height/8):int(height-height/4-height/16),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
 
-    if chosen_color == "yellow":
+    if chosen_color == "Amarillo":
         min_thres = 170
-    elif chosen_color == "red":
+    elif chosen_color == "Rojo":
         level1_img[:, :, 2] = 0
         min_thres = 50
-    elif chosen_color == "blue":
+    elif chosen_color == "Azul":
         level1_img[:, :, 0] = 0
         min_thres = 130
     level1_gray = cv2.cvtColor(level1_img, cv2.COLOR_BGR2GRAY)
@@ -556,6 +556,8 @@ def parse_profile_image(filename):
     cv2.imwrite(tmpfilename, level1_gray)
     level = pytesseract.image_to_string(Image.open(tmpfilename))
     logging.debug("supportmethods:parse_profile_image: Level: %s" % level)
+    if int(level)<5 or int(level)>40:
+        level = None
 
     # Extract Pokemon
     if aspect_ratio < 1.78:

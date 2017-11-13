@@ -77,7 +77,10 @@ CREATE TABLE `usuarios` (
   `username` varchar(33) DEFAULT NULL,
   `level` int(11) DEFAULT NULL,
   `team` enum('Rojo','Azul','Amarillo','') DEFAULT NULL,
-  `banned` tinyint(4) NOT NULL DEFAULT '0'
+  `banned` tinyint(4) NOT NULL DEFAULT '0',
+  `trainername` varchar(20) DEFAULT NULL,
+  `validation` enum('none','oak','internal') NOT NULL DEFAULT 'none',
+  `validation_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -104,6 +107,23 @@ CREATE TABLE `alertas` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
   `gimnasio_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+--
+-- Table structure for table `validaciones`
+--
+
+CREATE TABLE `validaciones` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `startedtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `step` enum('waitingtrainername','waitingscreenshot','failed','expired','completed') NOT NULL DEFAULT 'waitingtrainername',
+  `pokemon` varchar(15) NOT NULL,
+  `pokemonname` varchar(15) NOT NULL,
+  `trainername` varchar(20) DEFAULT NULL,
+  `team` enum('Azul','Rojo','Amarillo','') DEFAULT NULL,
+  `level` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
@@ -138,7 +158,10 @@ ALTER TABLE `incursiones`
 -- Indexes for table `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `trainername` (`trainername`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD KEY `validation_id` (`validation_id`);
 
 --
 -- Indexes for table `voy`
@@ -155,6 +178,11 @@ ALTER TABLE `alertas`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `usuario_id` (`usuario_id`,`gimnasio_id`) USING BTREE;
 
+--
+-- Indexes for table `validaciones`
+--
+ALTER TABLE `validaciones`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -176,6 +204,13 @@ ALTER TABLE `incursiones`
 --
 ALTER TABLE `alertas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `validaciones`
+--
+ALTER TABLE `validaciones`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+COMMIT;
 
 --
 -- Constraints for dumped tables

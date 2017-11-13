@@ -104,6 +104,39 @@ def getGroupsByUser(user_id):
         result = cursor.fetchall()
         return result
 
+def getValidationsByUser(user_id):
+    global db
+    logging.debug("storagemethods:getValidationsByUser: %s" % (user_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `id`, `startedtime`, `step`, `pokemon`, `pokemonname`, `usuario_id` FROM `validaciones` \
+        WHERE validaciones.usuario_id = %s"
+        cursor.execute(sql, (user_id))
+        result = cursor.fetchall()
+        return result
+
+def getCurrentValidation(user_id):
+    global db
+    logging.debug("storagemethods:getCurrentValidation: %s" % (user_id))
+    with db.cursor() as cursor:
+        sql = "SELECT `id`, `startedtime`, `step`, `pokemon`, `pokemonname`, `usuario_id`, `trainername`, `team`, `level` FROM `validaciones` \
+        WHERE `validaciones`.`usuario_id` = %s AND `step` = 'waitingtrainername' OR `step` = 'waitingscreenshot'"
+        cursor.execute(sql, (user_id))
+        result = cursor.fetchone()
+        return result
+
+def saveValidation(validation):
+    global db
+    logging.debug("storagemethods:saveValidation: %s" % (validation))
+    for k in ["id","trainername","team","level"]:
+        if k not in validation.keys():
+            validation[k] = None
+    with db.cursor() as cursor:
+        sql = "INSERT INTO validaciones (id, pokemon, pokemonname, usuario_id) VALUES (%s, %s, %s, %s) \
+        ON DUPLICATE KEY UPDATE trainername = %s, step = %s, team = %s, level = %s;"
+        cursor.execute(sql, (validation["id"], validation["pokemon"], validation["pokemonname"], validation["usuario_id"], validation["trainername"], validation["step"], validation["team"], validation["level"]))
+    db.commit()
+    return True
+
 def getActiveRaidsforUser(user_id):
     global db
     logging.debug("storagemethods:getActiveRaidsforUser: %s" % (user_id))
@@ -256,16 +289,20 @@ def saveUser(user):
     logging.debug("storagemethods:saveUser: %s" % (user))
     with db.cursor() as cursor:
         sql = "INSERT INTO usuarios (id,level,team,username) VALUES (%s, %s, %s, %s) \
-        ON DUPLICATE KEY UPDATE level=%s, team=%s, username=%s, banned=%s;"
+        ON DUPLICATE KEY UPDATE level=%s, team=%s, username=%s, banned=%s, trainername=%s, validation=%s;"
         if "level" not in user.keys():
             user["level"] = None
         if "team" not in user.keys():
             user["team"] = None
         if "username" not in user.keys():
             user["username"] = None
+        if "validation" not in user.keys():
+            user["validation"] = None
+        if "trainername" not in user.keys():
+            user["trainername"] = None
         if "banned" not in user.keys():
             user["banned"] = 0
-        cursor.execute(sql, (user["id"], user["level"], user["team"], user["username"], user["level"], user["team"], user["username"], user["banned"]))
+        cursor.execute(sql, (user["id"], user["level"], user["team"], user["username"], user["level"], user["team"], user["username"], user["banned"], user["trainername"], user["validation"]))
     db.commit()
 
 def refreshUsername(user_id, username):
@@ -284,7 +321,7 @@ def getUser(user_id, reconnect=True):
     global db
     logging.debug("storagemethods:getUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`level`,`team`,`username`,`banned` FROM `usuarios` WHERE `id`=%s"
+        sql = "SELECT `id`,`level`,`team`,`username`,`banned`,`validation`,`trainername` FROM `usuarios` WHERE `id`=%s"
         try:
             cursor.execute(sql, (user_id))
             result = cursor.fetchone()
