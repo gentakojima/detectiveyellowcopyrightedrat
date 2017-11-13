@@ -71,6 +71,9 @@ def settimezone(bot, update, args=None):
     logging.debug("detectivepikachubot:settimezone: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     chat_title = message.chat.title
+    group_alias = None
+    if hasattr(message.chat, 'username') and message.chat.username != None:
+        group_alias = message.chat.username
 
     if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
         return
@@ -92,6 +95,7 @@ def settimezone(bot, update, args=None):
     if tz != None:
         group = getGroup(chat_id)
         group["timezone"] = tz["name"]
+        group["alias"] = group_alias
         saveGroup(group)
         bot.sendMessage(chat_id=chat_id, text="👌 Establecida zona horaria *%s*." % group["timezone"], parse_mode=telegram.ParseMode.MARKDOWN)
         now = datetime.now(timezone(group["timezone"])).strftime("%H:%M")
@@ -103,6 +107,9 @@ def settalkgroup(bot, update, args=None):
     logging.debug("detectivepikachubot:settalkgroup: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     chat_title = message.chat.title
+    group_alias = None
+    if hasattr(message.chat, 'username') and message.chat.username != None:
+        group_alias = message.chat.username
 
     if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
         return
@@ -121,6 +128,7 @@ def settalkgroup(bot, update, args=None):
         return
 
     group = getGroup(chat_id)
+    group["alias"] = group_alias
     if args[0] != "-":
         group["talkgroup"] = args[0].replace("@","")
         saveGroup(group)
@@ -138,6 +146,9 @@ def setspreadsheet(bot, update, args=None):
   logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   chat_title = message.chat.title
+  group_alias = None
+  if hasattr(message.chat, 'username') and message.chat.username != None:
+      group_alias = message.chat.username
 
   if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
     return
@@ -166,6 +177,7 @@ def setspreadsheet(bot, update, args=None):
     else:
         group["title"] = chat_title
         group["spreadsheet"] = spreadsheet_id
+    group["alias"] = group_alias
     saveGroup(group)
     bot.sendMessage(chat_id=chat_id, text="👌 Establecida spreadsheet con ID %s.\n\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios." % spreadsheet_id )
 
@@ -173,6 +185,9 @@ def refresh(bot, update, args=None):
   logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
   chat_title = message.chat.title
+  group_alias = None
+  if hasattr(message.chat, 'username') and message.chat.username != None:
+      group_alias = message.chat.username
 
   if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
     return
@@ -226,6 +241,7 @@ def refresh(bot, update, args=None):
 
     if counter > 1:
       grupo["title"] = chat_title
+      grupo["alias"] = group_alias
       saveGroup(grupo)
       if savePlaces(chat_id, places):
           places = getPlaces(grupo["id"])
@@ -1317,6 +1333,9 @@ def raidbutton(bot, update):
 
   for k in settings:
       if data==k:
+          group_alias = None
+          if hasattr(message.chat, 'username') and message.chat.username != None:
+              group_alias = message.chat.username
           if not is_admin(chat_id, user_id, bot):
               bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
           else:
@@ -1329,6 +1348,7 @@ def raidbutton(bot, update):
                   group[settings[k]] = 1
                   if k == "settings_alertas":
                       group["locations"] = 1
+              group["alias"] = group_alias
               saveGroup(group)
               update_settings_message(chat_id, bot)
 

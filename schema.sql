@@ -26,6 +26,7 @@ CREATE TABLE `gimnasios` (
 CREATE TABLE `grupos` (
   `id` bigint(20) NOT NULL,
   `title` varchar(120) NOT NULL,
+  `alias` varchar(60) DEFAULT NULL,
   `spreadsheet` varchar(100) DEFAULT NULL,
   `settings_message` bigint(20) DEFAULT NULL,
   `testgroup` TINYINT NOT NULL DEFAULT '0',
