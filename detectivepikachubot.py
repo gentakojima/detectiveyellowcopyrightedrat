@@ -1333,9 +1333,6 @@ def raidbutton(bot, update):
 
   for k in settings:
       if data==k:
-          group_alias = None
-          if hasattr(message.chat, 'username') and message.chat.username != None:
-              group_alias = message.chat.username
           if not is_admin(chat_id, user_id, bot):
               bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
           else:
