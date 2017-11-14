@@ -350,7 +350,7 @@ def processLocation(bot, update):
                 continue
             filtered_places.append(place)
         if len(filtered_places) == 0:
-            bot.sendMessage(chat_id=chat_id, text="❌ No se han encontrado gimnasios cerca de esta zona en grupos en los que hayas participado en una incursión recientemente.", parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=chat_id, text="❌ No se han encontrado gimnasios cerca de esta zona en grupos en los que hayas participado en una incursión recientemente. Ten en cuenta que el radio de búsqueda es de aproximadamente 180 metros.", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             text_message = "🗺 Se han encontrado los siguientes gimnasios:\n"
             example_id = None
