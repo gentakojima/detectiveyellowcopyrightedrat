@@ -120,7 +120,7 @@ def getCurrentValidation(user_id):
     logging.debug("storagemethods:getCurrentValidation: %s" % (user_id))
     with db.cursor() as cursor:
         sql = "SELECT `id`, `startedtime`, `step`, `pokemon`, `pokemonname`, `usuario_id`, `trainername`, `team`, `level` FROM `validaciones` \
-        WHERE `validaciones`.`usuario_id` = %s AND `step` = 'waitingtrainername' OR `step` = 'waitingscreenshot'"
+        WHERE `validaciones`.`usuario_id` = %s AND (`step` = 'waitingtrainername' OR `step` = 'waitingscreenshot')"
         cursor.execute(sql, (user_id))
         result = cursor.fetchone()
         return result
