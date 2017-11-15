@@ -60,6 +60,7 @@ CREATE TABLE `incursiones` (
   `gimnasio_text` varchar(60) DEFAULT NULL,
   `message` int(11) DEFAULT NULL,
   `edited` tinyint(4) NOT NULL DEFAULT '0',
+  `refloated` tinyint(4) NOT NULL DEFAULT '0',
   `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `timeraid` timestamp NULL DEFAULT NULL,
   `timeend` datetime DEFAULT NULL,

@@ -123,7 +123,7 @@ def format_message(raid):
     else:
         text_edited = ""
     if "timeend" in raid.keys() and raid["timeend"] != None:
-        t = extract_time(raid["timeend"])
+        t = extract_time(raid["timeend"], group["timeformat"])
         text_endtime = "\n<em>Desaparece a las %s</em>" % t
     else:
         text_endtime = ""
@@ -143,7 +143,7 @@ def format_message(raid):
             created_text = "\nCreada por @%s%s" % (creador["username"], text_edited)
     else:
         created_text = ""
-    text = "Incursión %s %sa las <b>%s</b> en %s<b>%s</b>%s%s\n" % (what_text, what_day, extract_time(raid["timeraid"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
+    text = "Incursión %s %sa las <b>%s</b> en %s<b>%s</b>%s%s\n" % (what_text, what_day, extract_time(raid["timeraid"], group["timeformat"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
     if raid["status"] == "cancelled":
         text = text + "❌ <b>Incursión cancelada</b>"
     else:
@@ -310,9 +310,9 @@ def get_settings_keyboard(chat_id):
     else:
         alertas_text = "▪️ Alertas"
     if group["disaggregated"] == 1:
-        disaggregated_text = "👫 Totales desagregados"
+        disaggregated_text = "✅ Total desagregado"
     else:
-        disaggregated_text = "👬 Total simplificado"
+        disaggregated_text = "▪️ Total desagregado"
     if group["latebutton"] == 1:
         latebutton_text = "✅ ¡Llego tarde!"
     else:
@@ -345,9 +345,13 @@ def get_settings_keyboard(chat_id):
         babysitter_text = "✅ Modo niñero"
     else:
         babysitter_text = "▪️ Modo niñero"
+    if group["timeformat"] == 1:
+        timeformat_text = "✅ Horas AM/PM"
+    else:
+        timeformat_text = "▪️ Horas AM/PM"
     settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
     [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
-    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
+    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
@@ -449,13 +453,22 @@ def parse_time(st, tz):
     logging.debug("supportmethods::parse_time parsed %s" % dt_str)
     return dt_str
 
-def extract_time(formatted_datetime):
+def extract_time(formatted_datetime, format=0):
     logging.debug("supportmethods:extract_time %s" % formatted_datetime)
     if not isinstance(formatted_datetime,str):
         formatted_datetime = formatted_datetime.strftime("%Y-%m-%d %H:%M:%S")
     m = re.search("([0-9]{1,2}):([0-9]{0,2}):[0-9]{0,2}", formatted_datetime, flags=re.IGNORECASE)
     if m != None:
-        extracted_time = "%02d:%02d" % (int(m.group(1)), int(m.group(2)))
+        if format == 0:
+            extracted_time = "%02d:%02d" % (int(m.group(1)), int(m.group(2)))
+        else:
+            hour = int(m.group(1))
+            if hour >=12:
+                ampm = "PM"
+                hour = hour -12
+            else:
+                ampm = "AM"
+            extracted_time = "%d:%02d %s" % (hour, int(m.group(2)), ampm)
         logging.debug("supportmethods::extract_time extracted %s" % extracted_time)
         return extracted_time
     else:

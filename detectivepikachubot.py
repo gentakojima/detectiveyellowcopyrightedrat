@@ -1259,43 +1259,51 @@ def reflotar(bot, update, args=None):
     if isBanned(user_id):
         return
 
-    if edit_check_private(chat_id, chat_type, user_username, "reflotar", bot) == False:
+    if len(args)==0 and hasattr(message, 'reply_to_message') and message.reply_to_message != None:
         delete_message(chat_id, message.message_id, bot)
-        return
+        reply_chat_id = message.reply_to_message.chat.id
+        reply_message_id = message.reply_to_message.message_id
+        raid = getRaidbyMessage(reply_chat_id, reply_message_id)
+        if raid == None:
+            return
+    else:
+        if edit_check_private(chat_id, chat_type, user_username, "reflotar", bot) == False:
+            delete_message(chat_id, message.message_id, bot)
+            return
+        if len(args)<1 or not str(args[0]).isnumeric():
+            bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!",parse_mode=telegram.ParseMode.MARKDOWN)
+            return
+        raid_id = args[0]
+        raid = getRaid(raid_id)
 
-    if len(args)<1 or not str(args[0]).isnumeric():
-        bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!",parse_mode=telegram.ParseMode.MARKDOWN)
-        return
-
-    raid_id = args[0]
-    raid = getRaid(raid_id)
     group = getGroup(raid["grupo_id"])
     if raid != None:
         if is_admin(raid["grupo_id"], user_id, bot) or (group["refloat"] == 1 and raid["usuario_id"] == user_id):
             if raid["status"] == "old":
-                bot.sendMessage(chat_id=chat_id, text="No se puede reflotar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="No se puede reflotar una incursión tan antigua.", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             if raid["status"] == "cancelled":
-                bot.sendMessage(chat_id=chat_id, text="¡No se pueden reflotar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="¡No se pueden reflotar incursiones canceladas!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             if raid["status"] == "deleted":
-                bot.sendMessage(chat_id=chat_id, text="¡Esa incursión ha sido borrada y ya no se puede reflotar!", parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="¡Esa incursión ha sido borrada y ya no se puede reflotar!", parse_mode=telegram.ParseMode.MARKDOWN)
                 return
 
             try:
                 bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
             except Exception as e:
                 logging.debug("detectivepikachubot:reflotar: error borrando post antiguo %s" % raid["message"])
+            raid["refloated"] = 1
             text = format_message(raid)
             reply_markup = get_keyboard(raid)
             sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
             raid["message"] = sent_message.message_id
             saveRaid(raid)
-            bot.sendMessage(chat_id=chat_id, text="¡Se ha reflotado la incursión correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=user_id, text="¡Se ha reflotado la incursión correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
-            bot.sendMessage(chat_id=chat_id, text="¡No tienes permiso para reflotar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=user_id, text="¡No tienes permiso para reflotar esta incursión!",parse_mode=telegram.ParseMode.MARKDOWN)
     else:
-        bot.sendMessage(chat_id=chat_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=user_id, text="¡Esa incursión no existe!",parse_mode=telegram.ParseMode.MARKDOWN)
 
 def cambiarpokemon(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarpokemon: %s %s %s" % (bot, update, args))
