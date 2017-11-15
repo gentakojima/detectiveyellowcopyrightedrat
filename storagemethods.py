@@ -399,7 +399,7 @@ def getRaidPeople(raid_id):
     global db
     logging.debug("storagemethods:getRaidPeople: %s" % (raid_id))
     with db.cursor() as cursor:
-        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `plus`, `estoy`, `tarde`, `level`, `team`, `lotengo` FROM `incursiones` \
+        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `estoy`, `tarde`, `level`, `team`, `lotengo` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
         LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s \
         ORDER BY `voy`.`addedtime` ASC"
@@ -435,7 +435,7 @@ def getCreadorRaid(raid_id):
     global db
     logging.debug("storagemethods:getCreadorRaid: %s" % (raid_id))
     with db.cursor() as cursor:
-        sql = "SELECT `usuarios`.`id` AS `id`, `username` FROM `incursiones` LEFT JOIN `usuarios` ON `usuarios`.`id` = `incursiones`.`usuario_id` WHERE `incursiones`.`id`=%s"
+        sql = "SELECT `usuarios`.`id` AS `id`, `username`,`trainername` FROM `incursiones` LEFT JOIN `usuarios` ON `usuarios`.`id` = `incursiones`.`usuario_id` WHERE `incursiones`.`id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
         return result

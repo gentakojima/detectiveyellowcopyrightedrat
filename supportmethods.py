@@ -110,7 +110,7 @@ def update_message(chat_id, message_id, reply_markup, bot):
     logging.debug("supportmethods:update_message: %s %s %s" % (chat_id, message_id, reply_markup))
     raid = getRaidbyMessage(chat_id, message_id)
     text = format_message(raid)
-    return bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+    return bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def format_message(raid):
     logging.debug("supportmethods:format_message: %s" % (raid))
@@ -119,13 +119,14 @@ def format_message(raid):
     group = getGroup(raid["grupo_id"])
 
     if "edited" in raid.keys() and raid["edited"]>0:
-        text_edited=" _(editada)_"
+        text_edited = " <em>(editada)</em>"
     else:
-        text_edited=""
+        text_edited = ""
     if "timeend" in raid.keys() and raid["timeend"] != None:
-        text_endtime="\n_Desaparece a las %s_" % extract_time(raid["timeend"])
+        t = extract_time(raid["timeend"])
+        text_endtime = "\n<em>Desaparece a las %s</em>" % t
     else:
-        text_endtime=""
+        text_endtime = ""
     if group["locations"] == 1:
         if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] != None:
             gym_emoji="🌎"
@@ -133,15 +134,18 @@ def format_message(raid):
             gym_emoji="❓"
     else:
         gym_emoji=""
-    what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
-    what_day = format_text_day(raid["timeraid"], group["timezone"])
+    what_text = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+    what_day = format_text_day(raid["timeraid"], group["timezone"], "html")
     if creador["username"] != None:
-        created_text = "\nCreada por @%s%s" % (ensure_escaped(creador["username"]), text_edited)
+        if creador["trainername"] != None:
+            created_text = "\nCreada por <a href='https://t.me/%s'>%s</a>%s" % (creador["username"], creador["trainername"], text_edited)
+        else:
+            created_text = "\nCreada por @%s%s" % (creador["username"], text_edited)
     else:
         created_text = ""
-    text = "Incursión %s %sa las *%s* en %s*%s*%s%s\n" % (what_text, what_day, extract_time(raid["timeraid"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
+    text = "Incursión %s %sa las <b>%s</b> en %s<b>%s</b>%s%s\n" % (what_text, what_day, extract_time(raid["timeraid"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
     if raid["status"] == "cancelled":
-        text = text + "❌ *Incursión cancelada*"
+        text = text + "❌ <b>Incursión cancelada</b>"
     else:
         if group["disaggregated"] == 1:
             (numazules, numrojos, numamarillos, numotros, numgente) = count_people_disaggregated(gente)
@@ -175,22 +179,25 @@ def format_message(raid):
                         team_badge = "⚡️"
                     else:
                         team_badge = "❄️"
-                text = text + "\n%s%s%s @%s%s%s" % (estoy_text,team_badge,user["level"],ensure_escaped(user["username"]),lotengo_text,plus_text)
+                if user["trainername"] != None:
+                    text = text + "\n%s%s%s <a href='https://t.me/%s'>%s</a>%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["trainername"],lotengo_text,plus_text)
+                else:
+                    text = text + "\n%s%s%s @%s%s%s" % (estoy_text,team_badge,user["level"],user["username"],lotengo_text,plus_text)
             else:
-                text = text + "\n%s➖ - - @%s%s%s" % (estoy_text,ensure_escaped(user["username"]),lotengo_text,plus_text)
+                text = text + "\n%s➖ - - @%s%s%s" % (estoy_text,user["username"],lotengo_text,plus_text)
     return text
 
-def format_text_pokemon(pokemon, egg):
+def format_text_pokemon(pokemon, egg, format="markdown"):
     if pokemon != None:
-        what_text = "de *%s*" % pokemon
+        what_text = "de <b>%s</b>" % pokemon if format == "html" else "de *%s*" % pokemon
     else:
         if egg == "EX":
-            what_text="*🌟EX*"
+            what_text = "<b>🌟EX</b>" if format == "html" else "*🌟EX*"
         else:
-            what_text= egg.replace("N","de *nivel ") + "*"
+            what_text = egg.replace("N","de <b>nivel ") + "</b>" if format == "html" else egg.replace("N","de *nivel ") + "*"
     return what_text
 
-def format_text_day(timeraid, tzone):
+def format_text_day(timeraid, tzone, format="markdown"):
     logging.debug("supportmethods:format_text_day %s %s" % (timeraid, tzone))
     try:
         raid_datetime = datetime.strptime(timeraid,"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(tzone))
@@ -200,7 +207,7 @@ def format_text_day(timeraid, tzone):
     difftime = raid_datetime - now_datetime
     if difftime.total_seconds() > (3600*16):
         weekdays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
-        what_day = "el *%s día %s* " % (weekdays[raid_datetime.weekday()], raid_datetime.day)
+        what_day = "el <b>%s día %s</b> " % (weekdays[raid_datetime.weekday()], raid_datetime.day) if format == "html" else "el *%s día %s* " % (weekdays[raid_datetime.weekday()], raid_datetime.day)
     else:
         what_day = ""
     return what_day

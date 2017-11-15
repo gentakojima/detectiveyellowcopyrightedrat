@@ -823,7 +823,7 @@ def raid(bot, update, args=None):
 
   text  = format_message(current_raid)
   reply_markup = get_keyboard(current_raid)
-  sent_message = bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+  sent_message = bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
   current_raid["message"] = sent_message.message_id
   saveRaid(current_raid)
 
