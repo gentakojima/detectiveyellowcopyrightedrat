@@ -1288,7 +1288,7 @@ def reflotar(bot, update, args=None):
                 logging.debug("detectivepikachubot:reflotar: error borrando post antiguo %s" % raid["message"])
             text = format_message(raid)
             reply_markup = get_keyboard(raid)
-            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
             raid["message"] = sent_message.message_id
             saveRaid(raid)
             bot.sendMessage(chat_id=chat_id, text="¡Se ha reflotado la incursión correctamente!", parse_mode=telegram.ParseMode.MARKDOWN)
