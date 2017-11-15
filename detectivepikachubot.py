@@ -33,7 +33,7 @@ import urllib.request
 import random
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation
-from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -80,19 +80,19 @@ def register(bot, update):
     validation = getCurrentValidation(user_id)
     logging.debug(validation)
     if validation != None:
-        bot.sendMessage(chat_id=chat_id, text="❌ Ya has iniciado un proceso de validación. Debes completarlo antes de intentar comenzar de nuevo, o esperar 30 minutos a que caduque.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text="❌ Ya has iniciado un proceso de validación. Debes completarlo antes de intentar comenzar de nuevo, o esperar 20 minutos a que caduque.", parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     user = getUser(user_id)
     if user["validation"] != "none":
-        bot.sendMessage(chat_id=chat_id, text="⚠ Ya te has validado anteriormente. No es necesario que vuelvas a validarte, a no ser que quieras cambiar tu nombre de entrenador. Para reflejar un nuevo nivel, basta con que envíes una captura de pantalla de tu nuevo nivel, sin necesidad de hacer el proceso completo.\n\nSi aún así quieres, puedes continuar con el proceso, o sino espera 30 minutos a que caduque.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text="⚠ Ya te has validado anteriormente. No es necesario que vuelvas a validarte, a no ser que quieras cambiar tu nombre de entrenador. Para reflejar un nuevo nivel, basta con que envíes una captura de pantalla de tu nuevo nivel, sin necesidad de hacer el proceso completo.\n\nSi aún así quieres, puedes continuar con el proceso, o sino espera 20 minutos a que caduque.", parse_mode=telegram.ParseMode.MARKDOWN)
 
     pokemon = random.choice(validation_pokemons)
     name = random.choice(validation_names)
     validation = { "usuario_id": chat_id, "step": "waitingtrainername", "pokemon": pokemon, "pokemonname": name }
     saveValidation(validation)
 
-    bot.sendMessage(chat_id=chat_id, text="¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 30 minutos, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esos 30 minutos._", parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.sendMessage(chat_id=chat_id, text="⚠ *INFORMACIÓN IMPORTANTE* ⚠ Este proceso se encuentra en pruebas. Las validaciones realizadas con este método podrían resetearse en cualquier momento en caso de detectar un fallo. Si quieres validarte de forma segura, utiliza el método descrito en la ayuda.\n\n¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 20 minutos, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esos 20 minutos._", parse_mode=telegram.ParseMode.MARKDOWN)
 
 def settimezone(bot, update, args=None):
     logging.debug("detectivepikachubot:settimezone: %s %s %s" % (bot, update, args))
@@ -400,6 +400,7 @@ def processMessage(bot, update):
     if chat_type == "private":
         # Are we in a validation process?
         validation = getCurrentValidation(user_id)
+        user = getUser(user_id)
         if validation != None:
             # Expecting username
             if validation["step"] == "waitingtrainername" and text != None:
@@ -413,31 +414,32 @@ def processMessage(bot, update):
             elif validation["step"] == "waitingscreenshot" and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
                 photo = bot.get_file(update.message.photo[-1]["file_id"])
                 logging.debug("Downloading file %s" % photo)
-                filename = "photos/profile-%s.%s.jpg" % (user_id, validation["id"])
+                filename = "photos/profile-%s-%s-%s.jpg" % (user_id, validation["id"], time.time())
                 urllib.request.urlretrieve(photo["file_path"], filename)
                 try:
-                    (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name) = parse_profile_image(filename)
+                    (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename)
                     #output = "Información reconocida:\n - Nombre de entrenador: %s\n - Nivel: %s\n - Equipo: %s\n - Pokémon: %s\n - Nombre del Pokémon: %s" % (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name)
                     #bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
                     output = None
                 except Exception as e:
                     bot.sendMessage(chat_id=chat_id, text="❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
                     return
-                if trainer_name.lower() != validation["trainername"].lower():
-                    output = "❌ No he reconocido correctamente el *nombre del entrenador*. ¿Seguro que lo has escrito bien? Puedes volver a enviar otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
+                if chosen_profile == None:
+                    output = "❌ La captura de pantalla no pare válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
+                elif trainer_name.lower() != validation["trainername"].lower():
+                    output = "❌ No he reconocido correctamente el *nombre del entrenador*. ¿Seguro que lo has escrito bien? Puedes volver a enviar otra captura. Si te has equivocado, espera 20 minutos a que caduque la validación y vuelve a comenzar de nuevo. Si lo has escrito bien y no consigues que lo reconozca, pide ayuda en @detectivepikachuayuda."
                 elif level == None:
-                    output = "❌ No he reconocido correctamente el *nivel*. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
+                    output = "❌ No he reconocido correctamente el *nivel*. Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
                 elif chosen_color == None:
-                    output = "❌ No he reconocido correctamente el *equipo*. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
+                    output = "❌ No he reconocido correctamente el *equipo*. Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
                 elif pokemon_name.lower() != validation["pokemonname"].lower():
-                    output = "❌ No he reconocido correctamente el *nombre del Pokémon*. ¿Le has puesto *%s* como te dije? Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda." % validation["pokemonname"]
+                    output = "❌ No he reconocido correctamente el *nombre del Pokémon*. ¿Le has cambiado el nombre a *%s* como te dije? Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda." % validation["pokemonname"]
                 elif chosen_pokemon != validation["pokemon"]:
                     output = "❌ No he reconocido correctamente el *Pokémon*. ¿Has puesto de compañero a *%s* como te dije? Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda." % validation["pokemon"]
                 if output != None:
-                    bot.sendMessage(chat_id=chat_id, text=output,parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
                     return
                 # Validation ok!
-                user = getUser(user_id)
                 user["level"] = level
                 user["team"] = chosen_color
                 user["trainername"] = validation["trainername"]
@@ -449,7 +451,40 @@ def processMessage(bot, update):
                 saveValidation(validation)
                 output = "👌 Has completado el proceso de validación correctamente. Se te ha asignado el equipo *%s* y el nivel *%s*.\n\nA partir de ahora aparecerán tu nivel y equipo reflejados en las incursiones en las que participes.\n\nSi subes de nivel en el juego y quieres que se refleje en las incursiones, puedes enviarme en cualquier momento otra captura de tu perfil del juego, no es necesario que cambies tu Pokémon acompañante." % (validation["team"], validation["level"])
                 bot.sendMessage(chat_id=chat_id, text=output,parse_mode=telegram.ParseMode.MARKDOWN)
-
+        # Not expecting validation, probably screenshot to update level
+        elif user["validation"] == "internal" and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
+            photo = bot.get_file(update.message.photo[-1]["file_id"])
+            logging.debug("Downloading file %s" % photo)
+            filename = "photos/profile-%s-updatelevel-%s.jpg" % (user_id, time.time())
+            urllib.request.urlretrieve(photo["file_path"], filename)
+            try:
+                (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename)
+                #output = "Información reconocida:\n - Nombre de entrenador: %s\n - Nivel: %s\n - Equipo: %s\n - Pokémon: %s\n - Nombre del Pokémon: %s" % (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name)
+                #bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
+                output = None
+            except Exception as e:
+                bot.sendMessage(chat_id=chat_id, text="❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            if chosen_profile == None:
+                output = "❌ La captura de pantalla no pare válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
+            elif trainer_name.lower() != user["trainername"].lower():
+                output = "❌ No he reconocido correctamente el *nombre del entrenador*. Si no consigues que lo reconozca, pide ayuda en @detectivepikachuayuda."
+            elif level == None:
+                output = "❌ No he reconocido correctamente el *nivel*. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
+            elif int(user["level"]) == int(level):
+                output = "❌ En la captura pone que eres *nivel %s*, pero yo ya sabía que tenías ese nivel." % user["level"]
+            elif int(user["level"]) > int(level):
+                output = "❌ En la captura pone que eres *nivel %s*, pero ya eras *nivel %s*. ¿Cómo has bajado de nivel?" % (level,user["level"])
+            elif chosen_color != user["team"]:
+                output = "❌ No he reconocido correctamente el *equipo*. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."
+            if output != None:
+                bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+            # Validation ok!
+            user["level"] = level
+            saveUser(user)
+            output = "👌 Se ha actualizado tu nivel al *%s*.\n\nSi vuelves a subir de nivel en el juego y quieres que se refleje en las incursiones, puedes enviarme en cualquier momento otra captura de tu perfil del juego." % (user["level"])
+            bot.sendMessage(chat_id=chat_id, text=output,parse_mode=telegram.ParseMode.MARKDOWN)
         # Is this a forwarded message from Oak?
         if text != None and len(text) > 0:
             logging.debug(text)
@@ -1463,5 +1498,8 @@ j = updater.job_queue
 def callback_update_raids_status(bot, job):
     Thread(target=update_raids_status, args=(bot,)).start()
 job = j.run_repeating(callback_update_raids_status, interval=60, first=8)
+def callback_update_validations_status(bot, job):
+    Thread(target=update_validations_status, args=(bot,)).start()
+job2 = j.run_repeating(callback_update_validations_status, interval=60, first=16)
 
 updater.start_polling()

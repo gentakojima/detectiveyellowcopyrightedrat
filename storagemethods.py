@@ -7,6 +7,7 @@ import pymysql.cursors
 from pymysql.err import InterfaceError, IntegrityError
 from datetime import datetime, timedelta
 from pytz import timezone
+import time
 
 configdir = expanduser("~") + "/.config/detectivepikachu"
 configfile = configdir + "/config.ini"
@@ -671,3 +672,26 @@ def updateRaidsStatus():
         logging.debug("supportmethods:updateRaidsStatus error: %s" % str(e))
         refreshDb()
     return raidstoupdate
+
+def updateValidationsStatus():
+    global db
+    logging.debug("storagemethods:updateValidationsStatus")
+    validationstoupdate = []
+    try:
+        with db.cursor() as cursor:
+            sql = "SELECT * FROM `validaciones` WHERE (step = 'waitingtrainername' OR step = 'waitingscreenshot') and startedtime < timestamp(DATE_SUB(NOW(), INTERVAL 20 MINUTE)) LIMIT 0,2000"
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            for r in results:
+                logging.debug(r)
+                try:
+                    logging.debug("storagemethods:updateValidationsStatus marking validation %s as expired" % (r["id"]))
+                    sql = "UPDATE validaciones SET `step`='expired' WHERE id=%s;"
+                    cursor.execute(sql, (r["id"]))
+                    validationstoupdate.append(r)
+                except Exception as e:
+                    logging.debug("supportmethods:updateValidationsStatus error: %s" % str(e))
+    except Exception as e:
+        logging.debug("supportmethods:updateValidationsStatus error: %s" % str(e))
+        refreshDb()
+    return validationstoupdate

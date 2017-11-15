@@ -15,14 +15,15 @@ import pytesseract
 from PIL import Image, ImageOps
 from skimage.measure import compare_ssim as ssim
 
-from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus
+from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
 egglist = ['N1','N2','N3','N4','N5','EX']
 
-validation_pokemons = ["chikorita","machop","growlithe","diglett","spinarak","ditto","teddiursa","cubone"]
-validation_names = ["Cebolla","Calabaza","Puerro","Cebolleta","Remolacha","Aceituna","Pimiento","Zanahoria","Tomate","Guisante","Coliflor","Pepino","Berenjena","Perejil","Batata","Aguacate"]
+validation_pokemons = ["chikorita", "machop", "growlithe", "diglett", "spinarak", "ditto", "teddiursa", "cubone"]
+validation_profiles = ["model1", "model2", "model3"]
+validation_names = ["Cebolla", "Calabaza", "Puerro", "Cebolleta", "Remolacha", "Aceituna", "Pimiento", "Zanahoria", "Tomate", "Guisante", "Coliflor", "Pepino", "Berenjena", "Perejil", "Batata", "Aguacate", "Cebolleta", "Alcaparra"]
 
 def is_admin(chat_id, user_id, bot):
     is_admin = False
@@ -222,7 +223,19 @@ def update_raids_status(bot):
             logging.debug(updated)
         except Exception as e:
             logging.debug("supportmethods:update_raids_status error: %s" % str(e))
-    time.sleep(0.01)
+    time.sleep(0.05)
+
+def update_validations_status(bot):
+    logging.debug("supportmethods:update_validations_status")
+    validations = updateValidationsStatus()
+    for v in validations:
+        logging.debug(v)
+        logging.debug("Sending notification for validation ID %s, user ID %s" % (v["id"], v["usuario_id"]))
+        try:
+            bot.sendMessage(chat_id=v["usuario_id"], text="⚠ El proceso de validación pendiente ha caducado porque han pasado 20 minutos desde que empezó. Si quieres validarte, debes volver a empezar el proceso.", parse_mode=telegram.ParseMode.MARKDOWN)
+        except Exception as e:
+            logging.debug("supportmethods:update_validations_status error: %s" % str(e))
+    time.sleep(0.05)
 
 def error_callback(bot, update, error):
     try:
@@ -463,10 +476,18 @@ def parse_profile_image(filename):
     # Load possible pokemons
     pokemons = {}
     for i in validation_pokemons:
-        p = cv2.imread("pokemonimgs/%s.png" % i)
+        p = cv2.imread("modelimgs/pokemon/%s.png" % i)
         p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
         p = cv2.resize(p, (60,60))
         pokemons[i] = { "model":p }
+
+    # Load possible profiles
+    profiles = {}
+    for i in validation_profiles:
+        p = cv2.imread("modelimgs/profiles/%s.png" % i)
+        p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
+        p = cv2.resize(p, (120,120))
+        profiles[i] = { "model":p }
 
     # Load the full image
     image = cv2.imread(filename)
@@ -490,6 +511,28 @@ def parse_profile_image(filename):
     if bottombar_gray.mean() < 40:
         image = image[int(0):int(height-height/17),int(0):int(width)] # y1:y2,x1:x2
         height, width, _ = image.shape
+
+    # Extract profile layout for profile Testing
+    profile_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    profile_gray = profile_gray[int(height/20):int(height),int(0):int(width)] # y1:y2,x1:x2
+    profile_gray = cv2.resize(profile_gray, (120,120))
+    cv2.rectangle(profile_gray,(60,1),(100,75),(255,255,255),-1) # delete trainer
+    cv2.rectangle(profile_gray,(20,20),(60,75),(255,255,255),-1) # delete pokemon
+    cv2.rectangle(profile_gray,(8,5),(60,20),(255,255,255),-1)   # delete nickname
+    cv2.rectangle(profile_gray,(48,75),(72,85),(255,255,255),-1) # delete level
+
+    # Test extracted profile leyout against possible profile models
+    chosen_profile = None
+    chosen_similarity = 0.0
+    for i in validation_profiles:
+        profiles[i]["similarity"] = ssim(profiles[i]["model"], profile_gray)
+        logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (i,profiles[i]["similarity"]))
+        if profiles[i]["similarity"] > 0.7 and (chosen_profile == None or chosen_similarity < profiles[i]["similarity"]):
+            chosen_profile = i
+            chosen_similarity = profiles[i]["similarity"]
+            if profiles[i]["similarity"] > 0.9:
+                break
+    logging.debug("supportmethods:parse_profile_image: Chosen Pokemon: %s" % chosen_profile)
 
     # Extract Team
     team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
@@ -577,8 +620,10 @@ def parse_profile_image(filename):
            (chosen_pokemon == None or chosen_similarity < pokemons[i]["similarity"]):
            chosen_pokemon = i
            chosen_similarity = pokemons[i]["similarity"]
+           if pokemons[i]["similarity"] > 0.9:
+               break
     logging.debug("supportmethods:parse_profile_image: Chosen Pokemon: %s" % chosen_pokemon)
 
     # Cleanup and return
     os.remove(tmpfilename)
-    return (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name)
+    return (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile)
