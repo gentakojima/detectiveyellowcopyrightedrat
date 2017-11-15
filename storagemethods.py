@@ -365,6 +365,8 @@ def saveRaid(raid):
         raid["status"] = "waiting"
     if "edited" not in raid.keys():
         raid["edited"] = 0
+    if "refloated" not in raid.keys():
+        raid["refloated"] = 0
     if "pokemon" not in raid.keys():
         raid["pokemon"] = None
     if "egg" not in raid.keys():
@@ -383,8 +385,8 @@ def saveRaid(raid):
             return cursor.lastrowid
     else:
         with db.cursor() as cursor:
-            sql = "UPDATE incursiones SET `pokemon`=%s, `egg`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=%s, message=%s, timeraid=%s, timeend=%s, status=%s WHERE id=%s;"
-            cursor.execute(sql, (raid["pokemon"], raid["egg"], raid["gimnasio_id"], raid["gimnasio_text"], raid["edited"], raid["message"], raid["timeraid"], raid["timeend"], raid["status"], raid["id"]))
+            sql = "UPDATE incursiones SET `pokemon`=%s, `egg`=%s, `gimnasio_id`=%s, `gimnasio_text`=%s, edited=%s, message=%s, timeraid=%s, timeend=%s, status=%s, refloated=%s WHERE id=%s;"
+            cursor.execute(sql, (raid["pokemon"], raid["egg"], raid["gimnasio_id"], raid["gimnasio_text"], raid["edited"], raid["message"], raid["timeraid"], raid["timeend"], raid["status"], raid["refloated"], raid["id"]))
             db.commit()
             return raid["id"]
 
@@ -392,7 +394,7 @@ def getRaid(raid_id):
     global db
     logging.debug("storagemethods:getRaid: %s" % (raid_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `egg`, `gimnasio_id`, `gimnasio_text`, `edited`, `addedtime`, `timeraid`, `timeend`, `status` FROM `incursiones` WHERE `id`=%s"
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `egg`, `gimnasio_id`, `gimnasio_text`, `edited`, `refloated`, `addedtime`, `timeraid`, `timeend`, `status` FROM `incursiones` WHERE `id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
         return result
@@ -416,7 +418,7 @@ def getRaidbyMessage(grupo_id, message_id):
     global db
     logging.debug("storagemethods:getRaidByMessage: %s %s" % (grupo_id, message_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `egg`, `gimnasio_id`, `gimnasio_text`, `edited`, `addedtime`, `timeraid`, `timeend`, `status` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
+        sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `egg`, `gimnasio_id`, `gimnasio_text`, `edited`, `refloated`, `addedtime`, `timeraid`, `timeend`, `status` FROM `incursiones` WHERE  grupo_id = %s and `message` = %s"
         cursor.execute(sql, (grupo_id, message_id))
         result = cursor.fetchone()
         return result

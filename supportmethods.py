@@ -122,6 +122,10 @@ def format_message(raid):
         text_edited = " <em>(editada)</em>"
     else:
         text_edited = ""
+    if "refloated" in raid.keys() and raid["refloated"]>0:
+        text_refloated = " <em>(reflotada)</em>"
+    else:
+        text_refloated = ""
     if "timeend" in raid.keys() and raid["timeend"] != None:
         t = extract_time(raid["timeend"], group["timeformat"])
         text_endtime = "\n<em>Desaparece a las %s</em>" % t
@@ -138,9 +142,9 @@ def format_message(raid):
     what_day = format_text_day(raid["timeraid"], group["timezone"], "html")
     if creador["username"] != None:
         if creador["trainername"] != None:
-            created_text = "\nCreada por <a href='https://t.me/%s'>%s</a>%s" % (creador["username"], creador["trainername"], text_edited)
+            created_text = "\nCreada por <a href='https://t.me/%s'>%s</a>%s%s" % (creador["username"], creador["trainername"], text_edited, text_refloated)
         else:
-            created_text = "\nCreada por @%s%s" % (creador["username"], text_edited)
+            created_text = "\nCreada por @%s%s%s" % (creador["username"], text_edited, text_refloated)
     else:
         created_text = ""
     text = "Incursión %s %sa las <b>%s</b> en %s<b>%s</b>%s%s\n" % (what_text, what_day, extract_time(raid["timeraid"], group["timeformat"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
