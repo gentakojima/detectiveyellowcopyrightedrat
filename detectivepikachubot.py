@@ -1501,7 +1501,7 @@ dispatcher.add_handler(CallbackQueryHandler(raidbutton))
 # Channel support and unknown commands
 dispatcher.add_handler(MessageHandler(Filters.command, channelCommands))
 # Text and welcome message
-dispatcher.add_handler(MessageHandler(Filters.text | Filters.photo | Filters.voice | Filters.sticker | Filters.audio | Filters.video, processMessage))
+dispatcher.add_handler(MessageHandler(Filters.text | Filters.photo | Filters.voice | Filters.sticker | Filters.audio | Filters.video | Filters.contact, processMessage))
 dispatcher.add_handler(MessageHandler(Filters.status_update, joinedChat))
 
 
