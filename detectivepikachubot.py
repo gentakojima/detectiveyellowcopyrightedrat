@@ -84,8 +84,11 @@ def register(bot, update):
         return
 
     user = getUser(user_id)
-    if user["validation"] != "none":
+    if user != None and user["validation"] != "none":
         bot.sendMessage(chat_id=chat_id, text="⚠ Ya te has validado anteriormente. No es necesario que vuelvas a validarte, a no ser que quieras cambiar tu nombre de entrenador. Para reflejar un nuevo nivel, basta con que envíes una captura de pantalla de tu nuevo nivel, sin necesidad de hacer el proceso completo.\n\nSi aún así quieres, puedes continuar con el proceso, o sino espera 20 minutos a que caduque.", parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        user = {"id": user_id, "username": user_username}
+        saveUser(user)
 
     pokemon = random.choice(validation_pokemons)
     name = random.choice(validation_names)

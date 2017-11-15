@@ -298,7 +298,7 @@ def saveUser(user):
         if "username" not in user.keys():
             user["username"] = None
         if "validation" not in user.keys():
-            user["validation"] = None
+            user["validation"] = "none"
         if "trainername" not in user.keys():
             user["trainername"] = None
         if "banned" not in user.keys():
