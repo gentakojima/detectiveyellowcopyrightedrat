@@ -497,7 +497,8 @@ def extract_time(formatted_datetime, format=0):
             hour = int(m.group(1))
             if hour >=12:
                 ampm = "PM"
-                hour = hour -12
+                if hour > 12:
+                    hour = hour -12
             else:
                 ampm = "AM"
             extracted_time = "%d:%02d %s" % (hour, int(m.group(2)), ampm)
