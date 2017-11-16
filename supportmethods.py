@@ -398,13 +398,17 @@ def edit_check_private(chat_id, chat_type, user_username, command, bot):
 
 def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, command, bot):
     logging.debug("supportmethods:edit_check_private_or_reply")
-    if len(args)==0 and hasattr(message, 'reply_to_message') and message.reply_to_message != None:
+    if command == "borrar" or command == "cancelar" or command == "reflotar":
+        expectedargs = 0
+    else:
+        expectedargs = 1
+    if len(args)>=expectedargs and hasattr(message, 'reply_to_message') and message.reply_to_message != None:
         delete_message(chat_id, message.message_id, bot)
         reply_chat_id = message.reply_to_message.chat.id
         reply_message_id = message.reply_to_message.message_id
         raid = getRaidbyMessage(reply_chat_id, reply_message_id)
     elif chat_type == "private":
-        if len(args)<1 or not str(args[0]).isnumeric():
+        if len(args)<(expectedargs+1) or (expectedargs>0 and not str(args[expectedargs-1]).isnumeric()):
             bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!",parse_mode=telegram.ParseMode.MARKDOWN)
             return
         raid_id = args[0]
