@@ -21,7 +21,7 @@ from io import StringIO
 import csv
 import signal
 from os.path import expanduser
-import os
+import os, sys
 import telegram
 import configparser
 from threading import Thread
@@ -304,19 +304,24 @@ def registerOak(bot, update):
             if (this_date - forward_date).total_seconds() < 120:
                 m2 = re.search("✅",text, flags=re.IGNORECASE)
                 if m2 != None:
-                    thisuser = {}
-                    thisuser["id"] = user_id
-                    thisuser["team"] = m.group(2)
-                    thisuser["level"] = m.group(3)
-                    thisuser["username"] = user_username
-                    thisuser["trainername"] = m.group(1)
-                    user = getUser(user_id)
-                    if user != None and user["validation"] == "internal":
-                        thisuser["validation"] = "internal"
+                    fuser = getUserByTrainername(text)
+                    if fuser == None or fuser["trainername"] == m.group(1):
+                        thisuser = {}
+                        thisuser["id"] = user_id
+                        thisuser["team"] = m.group(2)
+                        thisuser["level"] = m.group(3)
+                        thisuser["username"] = user_username
+                        thisuser["trainername"] = m.group(1)
+                        user = getUser(user_id)
+                        if user != None and user["validation"] == "internal":
+                            thisuser["validation"] = "internal"
+                        else:
+                            thisuser["validation"] = "oak"
+                        bot.sendMessage(chat_id=chat_id, text="👌 ¡De acuerdo! He reconocido que tu nombre de entrenador es *%s*, eres del equipo *%s* y de *nivel %s*.\n\nA partir de ahora aparecerá tu equipo y nivel en las incursiones en las que participes. Si subes de nivel o te cambias el , repite esta operación para que pueda reflejarlo bien en las incursiones." % (ensure_escaped(thisuser["trainername"]), thisuser["team"], thisuser["level"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        saveUser(thisuser)
                     else:
-                        thisuser["validation"] = "oak"
-                    bot.sendMessage(chat_id=chat_id, text="👌 ¡De acuerdo! He reconocido que tu nombre de entrenador es *%s*, eres del equipo *%s* y de *nivel %s*.\n\nA partir de ahora aparecerá tu equipo y nivel en las incursiones en las que participes. Si subes de nivel o te cambias el , repite esta operación para que pueda reflejarlo bien en las incursiones." % (ensure_escaped(thisuser["trainername"]), thisuser["team"], thisuser["level"]), parse_mode=telegram.ParseMode.MARKDOWN)
-                    saveUser(thisuser)
+                        bot.sendMessage(chat_id=chat_id, text="❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Si realmente es tuyo, pide ayuda en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+                        return
                 else:
                     bot.sendMessage(chat_id=chat_id, text="❌ Parece que no estás validado con @profesoroak\_bot. No puedo aceptar tu nivel y equipo hasta que te valides.", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
@@ -409,15 +414,20 @@ def processMessage(bot, update):
             if validation["step"] == "waitingtrainername" and text != None:
                 m = re.match(r'[a-zA-Z0-9_]{3,16}', text)
                 if m != None:
-                    validation["trainername"] = text
-                    validation["step"] = "waitingscreenshot"
-                    saveValidation(validation)
-                    bot.sendMessage(chat_id=chat_id, text="Así que tu nombre de entrenador es *%s*.\n\nPara completar el registro, debes enviarme una captura de pantalla de tu perfil del juego. En la captura de pantalla debes tener un *%s* llamado *%s* como compañero. Si no tienes ninguno, o no te apetece cambiar ahora de compañero, puedes volver a comenzar el registro en cualquier otro momento." % (validation["trainername"], validation["pokemon"].capitalize(),validation["pokemonname"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                    fuser = getUserByTrainername(text)
+                    if fuser == None or fuser["id"] == user["id"]:
+                        validation["trainername"] = text
+                        validation["step"] = "waitingscreenshot"
+                        saveValidation(validation)
+                        bot.sendMessage(chat_id=chat_id, text="Así que tu nombre de entrenador es *%s*.\n\nPara completar el registro, debes enviarme una captura de pantalla de tu perfil del juego. En la captura de pantalla debes tener un *%s* llamado *%s* como compañero. Si no tienes ninguno, o no te apetece cambiar ahora de compañero, puedes volver a comenzar el registro en cualquier otro momento." % (validation["trainername"], validation["pokemon"].capitalize(),validation["pokemonname"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                    else:
+                        bot.sendMessage(chat_id=chat_id, text="❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Si realmente es tuyo, pide ayuda en @detectivepikachuayuda.\n\nSi lo has escrito mal y realmente no era ese el nombre, dime entonces, ¿cómo es el nombre de entrenador que aparece en tu perfil del juego?", parse_mode=telegram.ParseMode.MARKDOWN)
+                        return
             # Expecting screenshot
             elif validation["step"] == "waitingscreenshot" and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
                 photo = bot.get_file(update.message.photo[-1]["file_id"])
                 logging.debug("Downloading file %s" % photo)
-                filename = "photos/profile-%s-%s-%s.jpg" % (user_id, validation["id"], time.time())
+                filename = sys.path[0] + "/photos/profile-%s-%s-%s.jpg" % (user_id, validation["id"], int(time.time()))
                 urllib.request.urlretrieve(photo["file_path"], filename)
                 try:
                     (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename)
@@ -458,7 +468,7 @@ def processMessage(bot, update):
         elif user["validation"] == "internal" and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
             photo = bot.get_file(update.message.photo[-1]["file_id"])
             logging.debug("Downloading file %s" % photo)
-            filename = "photos/profile-%s-updatelevel-%s.jpg" % (user_id, time.time())
+            filename = sys.path[0] + "/photos/profile-%s-updatelevel-%s.jpg" % (user_id, int(time.time()))
             urllib.request.urlretrieve(photo["file_path"], filename)
             try:
                 (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename)

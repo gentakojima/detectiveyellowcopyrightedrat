@@ -338,6 +338,24 @@ def getUser(user_id, reconnect=True):
                 raise
         return result
 
+def getUserByTrainername(trainername, reconnect=True):
+    global db
+    logging.debug("storagemethods:getUserByTrainername: %s" % (trainername))
+    with db.cursor() as cursor:
+        sql = "SELECT `id`,`level`,`team`,`username`,`banned`,`validation`,`trainername` FROM `usuarios` WHERE `trainername`=%s"
+        try:
+            cursor.execute(sql, (trainername))
+            result = cursor.fetchone()
+        except:
+            if reconnect == True:
+                logging.info("storagemethods:getUser Error interfacing with the database! Trying to reconnect...")
+                refreshDb()
+                result = getUser(user_id, False)
+            else:
+                logging.info("storagemethods:getUser Error interfacing with the database but already tried to reconnect!")
+                raise
+        return result
+
 def isBanned(user_id):
     global db
     logging.debug("storagemethods:isBanned: %s" % (user_id))
