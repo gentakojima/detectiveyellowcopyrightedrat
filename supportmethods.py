@@ -396,6 +396,30 @@ def edit_check_private(chat_id, chat_type, user_username, command, bot):
     else:
         return True
 
+def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, command, bot):
+    logging.debug("supportmethods:edit_check_private_or_reply")
+    if len(args)==0 and hasattr(message, 'reply_to_message') and message.reply_to_message != None:
+        delete_message(chat_id, message.message_id, bot)
+        reply_chat_id = message.reply_to_message.chat.id
+        reply_message_id = message.reply_to_message.message_id
+        raid = getRaidbyMessage(reply_chat_id, reply_message_id)
+    elif chat_type == "private":
+        if len(args)<1 or not str(args[0]).isnumeric():
+            bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!",parse_mode=telegram.ParseMode.MARKDOWN)
+            return
+        raid_id = args[0]
+        raid = getRaid(raid_id)
+    else:
+        delete_message(chat_id, message.message_id, bot)
+        if user_username != None:
+            text = "@%s el comando `/%s` solo funciona por privado o contestando al mensaje de la incursión.\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(user_username), command)
+        else:
+            text = "El comando `/%s` solo funciona por privado o contestando al mensaje de la incursión.\n\n_(Este mensaje se borrará en unos segundos)_" % command
+        sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+        raid = None
+    return raid
+
 def parse_pokemon(pokestr):
     ret_pok = None
     ret_egg = None
