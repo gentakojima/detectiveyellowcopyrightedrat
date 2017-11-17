@@ -465,7 +465,7 @@ def processMessage(bot, update):
                 output = "👌 Has completado el proceso de validación correctamente. Se te ha asignado el equipo *%s* y el nivel *%s*.\n\nA partir de ahora aparecerán tu nivel y equipo reflejados en las incursiones en las que participes.\n\nSi subes de nivel en el juego y quieres que se refleje en las incursiones, puedes enviarme en cualquier momento otra captura de tu perfil del juego, no es necesario que cambies tu Pokémon acompañante." % (validation["team"], validation["level"])
                 bot.sendMessage(chat_id=chat_id, text=output,parse_mode=telegram.ParseMode.MARKDOWN)
         # Not expecting validation, probably screenshot to update level
-        elif user["validation"] == "internal" and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
+        elif user != None and user["validation"] == "internal" and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
             photo = bot.get_file(update.message.photo[-1]["file_id"])
             logging.debug("Downloading file %s" % photo)
             filename = sys.path[0] + "/photos/profile-%s-updatelevel-%s.jpg" % (user_id, int(time.time()))

@@ -15,7 +15,7 @@ CREATE TABLE `gimnasios` (
   `latitude` varchar(20) NOT NULL,
   `longitude` varchar(20) NOT NULL,
   `keywords` varchar(512) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -43,7 +43,7 @@ CREATE TABLE `grupos` (
   `babysitter` TINYINT NOT NULL DEFAULT '0',
   `timeformat` TINYINT NOT NULL DEFAULT '0',
   `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -66,7 +66,7 @@ CREATE TABLE `incursiones` (
   `timeraid` timestamp NULL DEFAULT NULL,
   `timeend` datetime DEFAULT NULL,
   `status` enum('waiting','started','ended','cancelled','deleted','old') NOT NULL DEFAULT 'waiting'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -83,7 +83,7 @@ CREATE TABLE `usuarios` (
   `trainername` varchar(20) DEFAULT NULL,
   `validation` enum('none','oak','internal') NOT NULL DEFAULT 'none',
   `validation_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -99,7 +99,7 @@ CREATE TABLE `voy` (
   `estoy` tinyint(4) NOT NULL DEFAULT '0',
   `tarde` tinyint(4) NOT NULL DEFAULT '0',
   `lotengo` tinyint(4) NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Table structure for table `alertas`
@@ -109,7 +109,7 @@ CREATE TABLE `alertas` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
   `gimnasio_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -126,7 +126,7 @@ CREATE TABLE `validaciones` (
   `trainername` varchar(20) DEFAULT NULL,
   `team` enum('Azul','Rojo','Amarillo','') DEFAULT NULL,
   `level` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
