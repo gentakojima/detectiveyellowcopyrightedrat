@@ -353,7 +353,7 @@ def getUserByTrainername(trainername, reconnect=True):
             if reconnect == True:
                 logging.info("storagemethods:getUser Error interfacing with the database! Trying to reconnect...")
                 refreshDb()
-                result = getUser(user_id, False)
+                result = getUserByTrainername(trainername, False)
             else:
                 logging.info("storagemethods:getUser Error interfacing with the database but already tried to reconnect!")
                 raise
