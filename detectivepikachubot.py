@@ -209,7 +209,7 @@ def setspreadsheet(bot, update, args=None):
         group["spreadsheet"] = spreadsheet_id
     group["alias"] = group_alias
     saveGroup(group)
-    bot.sendMessage(chat_id=chat_id, text="👌 Establecida spreadsheet con ID %s.\n\nRecuerda que debes hacer /refresh para volver a cargar los gimnasios." % spreadsheet_id )
+    bot.sendMessage(chat_id=chat_id, text="👌 Establecido documento con identificador %s.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos." % spreadsheet_id )
 
 def refresh(bot, update, args=None):
   logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
