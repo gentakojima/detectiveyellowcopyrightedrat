@@ -95,7 +95,7 @@ def register(bot, update):
     validation = { "usuario_id": chat_id, "step": "waitingtrainername", "pokemon": pokemon, "pokemonname": name }
     saveValidation(validation)
 
-    bot.sendMessage(chat_id=chat_id, text="⚠ *INFORMACIÓN IMPORTANTE* ⚠ Este proceso se encuentra en pruebas. Las validaciones realizadas con este método podrían resetearse en cualquier momento en caso de detectar un fallo. Si quieres validarte de forma segura, utiliza el método descrito en la ayuda.\n\n¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 20 minutos, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esos 20 minutos._", parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.sendMessage(chat_id=chat_id, text="¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 20 minutos, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esos 20 minutos._", parse_mode=telegram.ParseMode.MARKDOWN)
 
 def settimezone(bot, update, args=None):
     logging.debug("detectivepikachubot:settimezone: %s %s %s" % (bot, update, args))
@@ -465,7 +465,7 @@ def processMessage(bot, update):
                 output = "👌 Has completado el proceso de validación correctamente. Se te ha asignado el equipo *%s* y el nivel *%s*.\n\nA partir de ahora aparecerán tu nivel y equipo reflejados en las incursiones en las que participes.\n\nSi subes de nivel en el juego y quieres que se refleje en las incursiones, puedes enviarme en cualquier momento otra captura de tu perfil del juego, no es necesario que cambies tu Pokémon acompañante." % (validation["team"], validation["level"])
                 bot.sendMessage(chat_id=chat_id, text=output,parse_mode=telegram.ParseMode.MARKDOWN)
         # Not expecting validation, probably screenshot to update level
-        elif user != None and user["validation"] == "internal" and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
+        elif user != None and (user["validation"] == "internal" or user["validation"] == "oak") and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
             photo = bot.get_file(update.message.photo[-1]["file_id"])
             logging.debug("Downloading file %s" % photo)
             filename = sys.path[0] + "/photos/profile-%s-updatelevel-%s.jpg" % (user_id, int(time.time()))
@@ -1499,7 +1499,7 @@ def raidbutton(bot, update):
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
-dispatcher.add_handler(CommandHandler('register', register)) # Disabled for now!
+dispatcher.add_handler(CommandHandler('register', register))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
