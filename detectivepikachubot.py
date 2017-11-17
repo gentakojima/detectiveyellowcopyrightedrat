@@ -180,11 +180,11 @@ def setspreadsheet(bot, update, args=None):
   if hasattr(message.chat, 'username') and message.chat.username != None:
       group_alias = message.chat.username
 
-  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
+  if chat_type == "private":
+    bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos.")
     return
 
-  if chat_type == "private":
-    bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
+  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
     return
 
   try:
@@ -193,7 +193,7 @@ def setspreadsheet(bot, update, args=None):
       pass
 
   if args == None or len(args)!=1:
-    bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro")
+    bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro.")
     return
 
   m = re.search('docs.google.com/.*spreadsheets/d/([a-zA-Z0-9_-]+)', args[0], flags=re.IGNORECASE)
@@ -219,11 +219,11 @@ def refresh(bot, update, args=None):
   if hasattr(message.chat, 'username') and message.chat.username != None:
       group_alias = message.chat.username
 
-  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
+  if chat_type == "private":
+    bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos.")
     return
 
-  if chat_type == "private":
-    bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
+  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
     return
 
   try:
@@ -317,7 +317,7 @@ def registerOak(bot, update):
                             thisuser["validation"] = "internal"
                         else:
                             thisuser["validation"] = "oak"
-                        bot.sendMessage(chat_id=chat_id, text="👌 ¡De acuerdo! He reconocido que tu nombre de entrenador es *%s*, eres del equipo *%s* y de *nivel %s*.\n\nA partir de ahora aparecerá tu equipo y nivel en las incursiones en las que participes. Si subes de nivel o te cambias el , repite esta operación para que pueda reflejarlo bien en las incursiones." % (ensure_escaped(thisuser["trainername"]), thisuser["team"], thisuser["level"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text="👌 ¡De acuerdo! He reconocido que tu nombre de entrenador es *%s*, eres del equipo *%s* y de *nivel %s*.\n\nA partir de ahora aparecerá tu equipo y nivel en las incursiones en las que participes. Si subes de nivel o te cambias el nombre de entrenador, repite esta operación para que pueda reflejarlo bien en las incursiones." % (ensure_escaped(thisuser["trainername"]), thisuser["team"], thisuser["level"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         saveUser(thisuser)
                     else:
                         bot.sendMessage(chat_id=chat_id, text="❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Si realmente es tuyo, pide ayuda en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
