@@ -111,7 +111,7 @@ def getValidationsByUser(user_id):
     global db
     logging.debug("storagemethods:getValidationsByUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`, `startedtime`, `step`, `pokemon`, `pokemonname`, `usuario_id` FROM `validaciones` \
+        sql = "SELECT `id`, `startedtime`, `step`, `tries`, `pokemon`, `pokemonname`, `usuario_id` FROM `validaciones` \
         WHERE validaciones.usuario_id = %s"
         cursor.execute(sql, (user_id))
         result = cursor.fetchall()
@@ -121,8 +121,8 @@ def getCurrentValidation(user_id):
     global db
     logging.debug("storagemethods:getCurrentValidation: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`, `startedtime`, `step`, `pokemon`, `pokemonname`, `usuario_id`, `trainername`, `team`, `level` FROM `validaciones` \
-        WHERE `validaciones`.`usuario_id` = %s AND (`step` = 'waitingtrainername' OR `step` = 'waitingscreenshot')"
+        sql = "SELECT `id`, `startedtime`, `step`, `tries`, `pokemon`, `pokemonname`, `usuario_id`, `trainername`, `team`, `level` FROM `validaciones` \
+        WHERE `validaciones`.`usuario_id` = %s AND (`step` = 'waitingtrainername' OR `step` = 'waitingscreenshot' OR `step` = 'failed')"
         cursor.execute(sql, (user_id))
         result = cursor.fetchone()
         return result
@@ -133,10 +133,13 @@ def saveValidation(validation):
     for k in ["id","trainername","team","level"]:
         if k not in validation.keys():
             validation[k] = None
+    for k in ["tries"]:
+        if k not in validation.keys():
+            validation[k] = 0
     with db.cursor() as cursor:
         sql = "INSERT INTO validaciones (id, pokemon, pokemonname, usuario_id) VALUES (%s, %s, %s, %s) \
-        ON DUPLICATE KEY UPDATE trainername = %s, step = %s, team = %s, level = %s;"
-        cursor.execute(sql, (validation["id"], validation["pokemon"], validation["pokemonname"], validation["usuario_id"], validation["trainername"], validation["step"], validation["team"], validation["level"]))
+        ON DUPLICATE KEY UPDATE trainername = %s, step = %s, tries = %s, team = %s, level = %s;"
+        cursor.execute(sql, (validation["id"], validation["pokemon"], validation["pokemonname"], validation["usuario_id"], validation["trainername"], validation["step"], validation["tries"], validation["team"], validation["level"]))
     db.commit()
     return True
 
@@ -701,7 +704,7 @@ def updateValidationsStatus():
     validationstoupdate = []
     try:
         with db.cursor() as cursor:
-            sql = "SELECT * FROM `validaciones` WHERE (step = 'waitingtrainername' OR step = 'waitingscreenshot') and startedtime < timestamp(DATE_SUB(NOW(), INTERVAL 20 MINUTE)) LIMIT 0,2000"
+            sql = "SELECT * FROM `validaciones` WHERE (step = 'waitingtrainername' OR step = 'waitingscreenshot' OR step = 'failed') and startedtime < timestamp(DATE_SUB(NOW(), INTERVAL 6 HOUR)) LIMIT 0,2000"
             cursor.execute(sql)
             results = cursor.fetchall()
             for r in results:

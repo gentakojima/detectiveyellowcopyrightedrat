@@ -121,6 +121,7 @@ CREATE TABLE `validaciones` (
   `usuario_id` int(11) NOT NULL,
   `startedtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `step` enum('waitingtrainername','waitingscreenshot','failed','expired','completed') NOT NULL DEFAULT 'waitingtrainername',
+  `tries` int(11) NOT NULL DEFAULT '0',
   `pokemon` varchar(15) NOT NULL,
   `pokemonname` varchar(15) NOT NULL,
   `trainername` varchar(20) DEFAULT NULL,

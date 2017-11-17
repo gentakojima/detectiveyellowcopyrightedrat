@@ -9,7 +9,7 @@ from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
 from Levenshtein import distance
 import cv2
 import tempfile
-import os
+import os, sys
 import numpy as np
 import pytesseract
 from PIL import Image, ImageOps
@@ -243,7 +243,7 @@ def update_validations_status(bot):
         logging.debug(v)
         logging.debug("Sending notification for validation ID %s, user ID %s" % (v["id"], v["usuario_id"]))
         try:
-            bot.sendMessage(chat_id=v["usuario_id"], text="⚠ El proceso de validación pendiente ha caducado porque han pasado 20 minutos desde que empezó. Si quieres validarte, debes volver a empezar el proceso.", parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=v["usuario_id"], text="⚠ El proceso de validación pendiente ha caducado porque han pasado 6 horas desde que empezó. Si quieres validarte, debes volver a empezar el proceso.", parse_mode=telegram.ParseMode.MARKDOWN)
         except Exception as e:
             logging.debug("supportmethods:update_validations_status error: %s" % str(e))
     time.sleep(0.05)
@@ -528,7 +528,7 @@ def parse_profile_image(filename):
     # Load possible pokemons
     pokemons = {}
     for i in validation_pokemons:
-        p = cv2.imread("modelimgs/pokemon/%s.png" % i)
+        p = cv2.imread(sys.path[0] + "/modelimgs/pokemon/%s.png" % i)
         p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
         p = cv2.resize(p, (60,60))
         pokemons[i] = { "model":p }
@@ -536,7 +536,7 @@ def parse_profile_image(filename):
     # Load possible profiles
     profiles = {}
     for i in validation_profiles:
-        p = cv2.imread("modelimgs/profiles/%s.png" % i)
+        p = cv2.imread(sys.path[0] + "/modelimgs/profiles/%s.png" % i)
         p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
         p = cv2.resize(p, (120,120))
         profiles[i] = { "model":p }
@@ -628,7 +628,7 @@ def parse_profile_image(filename):
     text = pytesseract.image_to_string(Image.open(tmpfilename))
     trainer_name = re.sub(r'\n+.*$','',text)
     trainer_name = trainer_name.replace(" ","").replace("|","l")
-    pokemon_name = re.sub(r'^.*\n+(y|and)[ ]?','',text)
+    pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text)
     logging.debug("supportmethods:parse_profile_image: Trainer name: %s" % trainer_name)
     logging.debug("supportmethods:parse_profile_image: Pokemon name: %s" % pokemon_name)
 
