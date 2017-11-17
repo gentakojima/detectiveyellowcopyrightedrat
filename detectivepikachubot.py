@@ -4,6 +4,7 @@
 #
 # Command list for @botfather
 # help - Muestra la ayuda
+# register - Inicia el proceso de registro (en privado)
 # raid - Crea una incursión nueva (en grupo)
 # alerts - Configura alertas de incursiones (en privado)
 # raids - Muestra incursiones activas (en privado)
@@ -66,7 +67,7 @@ gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
 
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
-    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='%s'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nPregunta <code>quién soy?</code> a @profesoroak_bot y reenvíame a @%s la respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @%s el comando <code>/alerts</code>." % (config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"]), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='%s'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nEscríbeme por privado en @%s el comando <code>/register</code>. Alternativamente, puedes preguntar <code>quién soy?</code> a @profesoroak_bot y reenvíame su respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @%s el comando <code>/alerts</code>." % (config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"]), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def register(bot, update):
     logging.debug("detectivepikachubot:raids: %s %s" % (bot, update))
