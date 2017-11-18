@@ -560,13 +560,13 @@ def channelCommands(bot, update):
             cancelar(bot, update, args)
         elif command == "reflotar":
             reflotar(bot, update, args)
-        elif command == "cambiarhora":
+        elif command == "cambiarhora" or command == "hora":
             cambiarhora(bot, update, args)
-        elif command == "cambiarhorafin":
+        elif command == "cambiarhorafin" or command == "horafin":
             cambiarhorafin(bot, update, args)
-        elif command == "cambiargimnasio":
+        elif command == "cambiargimnasio" or command == "gimnasio":
             cambiargimnasio(bot, update, args)
-        elif command == "cambiarpokemon":
+        elif command == "cambiarpokemon" or command == "pokemon":
             cambiarpokemon(bot, update, args)
         else:
             # Default to process normal message for babysitter mode
@@ -885,7 +885,7 @@ def raid(bot, update, args=None):
           pokemon = current_raid["egg"]
       else:
           pokemon = current_raid["pokemon"]
-      bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión %s %sa las *%s* en *%s* pon aquí los siguientes comandos (mantén el identificador *%s*):\n\n🕒 *Cambiar día/hora*:\n`/cambiarhora %s %s%s`\n\n🕒 *Cambiar hora a la que desaparece*:\n`/cambiarhorafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/cambiargimnasio %s %s`\n\n👿 *Cambiar Pokémon/nivel*:\n`/cambiarpokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s" % (what_text, what_day, extract_time(current_raid["timeraid"]), current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], daystr, extract_time(current_raid["timeraid"]), current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], pokemon, current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+      bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión %s %sa las *%s* en *%s* pon aquí los siguientes comandos manteniendo el identificador *%s*:\n\n🕒 *Cambiar día/hora*:\n`/hora %s %s%s`\n\n🕒 *Cambiar hora a la que desaparece*:\n`/horafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/gimnasio %s %s`\n\n👿 *Cambiar Pokémon/nivel*:\n`/pokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s\n\nTambién puedes contestar a los mensajes de las incursiones con estos comandos, omitiendo el identificador." % (what_text, what_day, extract_time(current_raid["timeraid"]), current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], daystr, extract_time(current_raid["timeraid"]), current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], pokemon, current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
 
   if group["locations"] == 1:
       if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] != None:
@@ -1550,10 +1550,10 @@ dispatcher.add_handler(CommandHandler('settings', settings))
 # Commands related to raids
 dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))
 dispatcher.add_handler(CommandHandler('cancelar', cancelar, pass_args=True))
-dispatcher.add_handler(CommandHandler('cambiarhora', cambiarhora, pass_args=True))
-dispatcher.add_handler(CommandHandler('cambiarhorafin', cambiarhorafin, pass_args=True))
-dispatcher.add_handler(CommandHandler('cambiargimnasio', cambiargimnasio, pass_args=True))
-dispatcher.add_handler(CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cambiarhora','hora'], cambiarhora, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cambiarhorafin','horafin'], cambiarhorafin, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cambiargimnasio','gimnasio'], cambiargimnasio, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cambiarpokemon','pokemon'], cambiarpokemon, pass_args=True))
 dispatcher.add_handler(CommandHandler('borrar', borrar, pass_args=True))
 dispatcher.add_handler(CommandHandler('reflotar', reflotar, pass_args=True))
 dispatcher.add_handler(CommandHandler(['reflotartodo','reflotartodas'], reflotartodas, pass_args=True))
