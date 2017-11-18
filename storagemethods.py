@@ -439,7 +439,7 @@ def getRaidPeople(raid_id):
     global db
     logging.debug("storagemethods:getRaidPeople: %s" % (raid_id))
     with db.cursor() as cursor:
-        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `estoy`, `tarde`, `level`, `team`, `lotengo` FROM `incursiones` \
+        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `estoy`, `tarde`, `level`, `team`, `lotengo`, `novoy` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
         LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s \
         ORDER BY `voy`.`addedtime` ASC"
@@ -503,7 +503,7 @@ def raidVoy(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id) VALUES (%s, %s)"
             cursor.execute(sql, (raid["id"], user_id))
         else:
-            sql = "UPDATE voy SET plus = 0, estoy = 0, tarde = 0, lotengo = NULL WHERE incursion_id=%s and usuario_id=%s"
+            sql = "UPDATE voy SET plus = 0, estoy = 0, tarde = 0, novoy = 0, lotengo = NULL WHERE incursion_id=%s and usuario_id=%s"
             cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True
@@ -515,8 +515,15 @@ def raidNovoy(grupo_id, message_id, user_id):
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid["status"] == "ended" or raid["status"] == "old":
             return False
-        sql = "DELETE FROM voy WHERE `incursion_id`=%s and usuario_id=%s;"
+        sql = "SELECT * FROM voy WHERE `incursion_id`=%s and usuario_id=%s and addedtime < timestamp(DATE_SUB(NOW(), INTERVAL 5 MINUTE));"
         cursor.execute(sql, (raid["id"], user_id))
+        result = cursor.fetchone()
+        if result == None:
+            sql = "DELETE FROM voy WHERE `incursion_id`=%s and usuario_id=%s;"
+            cursor.execute(sql, (raid["id"], user_id))
+        else:
+            sql = "UPDATE voy SET novoy=1, estoy = 0, tarde = 0, lotengo = NULL WHERE `incursion_id`=%s and usuario_id=%s;"
+            cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True
 
@@ -533,7 +540,7 @@ def raidPlus1(grupo_id, message_id, user_id):
         if result != None:
             if result["plus"]>5:
                 return False
-            sql = "UPDATE voy SET plus=plus+1 WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET plus=plus+1, novoy = 0 WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
         else:
             result = {"plus":0}
@@ -556,7 +563,7 @@ def raidEstoy(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id, estoy) VALUES (%s, %s, 1)"
             cursor.execute(sql, (raid["id"], user_id))
         else:
-            sql = "UPDATE voy SET estoy=1, tarde=0, lotengo=NULL WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET estoy=1, tarde=0, novoy=0, lotengo=NULL WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True
@@ -575,7 +582,7 @@ def raidLlegotarde(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id, tarde) VALUES (%s, %s, 1)"
             cursor.execute(sql, (raid["id"], user_id))
         else:
-            sql = "UPDATE voy SET tarde=1, estoy=0, lotengo=NULL WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET tarde=1, estoy=0, novoy=0, lotengo=NULL WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     return True
@@ -587,6 +594,11 @@ def raidLotengo(grupo_id, message_id, user_id):
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid["status"] == "waiting" or raid["status"] == "old":
             return False
+        sql = "SELECT `novoy` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s and novoy = 1"
+        cursor.execute(sql, (raid["id"],user_id))
+        result = cursor.fetchone()
+        if result != None:
+            return False
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
@@ -594,7 +606,7 @@ def raidLotengo(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 1)"
             cursor.execute(sql, (raid["id"], user_id))
         elif result != None:
-            sql = "UPDATE voy SET tarde=0, estoy=1, lotengo = 1 WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET tarde=0, estoy=1, novoy=0, lotengo=1 WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
         else:
             return False
@@ -608,6 +620,11 @@ def raidEscapou(grupo_id, message_id, user_id):
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid["status"] == "waiting" or raid["status"] == "old":
             return False
+        sql = "SELECT `novoy` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s and novoy = 1"
+        cursor.execute(sql, (raid["id"],user_id))
+        result = cursor.fetchone()
+        if result != None:
+            return False
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
@@ -615,7 +632,7 @@ def raidEscapou(grupo_id, message_id, user_id):
             sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 0)"
             cursor.execute(sql, (raid["id"], user_id))
         elif result != None:
-            sql = "UPDATE voy SET tarde=0, estoy=1, lotengo = 0 WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET tarde=0, estoy=1, novoy=0, lotengo = 0 WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
         else:
             return False

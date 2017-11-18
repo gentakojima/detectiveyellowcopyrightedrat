@@ -95,6 +95,7 @@ CREATE TABLE `voy` (
   `usuario_id` bigint(20) NOT NULL,
   `incursion_id` int(11) NOT NULL,
   `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `novoy` TINYINT NOT NULL DEFAULT '0',
   `plus` int(11) NOT NULL DEFAULT '0',
   `estoy` tinyint(4) NOT NULL DEFAULT '0',
   `tarde` tinyint(4) NOT NULL DEFAULT '0',

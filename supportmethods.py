@@ -69,6 +69,8 @@ def count_people(gente):
     count = 0
     if gente != None:
         for user in gente:
+            if user["novoy"] > 0:
+                continue
             count = count + 1
             if user["plus"] != None and user["plus"] > 0:
                 count = count + user["plus"]
@@ -82,6 +84,8 @@ def count_people_disaggregated(gente):
     count = 0
     if gente != None:
         for user in gente:
+            if user["novoy"] > 0:
+                continue
             count = count + 1
             if user["plus"] != None and user["plus"] > 0:
                 count = count + user["plus"]
@@ -167,6 +171,8 @@ def format_message(raid):
                 estoy_text = "✅ "
             elif user["tarde"] != None and user["tarde"]>0:
                 estoy_text = "🕒 "
+            elif user["novoy"] >0:
+                estoy_text = "❌ "
             else:
                 estoy_text = "▪️ "
             if user["lotengo"] == 0:
