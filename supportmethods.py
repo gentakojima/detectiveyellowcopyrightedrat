@@ -627,7 +627,7 @@ def parse_profile_image(filename):
     cv2.imwrite(tmpfilename, nick1_gray)
     text = pytesseract.image_to_string(Image.open(tmpfilename))
     trainer_name = re.sub(r'\n+.*$','',text)
-    trainer_name = trainer_name.replace(" ","").replace("|","l")
+    trainer_name = trainer_name.replace(" ","").replace("|","l").replace("ﬁ","ri")
     pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text)
     logging.debug("supportmethods:parse_profile_image: Trainer name: %s" % trainer_name)
     logging.debug("supportmethods:parse_profile_image: Pokemon name: %s" % pokemon_name)
@@ -649,7 +649,7 @@ def parse_profile_image(filename):
     level1_gray = cv2.cvtColor(level1_img, cv2.COLOR_BGR2GRAY)
     ret,level1_gray = cv2.threshold(level1_gray,min_thres,255,cv2.THRESH_BINARY)
     cv2.imwrite(tmpfilename, level1_gray)
-    level = pytesseract.image_to_string(Image.open(tmpfilename))
+    level = pytesseract.image_to_string(Image.open(tmpfilename), config="-psm 6")
     logging.debug("supportmethods:parse_profile_image: Level: %s" % level)
     if int(level)<5 or int(level)>40:
         level = None
