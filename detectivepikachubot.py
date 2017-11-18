@@ -33,7 +33,7 @@ import tempfile
 import urllib.request
 import random
 
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status
 
 def cleanup(signum, frame):
@@ -1293,6 +1293,35 @@ def cambiargimnasio(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para editar la incursión `%s`." % raid["id"],parse_mode=telegram.ParseMode.MARKDOWN)
 
+def reflotartodas(bot, update, args=None):
+    logging.debug("detectivepikachubot:reflotartodas: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if chat_type == "private":
+      bot.sendMessage(chat_id=chat_id, text="Este comando solo funciona en canales y grupos.")
+      return
+
+    delete_message(chat_id, message.message_id, bot)
+
+    if not is_admin(chat_id, user_id, bot):
+        return
+
+    raids = getActiveRaidsforGroup(chat_id)
+    for raid in raids:
+        if raid["id"] != None and raid["status"] != "ended":
+            try:
+                bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+            except Exception as e:
+                logging.debug("detectivepikachubot:reflotar: error borrando post antiguo %s" % raid["message"])
+            raid["refloated"] = 1
+            text = format_message(raid)
+            reply_markup = get_keyboard(raid)
+            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            raid["message"] = sent_message.message_id
+            saveRaid(raid)
+            if user_id != None:
+                bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+
 def reflotar(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1527,6 +1556,7 @@ dispatcher.add_handler(CommandHandler('cambiargimnasio', cambiargimnasio, pass_a
 dispatcher.add_handler(CommandHandler('cambiarpokemon', cambiarpokemon, pass_args=True))
 dispatcher.add_handler(CommandHandler('borrar', borrar, pass_args=True))
 dispatcher.add_handler(CommandHandler('reflotar', reflotar, pass_args=True))
+dispatcher.add_handler(CommandHandler(['reflotartodo','reflotartodas'], reflotartodas, pass_args=True))
 dispatcher.add_handler(CommandHandler('gym', gym, pass_args=True))
 # Commands related to alerts
 dispatcher.add_handler(MessageHandler(Filters.location, processLocation))

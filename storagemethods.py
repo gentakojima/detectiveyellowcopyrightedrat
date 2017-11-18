@@ -167,6 +167,21 @@ def getActiveRaidsforUser(user_id):
         result = cursor.fetchall()
         return result
 
+def getActiveRaidsforGroup(group_id):
+    global db
+    logging.debug("storagemethods:getActiveRaidsforGroup: %s" % (group_id))
+    with db.cursor() as cursor:
+        sql = "SELECT * \
+        FROM incursiones \
+        WHERE status IN ('started', 'waiting', 'ended') \
+            AND addedtime > 0 \
+            AND timeraid > 0 \
+            AND grupo_id = %s \
+        ORDER BY incursiones.timeraid ASC"
+        cursor.execute(sql, (group_id))
+        result = cursor.fetchall()
+        return result
+
 def savePlaces(group_id, places):
     global db
     logging.debug("storagemethods:savePlaces: %s %s" % (group_id, places))
