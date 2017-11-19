@@ -534,10 +534,16 @@ def parse_profile_image(filename):
     # Load possible pokemons
     pokemons = {}
     for i in validation_pokemons:
-        p = cv2.imread(sys.path[0] + "/modelimgs/pokemon/%s.png" % i)
-        p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
-        p = cv2.resize(p, (60,60))
-        pokemons[i] = { "model":p }
+        thispoke_models = []
+        for j in range(1, 3):
+            pokfname = sys.path[0] + "/modelimgs/pokemon/%s%d.png" % (i,j)
+            if not os.path.isfile(pokfname):
+                break
+            p = cv2.imread(pokfname)
+            p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
+            p = cv2.resize(p, (60,60))
+            thispoke_models.append(p)
+        pokemons[i] = { "models":thispoke_models }
 
     # Load possible profiles
     profiles = {}
@@ -553,7 +559,7 @@ def parse_profile_image(filename):
     aspect_ratio = height/width
 
     # Raise error for unsupported aspect ratios
-    if aspect_ratio <= 1.74 or aspect_ratio >= 1.88:
+    if aspect_ratio <= 1.65 or aspect_ratio >= 1.88:
         raise Exception("Aspect ratio not supported")
 
     # Crop large bars
@@ -623,7 +629,7 @@ def parse_profile_image(filename):
         min_thres = 170
     elif chosen_color == "Rojo":
         nick1_img[:, :, 2] = 0
-        min_thres = 50
+        min_thres = 55
     elif chosen_color == "Azul":
         nick1_img[:, :, 0] = 0
         min_thres = 110
@@ -671,14 +677,15 @@ def parse_profile_image(filename):
     chosen_pokemon = None
     chosen_similarity = 0.0
     for i in validation_pokemons:
-        pokemons[i]["similarity"] = ssim(pokemons[i]["model"], pokemon_gray)
-        logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (i,pokemons[i]["similarity"]))
-        if pokemons[i]["similarity"] > 0.7 and \
-           (chosen_pokemon == None or chosen_similarity < pokemons[i]["similarity"]):
-           chosen_pokemon = i
-           chosen_similarity = pokemons[i]["similarity"]
-           if pokemons[i]["similarity"] > 0.9:
-               break
+        for pokemon_model in pokemons[i]["models"]:
+            pokemons[i]["similarity"] = ssim(pokemon_model, pokemon_gray)
+            logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (i,pokemons[i]["similarity"]))
+            if pokemons[i]["similarity"] > 0.7 and \
+               (chosen_pokemon == None or chosen_similarity < pokemons[i]["similarity"]):
+               chosen_pokemon = i
+               chosen_similarity = pokemons[i]["similarity"]
+               if pokemons[i]["similarity"] > 0.9:
+                   break
     logging.debug("supportmethods:parse_profile_image: Chosen Pokemon: %s" % chosen_pokemon)
 
     # Cleanup and return
