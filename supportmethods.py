@@ -369,10 +369,10 @@ def get_settings_keyboard(chat_id):
 def get_keyboard(raid):
     group = getGroup(raid["grupo_id"])
     if raid["status"] == "started" or raid["status"] == "waiting":
-        keyboard_row1 = [InlineKeyboardButton("🙋 ¡Voy!", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')]
-        keyboard_row2 = [InlineKeyboardButton("✅ ¡Estoy allí!", callback_data='estoy')]
+        keyboard_row1 = [InlineKeyboardButton("🙋 Voy", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')]
+        keyboard_row2 = [InlineKeyboardButton("✅ Estoy ahí", callback_data='estoy')]
         if group["latebutton"] == 1:
-            keyboard_row2.append(InlineKeyboardButton("🕒 ¡Llego tarde!", callback_data='llegotarde'))
+            keyboard_row2.append(InlineKeyboardButton("🕒 Tardo", callback_data='llegotarde'))
         if raid["gimnasio_id"] != None:
             keyboard_row2.append(InlineKeyboardButton("🌎 Ubicación", callback_data='ubicacion'))
         keyboard = [keyboard_row1, keyboard_row2]
@@ -685,3 +685,14 @@ def parse_profile_image(filename):
     # Cleanup and return
     os.remove(tmpfilename)
     return (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile)
+
+locations_sent = []
+def already_sent_location(user_id, location_id):
+    logging.debug("supportmethods:already_sent_location")
+    global locations_sent
+    k = str(user_id)+"+"+str(location_id)
+    if k in locations_sent:
+        return True
+    else:
+        locations_sent.append(k)
+        return False
