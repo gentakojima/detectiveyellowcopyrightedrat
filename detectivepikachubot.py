@@ -413,7 +413,7 @@ def processMessage(bot, update):
         if validation != None:
             # Expecting username
             if validation["step"] == "waitingtrainername" and text != None:
-                m = re.match(r'[a-zA-Z0-9_]{3,16}', text)
+                m = re.match(r'[a-zA-Z0-9]{4,15}$', text)
                 if m != None:
                     fuser = getUserByTrainername(text)
                     if fuser == None or fuser["id"] == user["id"]:
@@ -424,6 +424,9 @@ def processMessage(bot, update):
                     else:
                         bot.sendMessage(chat_id=chat_id, text="❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Si realmente es tuyo, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.\n\nSi lo has escrito mal y realmente no era ese el nombre, dime entonces, ¿cómo es el nombre de entrenador que aparece en tu perfil del juego?" % config["telegram"]["validationsmail"], parse_mode=telegram.ParseMode.MARKDOWN)
                         return
+                else:
+                    bot.sendMessage(chat_id=chat_id, text="❌ No te entiendo. Pon únicamente el nombre de entrenador que aparece en tu perfil del juego. No puede tener espacios y debe tener entre 4 y 15 caracteres de longitud.", parse_mode=telegram.ParseMode.MARKDOWN)
+                    return
             # Expecting screenshot
             elif validation["step"] == "waitingscreenshot" and hasattr(message, 'photo') and message.photo != None and len(message.photo) > 0:
                 photo = bot.get_file(update.message.photo[-1]["file_id"])
