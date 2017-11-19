@@ -638,7 +638,7 @@ def parse_profile_image(filename):
     logging.debug("supportmethods:parse_profile_image: Pokemon name: %s" % pokemon_name)
 
     # Extract and OCR level
-    if aspect_ratio < 1.78:
+    if aspect_ratio < 1.81:
         level1_img = image[int(height/2+2*height/13):int(height-height/4-height/22),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
     else:
         level1_img = image[int(height/2+height/8):int(height-height/4-height/16),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
@@ -660,7 +660,7 @@ def parse_profile_image(filename):
         level = None
 
     # Extract Pokemon
-    if aspect_ratio < 1.78:
+    if aspect_ratio < 1.81:
         pokemon_img = image[int(height/3):int(height-height/3),int(width/8):int(width/2)] # y1:y2,x1:x2
     else:
         pokemon_img = image[int(height/3-height/42):int(height-height/3-height/42),int(width/8):int(width/2)] # y1:y2,x1:x2
