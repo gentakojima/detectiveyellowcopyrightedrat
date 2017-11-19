@@ -619,7 +619,7 @@ def parse_profile_image(filename):
     logging.debug("supportmethods:parse_profile_image: Chosen color: %s" % chosen_color)
 
     # Extract and OCR trainer and Pokémon name
-    nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+2*width/5)] # y1:y2,x1:x2
+    nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
     if chosen_color == "Amarillo":
         min_thres = 170
     elif chosen_color == "Rojo":
