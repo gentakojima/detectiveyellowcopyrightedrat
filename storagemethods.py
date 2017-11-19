@@ -554,7 +554,7 @@ def raidEstoy(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidEstoy: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid["status"] == "ended" or raid["status"] == "old":
+        if raid == None or raid["status"] == "ended" or raid["status"] == "old":
             return False
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
@@ -573,7 +573,7 @@ def raidLlegotarde(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidLlegotarde: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid["status"] == "ended" or raid["status"] == "old":
+        if raid == None or raid["status"] == "ended" or raid["status"] == "old":
             return False
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
@@ -592,7 +592,7 @@ def raidLotengo(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidLotengo: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid["status"] == "waiting" or raid["status"] == "old":
+        if raid == None or raid["status"] == "waiting" or raid["status"] == "old":
             return False
         sql = "SELECT `novoy` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s and novoy = 1"
         cursor.execute(sql, (raid["id"],user_id))
@@ -618,7 +618,7 @@ def raidEscapou(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidEscapou: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid["status"] == "waiting" or raid["status"] == "old":
+        if raid == None or raid["status"] == "waiting" or raid["status"] == "old":
             return False
         sql = "SELECT `novoy` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s and novoy = 1"
         cursor.execute(sql, (raid["id"],user_id))

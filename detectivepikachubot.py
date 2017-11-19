@@ -203,11 +203,8 @@ def setspreadsheet(bot, update, args=None):
   else:
     spreadsheet_id = m.group(1)
     group = getGroup(chat_id)
-    if group == None:
-        group = {"id":chat_id, "title":chat_title, "spreadsheet":spreadsheet_id}
-    else:
-        group["title"] = chat_title
-        group["spreadsheet"] = spreadsheet_id
+    group["title"] = chat_title
+    group["spreadsheet"] = spreadsheet_id
     group["alias"] = group_alias
     saveGroup(group)
     bot.sendMessage(chat_id=chat_id, text="👌 Establecido documento con identificador %s.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos." % spreadsheet_id )
@@ -388,7 +385,10 @@ def joinedChat(bot, update):
         if new_chat_member.username == 'detectivepikachubot' and chat_type != "private":
             chat_title = message.chat.title
             chat_id = message.chat.id
-            message_text = "¡Hola a todos los miembros de *%s*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando /help para enteraros de todas las funciones." % ensure_escaped(chat_title)
+            group = getGroup(chat_id)
+            if group == None:
+                saveGroup({"id":chat_id, "title":message.chat.title})
+            message_text = "¡Hola a todos los miembros de *%s*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde explica en detalle todos los pasos que debe seguir." % ensure_escaped(chat_title)
             Thread(target=send_message_timed, args=(chat_id, message_text, 3, bot)).start()
     except:
         pass
@@ -590,9 +590,6 @@ def settings(bot, update):
         pass
 
     group = getGroup(chat_id)
-    if group == None:
-        saveGroup({"id":chat_id, "title":message.chat.title})
-        group = getGroup(chat_id)
 
     if group["settings_message"] != None:
         try:
