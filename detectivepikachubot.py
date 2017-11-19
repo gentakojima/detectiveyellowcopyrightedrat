@@ -434,14 +434,13 @@ def processMessage(bot, update):
                 filename = sys.path[0] + "/photos/profile-%s-%s-%s.jpg" % (user_id, validation["id"], int(time.time()))
                 urllib.request.urlretrieve(photo["file_path"], filename)
                 try:
-                    (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename)
+                    (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename, validation["pokemon"])
                     #output = "Información reconocida:\n - Nombre de entrenador: %s\n - Nivel: %s\n - Equipo: %s\n - Pokémon: %s\n - Nombre del Pokémon: %s" % (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name)
                     #bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
                     output = None
                 except Exception as e:
                     logging.debug("Exception validating: %s" % str(e))
-                    bot.sendMessage(chat_id=chat_id, text="❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"], parse_mode=telegram.ParseMode.MARKDOWN)
-                    return
+                    output = "❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
                 if chosen_profile == None:
                     output = "❌ La captura de pantalla no pare válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
                 elif trainer_name.lower() != validation["trainername"].lower():
@@ -453,7 +452,7 @@ def processMessage(bot, update):
                 elif pokemon_name.lower() != validation["pokemonname"].lower():
                     output = "❌ No he reconocido correctamente el *nombre del Pokémon*. ¿Le has cambiado el nombre a *%s* como te dije? Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % (validation["pokemonname"], config["telegram"]["validationsmail"])
                 elif chosen_pokemon != validation["pokemon"]:
-                    output = "❌ No he reconocido correctamente el *Pokémon*. ¿Has puesto de compañero a *%s* como te dije? Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % (validation["pokemonname"], config["telegram"]["validationsmail"])
+                    output = "❌ No he reconocido correctamente el *Pokémon*. ¿Has puesto de compañero a *%s* como te dije? Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % (validation["pokemon"], config["telegram"]["validationsmail"])
                 if output != None:
                     validation["tries"] = validation["tries"] + 1
                     if validation["tries"] > 3:
@@ -483,7 +482,7 @@ def processMessage(bot, update):
             filename = sys.path[0] + "/photos/profile-%s-updatelevel-%s.jpg" % (user_id, int(time.time()))
             urllib.request.urlretrieve(photo["file_path"], filename)
             try:
-                (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename)
+                (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename, None)
                 #output = "Información reconocida:\n - Nombre de entrenador: %s\n - Nivel: %s\n - Equipo: %s\n - Pokémon: %s\n - Nombre del Pokémon: %s" % (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name)
                 #bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
                 output = None

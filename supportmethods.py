@@ -525,25 +525,24 @@ def extract_day(timeraid, tzone):
     else:
         return None
 
-def parse_profile_image(filename):
+def parse_profile_image(filename, desired_pokemon):
     logging.debug("supportmethods:parse_profile_image %s" % filename)
 
     new_file, tmpfilename = tempfile.mkstemp(suffix=".png")
     os.close(new_file)
 
     # Load possible pokemons
-    pokemons = {}
-    for i in validation_pokemons:
+    if desired_pokemon != None:
         thispoke_models = []
-        for j in range(1, 3):
-            pokfname = sys.path[0] + "/modelimgs/pokemon/%s%d.png" % (i,j)
+        for j in range(1, 10):
+            pokfname = sys.path[0] + "/modelimgs/pokemon/%s%d.png" % (desired_pokemon,j)
             if not os.path.isfile(pokfname):
                 break
             p = cv2.imread(pokfname)
             p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
             p = cv2.resize(p, (60,60))
             thispoke_models.append(p)
-        pokemons[i] = { "models":thispoke_models }
+        pokemon = { "models":thispoke_models }
 
     # Load possible profiles
     profiles = {}
@@ -596,7 +595,7 @@ def parse_profile_image(filename):
             chosen_similarity = profiles[i]["similarity"]
             if profiles[i]["similarity"] > 0.9:
                 break
-    logging.debug("supportmethods:parse_profile_image: Chosen Pokemon: %s" % chosen_profile)
+    logging.debug("supportmethods:parse_profile_image: Chosen profile: %s" % chosen_profile)
 
     # Extract Team
     team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
@@ -676,16 +675,18 @@ def parse_profile_image(filename):
     # Test extracted pokemon against possible pokemons
     chosen_pokemon = None
     chosen_similarity = 0.0
-    for i in validation_pokemons:
-        for pokemon_model in pokemons[i]["models"]:
-            pokemons[i]["similarity"] = ssim(pokemon_model, pokemon_gray)
-            logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (i,pokemons[i]["similarity"]))
-            if pokemons[i]["similarity"] > 0.7 and \
-               (chosen_pokemon == None or chosen_similarity < pokemons[i]["similarity"]):
-               chosen_pokemon = i
-               chosen_similarity = pokemons[i]["similarity"]
-               if pokemons[i]["similarity"] > 0.9:
+    if desired_pokemon != None:
+        for pokemon_model in pokemon["models"]:
+            pokemon["similarity"] = ssim(pokemon_model, pokemon_gray)
+            logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (desired_pokemon,pokemon["similarity"]))
+            if pokemon["similarity"] > 0.7 and \
+               (chosen_pokemon == None or chosen_similarity < pokemon["similarity"]):
+               chosen_pokemon = desired_pokemon
+               chosen_similarity = pokemon["similarity"]
+               if pokemon["similarity"] > 0.9:
                    break
+    else:
+        chosen_pokemon = None
     logging.debug("supportmethods:parse_profile_image: Chosen Pokemon: %s" % chosen_pokemon)
 
     # Cleanup and return
