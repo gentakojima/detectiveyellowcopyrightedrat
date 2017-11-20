@@ -437,11 +437,6 @@ def parse_pokemon(pokestr):
       if m != None:
         ret_pok = pokemon
         break
-    if ret_pok == None:
-        for pokemon in pokemonlist:
-            if distance(pokestr, pokemon) < 3:
-                ret_pok = pokemon
-                break
 
     if ret_pok == None:
         for egg in egglist:
@@ -449,6 +444,13 @@ def parse_pokemon(pokestr):
             if m != None:
                 ret_egg = egg
                 break
+
+    if ret_pok == None and ret_egg == None:
+        for pokemon in pokemonlist:
+            if distance(pokestr.lower(), pokemon.lower()) < 3:
+                ret_pok = pokemon
+                break
+
     return (ret_pok, ret_egg)
 
 def parse_time(st, tz):
