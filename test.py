@@ -22,7 +22,7 @@ for root, dirs, filenames in os.walk("testingimgs"):
             expected_pokemon = m.group(4)
             expected_pokemon_name = m.group(5)
 
-            (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(os.path.join(root, f))
+            (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(os.path.join(root, f), expected_pokemon)
 
             try:
                 assert chosen_color == expected_color
