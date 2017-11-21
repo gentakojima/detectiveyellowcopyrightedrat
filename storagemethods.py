@@ -683,10 +683,10 @@ def updateRaidsStatus():
             results = cursor.fetchall()
             for r in results:
                 try:
-                    onehourago_datetime = datetime.now(timezone(r["timezone"])).replace(tzinfo=timezone(r["timezone"])) - timedelta(minutes = 60)
+                    threehoursago_datetime = datetime.now(timezone(r["timezone"])).replace(tzinfo=timezone(r["timezone"])) - timedelta(minutes = 180)
                     raid_datetime = r["timeraid"].replace(tzinfo=timezone(r["timezone"]))
-                    if raid_datetime < onehourago_datetime:
-                        logging.debug("storagemethods:updateRaidsStatus marking raid %s as old because %s < %s" % (r["id"],raid_datetime,onehourago_datetime))
+                    if raid_datetime < threehoursago_datetime:
+                        logging.debug("storagemethods:updateRaidsStatus marking raid %s as old because %s < %s" % (r["id"],raid_datetime,threehoursago_datetime))
                         sql = "UPDATE incursiones SET `status`='old' WHERE id=%s;"
                         cursor.execute(sql, (r["id"]))
                         raidstoupdate.append(r)
