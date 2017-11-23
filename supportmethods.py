@@ -630,7 +630,7 @@ def parse_profile_image(filename, desired_pokemon):
         min_thres = 170
     elif chosen_color == "Rojo":
         nick1_img[:, :, 2] = 0
-        min_thres = 55
+        min_thres = 53
     elif chosen_color == "Azul":
         nick1_img[:, :, 0] = 0
         min_thres = 110
