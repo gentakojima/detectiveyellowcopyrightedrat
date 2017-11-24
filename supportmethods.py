@@ -454,7 +454,7 @@ def parse_pokemon(pokestr):
     return (ret_pok, ret_egg)
 
 def parse_time(st, tz):
-    logging.debug("supportmethods:parse_time")
+    logging.debug("supportmethods:parse_time %s %s" % (st,tz))
     m = re.match("([0-9]{1,2}/)?([0-9]{1,2})[:.]?([0-9]{0,2})h?", st, flags=re.IGNORECASE)
     if m != None:
         hour = str(m.group(2))
@@ -462,6 +462,7 @@ def parse_time(st, tz):
         logging.debug("supportmethods:parse_time parsing time %s %s" % (hour, minute))
         if m.group(1) != None:
             day = m.group(1).replace("/","")
+            logging.debug("supportmethods:parse_time parsing day %s" % (day))
         else:
             day = None
         if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59 or \
@@ -484,9 +485,9 @@ def parse_time(st, tz):
             dt = dt.replace(day=int(day))
         else:
             if dt.month == 12:
-                dt = dt.replace(month=1, year=dt.year+1)
+                dt = dt.replace(month=1, year=dt.year+1, day=int(day))
             else:
-                dt = dt.replace(month=dt.month+1)
+                dt = dt.replace(month=dt.month+1, day=int(day))
     dt = dt.replace(hour=int(hour),minute=int(minute))
     dt_str = dt.strftime("%Y-%m-%d %H:%M:00")
     logging.debug("supportmethods::parse_time parsed %s" % dt_str)
