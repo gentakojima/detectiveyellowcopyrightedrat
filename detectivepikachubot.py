@@ -1134,7 +1134,7 @@ def cambiarhora(bot, update, args=None):
 
             if oldtimeraid.strftime("%Y-%m-%d %H:%M:%S") == raid["timeraid"]:
                 user_id = chat_id if user_id == None else user_id
-                bot.sendMessage(chat_id=chat_id, text="❌ La incursión `%s` ya está puesta para esa hora." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="❌ La incursión `%s` ya está puesta para esa hora." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 raid["edited"] = 1
                 raid["status"] = "waiting"
