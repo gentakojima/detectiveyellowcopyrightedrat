@@ -107,7 +107,7 @@ def settimezone(bot, update, args=None):
     if hasattr(message.chat, 'username') and message.chat.username != None:
         group_alias = message.chat.username
 
-    if not is_admin(chat_id, user_id, bot) or isBanned(user_id):
+    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
         return
 
     if chat_type == "private":
@@ -380,7 +380,6 @@ def processLocation(bot, update):
 def joinedChat(bot, update):
     logging.debug("detectivepikachubot:joinedChat: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    user_username = message.from_user.username
     try:
         new_chat_member = message.new_chat_member
         if new_chat_member.username == 'detectivepikachubot' and chat_type != "private":
@@ -593,6 +592,9 @@ def settings(bot, update):
         pass
 
     group = getGroup(chat_id)
+    if group == None and chat_type == "channel":
+        saveGroup({"id":chat_id, "title":message.chat.title})
+        group = getGroup(chat_id)
 
     if group["settings_message"] != None:
         try:
