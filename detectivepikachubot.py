@@ -32,6 +32,7 @@ from pytz import timezone
 import tempfile
 import urllib.request
 import random
+from Levenshtein import distance
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location
@@ -443,7 +444,7 @@ def processMessage(bot, update):
                     output = "❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
                 if chosen_profile == None:
                     output = "❌ La captura de pantalla no pare válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
-                elif trainer_name.lower() != validation["trainername"].lower():
+                elif trainer_name.lower() != validation["trainername"].lower() and distance(trainer_name.lower(),validation["trainername"].lower())>2:
                     output = "❌ No he reconocido correctamente el *nombre del entrenador*. ¿Seguro que lo has escrito bien? Puedes volver a enviar otra captura. Si te has equivocado, espera 6 horas a que caduque la validación y vuelve a comenzar de nuevo. Si lo has escrito bien y no consigues que lo reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
                 elif level == None:
                     output = "❌ No he reconocido correctamente el *nivel*. Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
@@ -491,7 +492,7 @@ def processMessage(bot, update):
                 return
             if chosen_profile == None:
                 output = "❌ La captura de pantalla no pare válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
-            elif trainer_name.lower() != user["trainername"].lower():
+            elif trainer_name.lower() != user["trainername"].lower() and distance(trainer_name.lower(),user["trainername"].lower())>2:
                 output = "❌ No he reconocido correctamente el *nombre del entrenador*. Si no consigues que lo reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
             elif level == None:
                 output = "❌ No he reconocido correctamente el *nivel*. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
