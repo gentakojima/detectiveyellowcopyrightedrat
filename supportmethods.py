@@ -603,7 +603,7 @@ def parse_profile_image(filename, desired_pokemon):
     team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
     boundaries = {
         "Rojo": ([0, 0, 150], [70, 20, 255]),
-        "Azul": ([200, 90, 0], [255, 130, 20]),
+        "Azul": ([180, 50, 0], [255, 140, 60]),
         "Amarillo": ([0, 190, 200], [20, 215, 255])
     }
     chosen_color = None
