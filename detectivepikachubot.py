@@ -8,6 +8,7 @@
 # raid - Crea una incursión nueva (en grupo)
 # alerts - Configura alertas de incursiones (en privado)
 # raids - Muestra incursiones activas (en privado)
+# profile - Muestra info de tu perfil (en privado)
 #
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, Filters
@@ -673,6 +674,32 @@ def raids(bot, update):
             output = output + text
     else:
         output = "🐲 No hay incursiones activas en los grupos en los que has participado recientemente"
+    bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
+
+def profile(bot, update):
+    logging.debug("detectivepikachubot:profile: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
+
+    if edit_check_private(chat_id, chat_type, user_username, "profile", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
+        return
+
+    user = getUser(chat_id)
+    if user != None:
+        text_alias = ("*%s*" % user["username"]) if user["username"] != None else "_Desconocido_"
+        text_trainername = ("*%s*" % user["trainername"]) if user["trainername"] != None else "_Desconocido_"
+        text_team = ("*%s*" % user["team"]) if user["team"] != None else "_Desconocido_"
+        text_level = ("*%s*" % user["level"]) if user["level"] != None else "_Desconocido_"
+        if user["banned"] == "1":
+            text_validationstatus = "*Baneada*"
+        elif user["validation"] == "internal" or user["validation"] == "oak":
+            text_validationstatus = "*Validada*"
+        else:
+            text_validationstatus = "*No validada*"
+        output = "ID de Telegram: *%s*\nAlias de Telegram: %s\nNombre de entrenador: %s\nEstado cuenta: %s\nEquipo: %s\nNivel: %s" % (user["id"], text_alias, text_trainername, text_validationstatus, text_team, text_level)
+    else:
+        output = "❌ No tengo información sobre ti."
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def gym(bot, update, args=None):
@@ -1543,23 +1570,23 @@ def raidbutton(bot, update):
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
 dispatcher.add_handler(CommandHandler('register', register))
+dispatcher.add_handler(CommandHandler('profile', profile))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
 dispatcher.add_handler(CommandHandler('settalkgroup', settalkgroup, pass_args=True))
 dispatcher.add_handler(CommandHandler('refresh', refresh))
 dispatcher.add_handler(CommandHandler('list', list))
-dispatcher.add_handler(CommandHandler('incursiones', raids))
-dispatcher.add_handler(CommandHandler('raids', raids))
+dispatcher.add_handler(CommandHandler(['raids','incursiones'], raids))
 dispatcher.add_handler(CommandHandler('settings', settings))
 # Commands related to raids
 dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))
-dispatcher.add_handler(CommandHandler('cancelar', cancelar, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cancelar','cancel'], cancelar, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cambiarhora','hora'], cambiarhora, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cambiarhorafin','horafin'], cambiarhorafin, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cambiargimnasio','gimnasio'], cambiargimnasio, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cambiarpokemon','pokemon'], cambiarpokemon, pass_args=True))
-dispatcher.add_handler(CommandHandler('borrar', borrar, pass_args=True))
+dispatcher.add_handler(CommandHandler(['borrar','delete','remove'], borrar, pass_args=True))
 dispatcher.add_handler(CommandHandler('reflotar', reflotar, pass_args=True))
 dispatcher.add_handler(CommandHandler(['reflotartodo','reflotartodas'], reflotartodas, pass_args=True))
 dispatcher.add_handler(CommandHandler('gym', gym, pass_args=True))
