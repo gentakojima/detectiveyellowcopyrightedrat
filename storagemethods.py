@@ -1,19 +1,12 @@
 import json
 import logging
-import configparser
 import types
-from os.path import expanduser
 import pymysql.cursors
 from pymysql.err import InterfaceError, IntegrityError
 from datetime import datetime, timedelta
 from pytz import timezone
 import time
-
-configdir = expanduser("~") + "/.config/detectivepikachu"
-configfile = configdir + "/config.ini"
-
-config = configparser.ConfigParser()
-config.read(configfile)
+from config import config
 
 db = None
 

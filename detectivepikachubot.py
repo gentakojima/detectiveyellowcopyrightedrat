@@ -22,10 +22,8 @@ import requests
 from io import StringIO
 import csv
 import signal
-from os.path import expanduser
 import os, sys
 import telegram
-import configparser
 from threading import Thread
 from unidecode import unidecode
 from datetime import datetime, timedelta
@@ -34,6 +32,7 @@ import tempfile
 import urllib.request
 import random
 from Levenshtein import distance
+from config import config
 
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, getPlacesByLocation, getAlerts, addAlert, delAlert, clearAlerts, getGroupsByUser, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location
@@ -46,21 +45,7 @@ signal.signal(signal.SIGINT, cleanup)
 logging.basicConfig(filename='/tmp/detectivepikachubot.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
 logging.info("--------------------- Starting bot! -----------------------")
 
-configdir = expanduser("~") + "/.config/detectivepikachu"
-configfile = configdir + "/config.ini"
-
-if not os.path.exists(configdir):
-  os.makedirs(configdir)
-if not os.path.exists(configfile):
-  f = open(configfile, "w")
-  f.write("[database]\nhost=localhost\nport=3306\nuser=detectivepikachu\npassword=detectivepikachu\nschema=detectivepikachu\n[telegram]\ntoken=xxx\nbotalias=detectivepikachubot\nbothelp=http://telegra.ph/Detective-Pikachu-09-28\nvalidationsmail=help@example.com\n[googlemaps]\nkey=xxx\n")
-  f.close()
-  print("Se acaba de crear el fichero de configuración en «»%s».\nComprueba la configuración y vuelve a ejecutarme." % configfile)
-  exit(1)
-
 refreshDb()
-config = configparser.ConfigParser()
-config.read(configfile)
 
 updater = Updater(token=config["telegram"]["token"])
 dispatcher = updater.dispatcher
@@ -574,8 +559,6 @@ def channelCommands(bot, update):
         else:
             # Default to process normal message for babysitter mode
             processMessage(bot,update)
-
-
 
 def settings(bot, update):
     logging.debug("detectivepikachubot:settings: %s %s" % (bot, update))
