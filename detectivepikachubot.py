@@ -51,7 +51,7 @@ refreshDb()
 updater = Updater(token=config["telegram"]["token"])
 dispatcher = updater.dispatcher
 dispatcher.add_error_handler(error_callback)
-gmaps = googlemaps.Client(key=config["googlemaps"]["key"])
+gmaps = googlemaps.Client(key=config["googlemaps"]["key"], retry_timeout=3)
 
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
