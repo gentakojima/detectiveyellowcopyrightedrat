@@ -23,7 +23,7 @@ egglist = ['N1','N2','N3','N4','N5','EX']
 
 validation_pokemons = ["chikorita", "machop", "growlithe", "diglett", "spinarak", "ditto", "teddiursa", "cubone", "sentret", "voltorb"]
 validation_profiles = ["model1", "model2", "model3"]
-validation_names = ["Cebolla", "Calabaza", "Puerro", "Cebolleta", "Remolacha", "Aceituna", "Pimiento", "Zanahoria", "Tomate", "Guisante", "Coliflor", "Pepino", "Berenjena", "Perejil", "Batata", "Aguacate", "Cebolleta", "Alcaparra", "Escarola", "Apio", "Lechuga", "Hinojo"]
+validation_names = ["Calabaza", "Puerro", "Cebolleta", "Remolacha", "Aceituna", "Pimiento", "Zanahoria", "Tomate", "Guisante", "Coliflor", "Pepino", "Berenjena", "Perejil", "Batata", "Aguacate", "Alcaparra", "Escarola", "Lechuga", "Hinojo"]
 
 def is_admin(chat_id, user_id, bot):
     is_admin = False
