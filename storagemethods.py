@@ -298,9 +298,9 @@ def getPlacesByLocation(latitude, longitude, distance=100):
         result = cursor.fetchall()
         return result
 
-def saveUser(user):
+def saveWholeUser(user):
     global db
-    logging.debug("storagemethods:saveUser: %s" % (user))
+    logging.debug("storagemethods:saveWholeUser: %s" % (user))
     with db.cursor() as cursor:
         sql = "INSERT INTO usuarios (id,level,team,username) VALUES (%s, %s, %s, %s) \
         ON DUPLICATE KEY UPDATE level=%s, team=%s, username=%s, banned=%s, trainername=%s, validation=%s;"
@@ -317,6 +317,17 @@ def saveUser(user):
         if "banned" not in user.keys():
             user["banned"] = 0
         cursor.execute(sql, (user["id"], user["level"], user["team"], user["username"], user["level"], user["team"], user["username"], user["banned"], user["trainername"], user["validation"]))
+    db.commit()
+
+def saveUser(user):
+    global db
+    logging.debug("storagemethods:saveUser: %s" % (user))
+    with db.cursor() as cursor:
+        sql = "INSERT INTO usuarios (id,username) VALUES (%s, %s) \
+        ON DUPLICATE KEY UPDATE username=%s;"
+        if "username" not in user.keys():
+            user["username"] = None
+        cursor.execute(sql, (user["id"], user["username"], user["username"]))
     db.commit()
 
 def refreshUsername(user_id, username):
