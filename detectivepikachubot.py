@@ -474,6 +474,7 @@ def processMessage(bot, update):
     return
 
 def channelCommands(bot, update):
+    logging.debug("detectivepikachubot:channelCommands: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     try:
@@ -483,6 +484,7 @@ def channelCommands(bot, update):
     m = re.match("/([a-z0-9_]+)", text)
     if m != None:
         command = m.group(1)
+        logging.debug("detectivepikachubot:channelCommands: Possible command %s" % command)
         if command == "setspreadsheet":
             setspreadsheet(bot, update, args)
         elif command == "settimezone":
@@ -503,6 +505,10 @@ def channelCommands(bot, update):
             cancelar(bot, update, args)
         elif command == "reflotar":
             reflotar(bot, update, args)
+        elif command == "reflotartodo" or command=="reflotartodas":
+            reflotartodas(bot, update, args)
+        elif command == "reflotarhoy":
+            reflotarhoy(bot, update, args)
         elif command == "cambiarhora" or command == "hora":
             cambiarhora(bot, update, args)
         elif command == "cambiarhorafin" or command == "horafin":
@@ -1165,7 +1171,7 @@ def reflotartodas(bot, update, args=None):
 
     delete_message(chat_id, message.message_id, bot)
 
-    if not is_admin(chat_id, user_id, bot):
+    if chat_type != "channel" and not is_admin(chat_id, user_id, bot):
         return
 
     raids = getActiveRaidsforGroup(chat_id)
@@ -1194,7 +1200,7 @@ def reflotarhoy(bot, update, args=None):
 
     delete_message(chat_id, message.message_id, bot)
 
-    if not is_admin(chat_id, user_id, bot):
+    if chat_type != "channel" and not is_admin(chat_id, user_id, bot):
         return
 
     group = getGroup(chat_id)
