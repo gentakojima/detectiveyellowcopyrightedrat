@@ -478,12 +478,12 @@ def channelCommands(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     try:
-        args = re.sub(r"^/[a-z0-9_]+", "", text).strip().split(" ")
+        args = re.sub(r"^/[a-zA-Z0-9_]+", "", text).strip().split(" ")
     except:
         args = None
-    m = re.match("/([a-z0-9_]+)", text)
+    m = re.match("/([a-zA-Z0-9_]+)", text)
     if m != None:
-        command = m.group(1)
+        command = m.group(1).lower()
         logging.debug("detectivepikachubot:channelCommands: Possible command %s" % command)
         if command == "setspreadsheet":
             setspreadsheet(bot, update, args)
