@@ -332,9 +332,9 @@ def get_settings_keyboard(chat_id):
     else:
         alertas_text = "▪️ Alertas"
     if group["disaggregated"] == 1:
-        disaggregated_text = "✅ Total disagregado"
+        disaggregated_text = "✅ Total disgregado"
     else:
-        disaggregated_text = "▪️ Total disagregado"
+        disaggregated_text = "▪️ Total disgregado"
     if group["latebutton"] == 1:
         latebutton_text = "✅ ¡Llego tarde!"
     else:
