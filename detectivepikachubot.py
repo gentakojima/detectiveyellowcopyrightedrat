@@ -1444,7 +1444,7 @@ def raidbutton(bot, update):
       else:
           group = getGroup(chat_id)
           group["icontheme"] = group["icontheme"] + 1
-          if group["icontheme"] > 2:
+          if group["icontheme"] > 3:
               group["icontheme"] = 0
           saveGroup(group)
           update_settings_message(chat_id, bot)

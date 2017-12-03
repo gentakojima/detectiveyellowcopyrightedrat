@@ -122,6 +122,17 @@ def format_message(raid):
     gente = getRaidPeople(raid["id"])
     group = getGroup(raid["grupo_id"])
 
+    if group["icontheme"] == 0:
+        icons = { "Rojo": "🔥", "Azul": "❄️", "Amarillo": "⚡️" }
+    elif group["icontheme"] == 1:
+        icons = { "Rojo": "🔴", "Azul": "🔵", "Amarillo": "🌕" }
+    elif group["icontheme"] == 2:
+        icons = { "Rojo": "❤", "Azul": "💙", "Amarillo": "💛" }
+    elif group["icontheme"] == 3:
+        icons = { "Rojo": "🔴", "Azul": "🔵", "Amarillo": "🔶" }
+    else:
+        icons = { "Rojo": "🔥", "Azul": "❄️", "Amarillo": "⚡️" }
+
     if "edited" in raid.keys() and raid["edited"]>0:
         text_edited = " <em>(editada)</em>"
     else:
@@ -157,7 +168,7 @@ def format_message(raid):
     else:
         if group["disaggregated"] == 1:
             (numazules, numrojos, numamarillos, numotros, numgente) = count_people_disaggregated(gente)
-            text = text + "❄️%s · 🔥%s · ⚡️%s · ❓%s · 👩‍👩‍👧‍👧%s" % (numazules, numrojos, numamarillos, numotros, numgente)
+            text = text + "%s%s · %s%s · %s%s · ❓%s · 👩‍👩‍👧‍👧%s" % (icons["Azul"], numazules, icons["Rojo"], numrojos, icons["Amarillo"], numamarillos, numotros, numgente)
         else:
             numgente = count_people(gente)
             text = text + "%s entrenadores apuntados:" % numgente
@@ -184,38 +195,17 @@ def format_message(raid):
             if user["level"] != None and user["team"] != None:
                 if user["team"] != None:
                     if user["team"]=="Rojo":
-                        if group["icontheme"] == 0:
-                            team_badge = "🔥"
-                        elif group["icontheme"] == 1:
-                            team_badge = "🔴"
-                        elif group["icontheme"] == 2:
-                            team_badge = "❤"
-                        else:
-                            team_badge = "❓"
+                        team_badge = icons["Rojo"]
                     elif user["team"]=="Amarillo":
-                        if group["icontheme"] == 0:
-                            team_badge = "⚡️"
-                        elif group["icontheme"] == 1:
-                            team_badge = "🌕"
-                        elif group["icontheme"] == 2:
-                            team_badge = "💛"
-                        else:
-                            team_badge = "❓"
+                        team_badge = icons["Amarillo"]
                     else:
-                        if group["icontheme"] == 0:
-                            team_badge = "❄️"
-                        elif group["icontheme"] == 1:
-                            team_badge = "🔵"
-                        elif group["icontheme"] == 2:
-                            team_badge = "💙"
-                        else:
-                            team_badge = "❓"
+                        team_badge = icons["Azul"]
                 if user["trainername"] != None:
                     text = text + "\n%s%s%s <a href='https://t.me/%s'>%s</a>%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["trainername"],lotengo_text,plus_text)
                 else:
-                    text = text + "\n%s%s%s @%s%s%s" % (estoy_text,team_badge,user["level"],user["username"],lotengo_text,plus_text)
+                    text = text + "\n%s%s%s <a href='https://t.me/%s'>@%s</a>%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["username"],lotengo_text,plus_text)
             else:
-                text = text + "\n%s➖ - - @%s%s%s" % (estoy_text,user["username"],lotengo_text,plus_text)
+                text = text + "\n%s➖ - - <a href='https://t.me/%s'>@%s</a>%s%s" % (estoy_text,user["username"],user["username"],lotengo_text,plus_text)
     return text
 
 def format_text_pokemon(pokemon, egg, format="markdown"):
@@ -385,8 +375,10 @@ def get_settings_keyboard(chat_id):
         icontheme_text = "❄️🔥⚡️ Iconos"
     elif group["icontheme"] == 1:
         icontheme_text = "🔵🔴🌕 Iconos"
-    else:
+    elif group["icontheme"] == 2:
         icontheme_text = "💙❤💛 Iconos"
+    else:
+        icontheme_text = "🔵🔴🔶 Iconos"
     settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
     [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
     [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme'), InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
