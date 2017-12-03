@@ -321,9 +321,9 @@ def get_settings_keyboard(chat_id):
     else:
         alertas_text = "▪️ Alertas"
     if group["disaggregated"] == 1:
-        disaggregated_text = "✅ Total desagregado"
+        disaggregated_text = "✅ Total disagregado"
     else:
-        disaggregated_text = "▪️ Total desagregado"
+        disaggregated_text = "▪️ Total disagregado"
     if group["latebutton"] == 1:
         latebutton_text = "✅ ¡Llego tarde!"
     else:
@@ -422,8 +422,8 @@ def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username
         raid = getRaid(raid_id)
     else:
         delete_message(chat_id, message.message_id, bot)
-        user_text = "@%s" % ensure_escaped(user_username) if user_username != None else "Se"
-        text = "%s el comando `/%s` solo funciona por privado o contestando al mensaje de la incursión.\n\n_(Este mensaje se borrará en unos segundos)_" % (user_text, command)
+        user_text = "@%s el" % ensure_escaped(user_username) if user_username != None else "El"
+        text = "%s comando `/%s` solo funciona por privado o contestando al mensaje de la incursión.\n\n_(Este mensaje se borrará en unos segundos)_" % (user_text, command)
         sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         raid = None
