@@ -20,6 +20,14 @@ from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, C
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
 egglist = ['N1','N2','N3','N4','N5','EX']
+iconthemes = [
+    { "Rojo": "🔥", "Azul": "❄️", "Amarillo": "⚡️" },
+    { "Rojo": "🔴", "Azul": "🔵", "Amarillo": "🌕" },
+    { "Rojo": "❤", "Azul": "💙", "Amarillo": "💛" },
+    { "Rojo": "🔴", "Azul": "🔵", "Amarillo": "🔶" },
+    { "Rojo": "♦️", "Azul": "🔷", "Amarillo": "🔶" },
+    { "Rojo": "🦊", "Azul": "🐳", "Amarillo": "🐥" }
+]
 
 validation_pokemons = ["chikorita", "machop", "growlithe", "diglett", "spinarak", "ditto", "teddiursa", "cubone", "sentret", "voltorb"]
 validation_profiles = ["model1", "model2", "model3"]
@@ -121,17 +129,7 @@ def format_message(raid):
     creador = getCreadorRaid(raid["id"])
     gente = getRaidPeople(raid["id"])
     group = getGroup(raid["grupo_id"])
-
-    if group["icontheme"] == 0:
-        icons = { "Rojo": "🔥", "Azul": "❄️", "Amarillo": "⚡️" }
-    elif group["icontheme"] == 1:
-        icons = { "Rojo": "🔴", "Azul": "🔵", "Amarillo": "🌕" }
-    elif group["icontheme"] == 2:
-        icons = { "Rojo": "❤", "Azul": "💙", "Amarillo": "💛" }
-    elif group["icontheme"] == 3:
-        icons = { "Rojo": "🔴", "Azul": "🔵", "Amarillo": "🔶" }
-    else:
-        icons = { "Rojo": "🔥", "Azul": "❄️", "Amarillo": "⚡️" }
+    icons = iconthemes[group["icontheme"]]
 
     if "edited" in raid.keys() and raid["edited"]>0:
         text_edited = " <em>(editada)</em>"
@@ -371,14 +369,9 @@ def get_settings_keyboard(chat_id):
         timeformat_text = "✅ Horas AM/PM"
     else:
         timeformat_text = "▪️ Horas AM/PM"
-    if group["icontheme"] == 0:
-        icontheme_text = "❄️🔥⚡️ Iconos"
-    elif group["icontheme"] == 1:
-        icontheme_text = "🔵🔴🌕 Iconos"
-    elif group["icontheme"] == 2:
-        icontheme_text = "💙❤💛 Iconos"
-    else:
-        icontheme_text = "🔵🔴🔶 Iconos"
+    icons = iconthemes[group["icontheme"]]
+    icontheme_text = "%s%s%s Iconos" % (icons["Rojo"],icons["Azul"],icons["Amarillo"])
+
     settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
     [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
     [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme'), InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
