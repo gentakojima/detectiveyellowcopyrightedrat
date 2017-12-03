@@ -744,6 +744,13 @@ def raid(bot, update, args=None):
   if args[0] == "de":
     del args[0]
 
+  if args[0].lower() == "nivel" and args[1] in ["1","2","3","4","5"]:
+      del args[0]
+      args[0] = "N%s" % args[0]
+
+  if args[0].lower() == "legendaria":
+      args[0] = "N5"
+
   (current_raid["pokemon"], current_raid["egg"]) = parse_pokemon(args[0])
   if current_raid["pokemon"] == None and current_raid["egg"] == None:
     if chat_type != "channel":
