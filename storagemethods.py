@@ -31,40 +31,18 @@ def searchTimezone(tz):
 def saveGroup(group):
     global db
     logging.debug("storagemethods:saveSpreadsheet: %s" % (group))
-    if "settings_message" not in group.keys():
-        group["settings_message"] = None
-    if "spreadsheet" not in group.keys():
-        group["spreadsheet"] = None
-    if "talkgroup" not in group.keys():
-        group["talkgroup"] = None
-    if "alerts" not in group.keys():
-        group["alerts"] = 1
-    if "disaggregated" not in group.keys():
-        group["disaggregated"] = 0
-    if "latebutton" not in group.keys():
-        group["latebutton"] = 0
-    if "refloat" not in group.keys():
-        group["refloat"] = 0
-    if "candelete" not in group.keys():
-        group["candelete"] = 1
-    if "gotitbuttons" not in group.keys():
-        group["gotitbuttons"] = 0
-    if "locations" not in group.keys():
-        group["locations"] = 1
-    if "gymcommand" not in group.keys():
-        group["gymcommand"] = 0
-    if "raidcommand" not in group.keys():
-        group["raidcommand"] = 1
-    if "babysitter" not in group.keys():
-        group["babysitter"] = 0
     if "timezone" not in group.keys():
-        group["timezone"] = 0
-    if "timeformat" not in group.keys():
-        group["timeformat"] = 0
-    if "alias" not in group.keys():
-        group["alias"] = None
-    if "icontheme" not in group.keys():
-        group["icontheme"] = 0
+        group["timezone"] = "Europe/Madrid"
+    for k in ["settings_message","spreadsheet","talkgroup","alias"]:
+        if k not in group.keys():
+            group[k] = None
+    for k in ["disaggregated","latebutton","refloat","gotitbuttons","gymcommand","babysitter","timeformat","icontheme"]:
+        if k not in group.keys():
+            group[k] = 0
+    for k in ["alerts","candelete","locations","raidcommand"]:
+        if k not in group.keys():
+            group[k] = 1
+    with db.cursor() as cursor:
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, alias, spreadsheet) VALUES (%s, %s, %s, %s) \
         ON DUPLICATE KEY UPDATE title = %s, alias = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s, talkgroup = %s, timeformat = %s, icontheme = %s;"
@@ -306,18 +284,13 @@ def saveWholeUser(user):
     with db.cursor() as cursor:
         sql = "INSERT INTO usuarios (id,level,team,username) VALUES (%s, %s, %s, %s) \
         ON DUPLICATE KEY UPDATE level=%s, team=%s, username=%s, banned=%s, trainername=%s, validation=%s;"
-        if "level" not in user.keys():
-            user["level"] = None
-        if "team" not in user.keys():
-            user["team"] = None
-        if "username" not in user.keys():
-            user["username"] = None
         if "validation" not in user.keys():
             user["validation"] = "none"
-        if "trainername" not in user.keys():
-            user["trainername"] = None
         if "banned" not in user.keys():
             user["banned"] = 0
+        for k in ["trainername","username","team","level"]:
+            if k not in user.keys():
+                user[k] = None
         cursor.execute(sql, (user["id"], user["level"], user["team"], user["username"], user["level"], user["team"], user["username"], user["banned"], user["trainername"], user["validation"]))
     db.commit()
 
@@ -395,24 +368,15 @@ def isBanned(user_id):
 def saveRaid(raid):
     global db
     logging.debug("storagemethods:saveRaid: %s" % (raid))
-    if "gimnasio_id" not in raid.keys():
-        raid["gimnasio_id"] = None
-    if "message" not in raid.keys():
-        raid["message"] = None
-    if "timeraid" not in raid.keys():
-        raid["timeraid"] = None
-    if "timeend" not in raid.keys():
-        raid["timeend"] = None
     if "status" not in raid.keys():
         raid["status"] = "waiting"
     if "edited" not in raid.keys():
         raid["edited"] = 0
     if "refloated" not in raid.keys():
         raid["refloated"] = 0
-    if "pokemon" not in raid.keys():
-        raid["pokemon"] = None
-    if "egg" not in raid.keys():
-        raid["egg"] = None
+    for k in ["egg","pokemon","timeend","timeraid","message","gimnasio_id"]:
+        if k not in raid.keys():
+            raid[k] = None
     if "id" not in raid.keys():
         with db.cursor() as cursor:
             sql = "SELECT id FROM grupos WHERE id=%s"
