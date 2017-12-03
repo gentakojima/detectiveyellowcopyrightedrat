@@ -184,11 +184,32 @@ def format_message(raid):
             if user["level"] != None and user["team"] != None:
                 if user["team"] != None:
                     if user["team"]=="Rojo":
-                        team_badge = "🔥"
+                        if group["icontheme"] == 0:
+                            team_badge = "🔥"
+                        elif group["icontheme"] == 1:
+                            team_badge = "🔴"
+                        elif group["icontheme"] == 2:
+                            team_badge = "❤"
+                        else:
+                            team_badge = "❓"
                     elif user["team"]=="Amarillo":
-                        team_badge = "⚡️"
+                        if group["icontheme"] == 0:
+                            team_badge = "⚡️"
+                        elif group["icontheme"] == 1:
+                            team_badge = "🌕"
+                        elif group["icontheme"] == 2:
+                            team_badge = "💛"
+                        else:
+                            team_badge = "❓"
                     else:
-                        team_badge = "❄️"
+                        if group["icontheme"] == 0:
+                            team_badge = "❄️"
+                        elif group["icontheme"] == 1:
+                            team_badge = "🔵"
+                        elif group["icontheme"] == 2:
+                            team_badge = "💙"
+                        else:
+                            team_badge = "❓"
                 if user["trainername"] != None:
                     text = text + "\n%s%s%s <a href='https://t.me/%s'>%s</a>%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["trainername"],lotengo_text,plus_text)
                 else:
@@ -360,9 +381,15 @@ def get_settings_keyboard(chat_id):
         timeformat_text = "✅ Horas AM/PM"
     else:
         timeformat_text = "▪️ Horas AM/PM"
+    if group["icontheme"] == 0:
+        icontheme_text = "❄️🔥⚡️ Iconos"
+    elif group["icontheme"] == 1:
+        icontheme_text = "🔵🔴🌕 Iconos"
+    else:
+        icontheme_text = "💙❤💛 Iconos"
     settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
     [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
-    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
+    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme'), InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 

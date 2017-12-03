@@ -42,6 +42,7 @@ CREATE TABLE `grupos` (
   `talkgroup` VARCHAR(60) NULL DEFAULT NULL,
   `babysitter` TINYINT NOT NULL DEFAULT '0',
   `timeformat` TINYINT NOT NULL DEFAULT '0',
+  `icontheme` TINYINT NOT NULL DEFAULT '0',
   `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

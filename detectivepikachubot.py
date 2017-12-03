@@ -1438,6 +1438,17 @@ def raidbutton(bot, update):
               saveGroup(group)
               update_settings_message(chat_id, bot)
 
+  if data=="settings_icontheme":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          group = getGroup(chat_id)
+          group["icontheme"] = group["icontheme"] + 1
+          if group["icontheme"] > 2:
+              group["icontheme"] = 0
+          saveGroup(group)
+          update_settings_message(chat_id, bot)
+
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
