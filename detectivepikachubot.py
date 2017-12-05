@@ -741,7 +741,7 @@ def raid(bot, update, args=None):
   else:
     current_raid["username"] = None
 
-  if args[0] == "de":
+  if args[0].lower() == "de":
     del args[0]
 
   if args[0].lower() == "nivel" and args[1] in ["1","2","3","4","5"]:
@@ -761,7 +761,7 @@ def raid(bot, update, args=None):
     return
 
   del args[0]
-  if args[0] == "a" and (args[1] == "las" or args[1] == "la"):
+  if args[0].lower() == "a" and (args[1].lower() == "las" or args[1].lower() == "la"):
     del args[0]
     del args[0]
 
@@ -807,7 +807,7 @@ def raid(bot, update, args=None):
           pass
 
   del args[0]
-  if args[0] == "en":
+  if args[0].lower() == "en":
     del args[0]
 
   current_raid["gimnasio_text"] = ""
