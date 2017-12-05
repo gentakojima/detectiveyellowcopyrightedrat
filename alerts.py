@@ -8,7 +8,7 @@ def alerts(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    if isBanned(user_id):
+    if user_id!=None and isBanned(user_id):
         return
 
     if edit_check_private(chat_id, chat_type, user_username, "alerts", bot) == False:
@@ -33,7 +33,7 @@ def addalert(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    if isBanned(user_id):
+    if user_id!=None and isBanned(user_id):
         return
 
     if edit_check_private(chat_id, chat_type, user_username, "addalert", bot) == False:
@@ -69,7 +69,7 @@ def delalert(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    if isBanned(user_id):
+    if user_id!=None and isBanned(user_id):
         return
 
     if edit_check_private(chat_id, chat_type, user_username, "delalert", bot) == False:
@@ -95,7 +95,7 @@ def clearalerts(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    if isBanned(user_id):
+    if user_id!=None and isBanned(user_id):
         return
 
     if edit_check_private(chat_id, chat_type, user_username, "clearalerts", bot) == False:
@@ -112,7 +112,7 @@ def processLocation(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     location = message.location
 
-    if isBanned(user_id):
+    if user_id!=None and isBanned(user_id):
         return
 
     if chat_type == "private":
