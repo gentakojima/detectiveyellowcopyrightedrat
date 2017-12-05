@@ -622,7 +622,7 @@ def parse_profile_image(filename, desired_pokemon):
                 break
     logging.debug("supportmethods:parse_profile_image: Chosen profile: %s" % chosen_profile)
 
-    # Extract Team
+    # Prepare color boundaries to extract team
     team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
     boundaries = {
         "Rojo": ([0, 0, 150], [70, 20, 255]),
@@ -647,23 +647,27 @@ def parse_profile_image(filename, desired_pokemon):
             chosen_color = color
     logging.debug("supportmethods:parse_profile_image: Chosen color: %s" % chosen_color)
 
+    # Prepare color boundaries to extract level, trainer and pokémon name
+    boundaries = {
+        "Rojo": ([35, 10, 105], [95, 80, 190]),
+        "Azul": ([90, 75, 0], [190, 125, 70]),
+        "Amarillo": ([0, 105, 200], [80, 180, 255])
+    }
+	# create NumPy arrays from the boundaries
+    lower = np.array(boundaries[chosen_color][0], dtype = "uint8")
+    upper = np.array(boundaries[chosen_color][1], dtype = "uint8")
+
     # Extract and OCR trainer and Pokémon name
     nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
-    if chosen_color == "Amarillo":
-        min_thres = 170
-    elif chosen_color == "Rojo":
-        nick1_img[:, :, 2] = 0
-        min_thres = 53
-    elif chosen_color == "Azul":
-        nick1_img[:, :, 0] = 0
-        min_thres = 110
-    nick1_gray = cv2.cvtColor(nick1_img, cv2.COLOR_BGR2GRAY)
-    ret,nick1_gray = cv2.threshold(nick1_gray,min_thres,255,cv2.THRESH_BINARY)
+    # find colors within the specified boundaries
+    nick1_gray = cv2.inRange(nick1_img, lower, upper)
+    nick1_gray = 255 - nick1_gray
+    # Do the OCR
     cv2.imwrite(tmpfilename, nick1_gray)
     text = pytesseract.image_to_string(Image.open(tmpfilename))
     trainer_name = re.sub(r'\n+.*$','',text)
     trainer_name = trainer_name.replace(" ","").replace("|","l").replace("ﬁ","ri")
-    pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text)
+    pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text).replace(" ","")
     logging.debug("supportmethods:parse_profile_image: Trainer name: %s" % trainer_name)
     logging.debug("supportmethods:parse_profile_image: Pokemon name: %s" % pokemon_name)
 
@@ -672,19 +676,16 @@ def parse_profile_image(filename, desired_pokemon):
         level1_img = image[int(height/2+2*height/13):int(height-height/4-height/22),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
     else:
         level1_img = image[int(height/2+height/8):int(height-height/4-height/16),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
-
-    if chosen_color == "Amarillo":
-        min_thres = 170
-    elif chosen_color == "Rojo":
-        level1_img[:, :, 2] = 0
-        min_thres = 50
-    elif chosen_color == "Azul":
-        level1_img[:, :, 0] = 0
-        min_thres = 130
-    level1_gray = cv2.cvtColor(level1_img, cv2.COLOR_BGR2GRAY)
-    ret,level1_gray = cv2.threshold(level1_gray,min_thres,255,cv2.THRESH_BINARY)
+    # find colors within the specified boundaries
+    level1_gray = cv2.inRange(level1_img, lower, upper)
+    level1_gray = 255 - level1_gray
+    # Do the OCR
     cv2.imwrite(tmpfilename, level1_gray)
     level = pytesseract.image_to_string(Image.open(tmpfilename), config="-psm 6")
+    level = re.sub('O','0',level)
+    numbers = re.findall(r'\d+', level)
+    if len(numbers)>0:
+        level = numbers[0]
     logging.debug("supportmethods:parse_profile_image: Level: %s" % level)
     if int(level)<5 or int(level)>40:
         level = None
