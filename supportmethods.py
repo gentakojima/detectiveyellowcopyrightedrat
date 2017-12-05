@@ -113,10 +113,16 @@ def send_alerts(raid, bot):
     alerts = getAlertsByPlace(raid["gimnasio_id"])
     group = getGroup(raid["grupo_id"])
     if group["alerts"] == 1:
-        what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
+        what_text = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
         what_day = format_text_day(raid["timeraid"], group["timezone"])
+        if group["alias"] != None:
+            incursion_text = "<a href='https://t.me/%s/%s'>incursión</a>" % (group["alias"], raid["message"])
+            group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], group["title"])
+        else:
+            incursion_text = "incursión"
+            group_text = "<em>%s</em>" % group["title"]
         for alert in alerts:
-            bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una incursión %s en *%s* %sa las *%s* en el grupo _%s_.\n\n_Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando_ `/clearalerts`" % (what_text, raid["gimnasio_text"], what_day, extract_time(raid["timeraid"]), group["title"]), parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una %s %s en <b>%s</b> %sa las <b>%s</b> en el grupo %s.\n\n<i>Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando</i> <code>/clearalerts</code>" % (incursion_text, what_text, raid["gimnasio_text"], what_day, extract_time(raid["timeraid"]), group_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def update_message(chat_id, message_id, reply_markup, bot):
     logging.debug("supportmethods:update_message: %s %s %s" % (chat_id, message_id, reply_markup))
@@ -289,30 +295,34 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
     notwarned = []
     if people == None:
         return
+    if group["alias"] != None:
+        incursion_text = "<a href='https://t.me/%s/%s'>incursión</a>" % (group["alias"], raid["message"])
+    else:
+        incursion_text = "incursión"
     for p in people:
         if p["username"] == user_username:
             continue
         try:
-            user_text = "@%s" % ensure_escaped(user_username) if user_username != None else "Se"
+            user_text = "@%s" % user_username if user_username != None else "Se"
             if warntype == "cancelar":
-                text = "❌ %s ha *cancelado* la incursión de %s a las %s en %s" % (user_text, raid["pokemon"], extract_time(raid["timeraid"]), ensure_escaped(raid["gimnasio_text"]))
+                text = "❌ %s ha <b>cancelado</b> la %s de %s a las %s en %s" % (user_text, incursion_text, raid["pokemon"], extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "borrar":
-                text = "🚫 %s ha *borrado* la incursión de %s a las %s en %s" % (user_text, raid["pokemon"], extract_time(raid["timeraid"]), ensure_escaped(raid["gimnasio_text"]))
+                text = "🚫 %s ha <b>borrado</b> la incursión de %s a las %s en %s" % (user_text, raid["pokemon"], extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarhora":
                 text_day = format_text_day(raid["timeraid"], group["timezone"])
                 if text_day != "":
                     text_day = " " + text_day
-                text = "⚠️ %s ha cambiado la hora de la incursión de %s en %s para las *%s*%s" % (user_text, raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), extract_time(raid["timeraid"]), text_day)
+                text = "⚠️ %s ha cambiado la hora de la %s de %s en %s para las <b>%s</b>%s" % (user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]), text_day)
             elif warntype == "cambiarhorafin":
-                text = "⚠️ %s ha cambiado la hora a la que se termina la incursión de %s en %s a las *%s* (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
+                text = "⚠️ %s ha cambiado la hora a la que se termina la %s de %s en %s a las <b>%s</b> (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
             elif warntype == "borrarhorafin":
-                text = "⚠️ %s ha borrado la hora a la que se termina la incursión de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, raid["pokemon"], ensure_escaped(raid["gimnasio_text"]), extract_time(raid["timeraid"]))
+                text = "⚠️ %s ha borrado la hora a la que se termina la %s de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]))
             elif warntype == "cambiargimnasio":
-                text = "⚠️ %s ha cambiado el gimnasio de la incursión de %s para las %s a *%s*" % (user_text, raid["pokemon"], extract_time(raid["timeraid"]), ensure_escaped(raid["gimnasio_text"]))
+                text = "⚠️ %s ha cambiado el gimnasio de la %s de %s para las %s a <b>%s</b>" % (user_text, incursion_text, raid["pokemon"], extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarpokemon":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"])
-                text = "⚠️ %s ha cambiado la incursión para las %s en %s a incursión %s" % (user_text, extract_time(raid["timeraid"]), ensure_escaped(raid["gimnasio_text"]), text_pokemon)
-            bot.sendMessage(chat_id=p["id"], text=text, parse_mode=telegram.ParseMode.MARKDOWN)
+                text = "⚠️ %s ha cambiado la %s para las %s en %s a incursión %s" % (user_text, incursion_text, extract_time(raid["timeraid"]), raid["gimnasio_text"], text_pokemon)
+            bot.sendMessage(chat_id=p["id"], text=text, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
             warned.append(p["username"])
         except Exception as e:
             logging.debug("supportmethods:warn_people error sending message to %s: %s" % (p["username"],str(e)))
