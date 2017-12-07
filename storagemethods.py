@@ -453,7 +453,7 @@ def getGrupoRaid(raid_id):
     global db
     logging.debug("storagemethods:getGrupoRaid: %s" % (raid_id))
     with db.cursor() as cursor:
-        sql = "SELECT `grupos`.`id` AS `id`, `grupos`.`title` AS `title`, `grupos`.`locations` AS `locations`, `grupos`.`timezone` AS `timezone` FROM `incursiones` LEFT JOIN `grupos` ON `grupos`.`id` = `incursiones`.`grupo_id` WHERE `incursiones`.`id`=%s"
+        sql = "SELECT `grupos`.`id` AS `id`, `grupos`.`title` AS `title`, `grupos`.`locations` AS `locations`, `grupos`.`timezone` AS `timezone`, `grupos`.`alias` AS `alias` FROM `incursiones` LEFT JOIN `grupos` ON `grupos`.`id` = `incursiones`.`grupo_id` WHERE `incursiones`.`id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
         return result

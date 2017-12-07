@@ -594,31 +594,37 @@ def raids(bot, update):
             creador = getCreadorRaid(r["id"])
             group = getGrupoRaid(r["id"])
             gym_emoji = created_text = identifier_text = ""
+            if group["alias"] != None:
+                incursion_text = "<a href='https://t.me/%s/%s'>Incursión</a>" % (group["alias"], r["message"])
+                group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], group["title"])
+            else:
+                incursion_text = "Incursión"
+                group_text = "<em>%s</em>" % group["title"]
             if group["locations"] == 1:
                 if "gimnasio_id" in r.keys() and r["gimnasio_id"] != None:
                     gym_emoji="🌎"
                 else:
                     gym_emoji="❓"
             if r["pokemon"] != None:
-                what_text = "*%s*" % r["pokemon"]
+                what_text = "<b>%s</b>" % r["pokemon"]
             else:
-                what_text= r["egg"].replace("N","*Nivel ").replace("EX","*EX") + "*"
-            what_day = format_text_day(r["timeraid"], group["timezone"])
+                what_text= r["egg"].replace("N","<b>Nivel ").replace("EX","<b>EX") + "</b>"
+            what_day = format_text_day(r["timeraid"], group["timezone"], "html")
             if creador["username"] != None:
                 created_text = " por @%s" % (ensure_escaped(creador["username"]))
             if is_admin(r["grupo_id"], user_id, bot):
-                identifier_text = " (id `%s`)" % r["id"]
+                identifier_text = " (id <code>%s</code>)" % r["id"]
             if r["status"] == "waiting":
                 raid_emoji = "🕒"
             elif r["status"] == "started":
                 raid_emoji = "💥"
             else:
-                raid_emoji = "✌"
-            text = "\n%s %s %sa las *%s* en %s*%s*%s%s - Grupo %s" % (raid_emoji, what_text, what_day, extract_time(r["timeraid"]), gym_emoji, r["gimnasio_text"], created_text, identifier_text, group["title"])
+                continue
+            text = "\n%s %s %sa las <b>%s</b> en %s<b>%s</b>%s%s - %s en %s" % (raid_emoji, what_text, what_day, extract_time(r["timeraid"]), gym_emoji, r["gimnasio_text"], created_text, identifier_text, incursion_text, group_text)
             output = output + text
     else:
         output = "🐲 No hay incursiones activas en los grupos en los que has participado recientemente"
-    bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def profile(bot, update):
     logging.debug("detectivepikachubot:profile: %s %s" % (bot, update))
