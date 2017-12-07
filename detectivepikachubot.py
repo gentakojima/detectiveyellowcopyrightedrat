@@ -547,6 +547,11 @@ def settings(bot, update):
         except:
             pass
 
+    group_alias = None
+    if hasattr(message.chat, 'username') and message.chat.username != None:
+        group_alias = message.chat.username
+    group["alias"] = group_alias
+
     settings_markup = get_settings_keyboard(chat_id)
     message = bot.sendMessage(chat_id=chat_id, text="Cargando preferencias del grupo. Un momento...")
     group["settings_message"] = message.message_id
