@@ -616,7 +616,7 @@ def raids(bot, update):
                 what_text= r["egg"].replace("N","<b>Nivel ").replace("EX","<b>EX") + "</b>"
             what_day = format_text_day(r["timeraid"], group["timezone"], "html")
             if creador["username"] != None:
-                created_text = " por @%s" % (ensure_escaped(creador["username"]))
+                created_text = " por @%s" % (creador["username"])
             if is_admin(r["grupo_id"], user_id, bot):
                 identifier_text = " (id <code>%s</code>)" % r["id"]
             if r["status"] == "waiting":
