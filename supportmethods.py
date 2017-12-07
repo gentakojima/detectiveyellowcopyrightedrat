@@ -649,9 +649,9 @@ def parse_profile_image(filename, desired_pokemon):
 
     # Prepare color boundaries to extract level, trainer and pokémon name
     boundaries = {
-        "Rojo": ([35, 10, 105], [95, 80, 190]),
+        "Rojo": ([35, 10, 105], [100, 90, 190]),
         "Azul": ([90, 75, 0], [190, 125, 70]),
-        "Amarillo": ([0, 105, 200], [80, 180, 255])
+        "Amarillo": ([0, 105, 200], [105, 198, 255])
     }
 	# create NumPy arrays from the boundaries
     lower = np.array(boundaries[chosen_color][0], dtype = "uint8")
