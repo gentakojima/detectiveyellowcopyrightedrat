@@ -26,15 +26,15 @@ import os, sys
 import telegram
 from threading import Thread
 from unidecode import unidecode
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from pytz import timezone
 import tempfile
 import urllib.request
 import random
 from Levenshtein import distance
-from config import config
 
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup
+from config import config
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getRaidsforUserGroup
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
@@ -656,6 +656,61 @@ def profile(bot, update):
     else:
         output = "❌ No tengo información sobre ti."
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
+
+def stats(bot, update):
+    logging.debug("detectivepikachubot:stats: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    user_username = message.from_user.username
+
+    if edit_check_private(chat_id, chat_type, user_username, "stats", bot) == False:
+        delete_message(chat_id, message.message_id, bot)
+        return
+
+    user = getUser(chat_id)
+    if user != None:
+        groups = getGroupsByUser(user["id"])
+        # Groups
+        groups_text = ""
+        valid_groups = 0
+        for g in groups:
+            if g["testgroup"] == 1:
+                continue
+            if g["alias"] != None:
+                groups_text  = groups_text + "\n - <a href='https://t.me/%s'>%s</a>" % (g["alias"],g["title"])
+            else:
+                groups_text  = groups_text + "\n - <i>%s</i>" % (g["title"])
+            valid_groups = valid_groups + 1
+        output = "Participas en incursiones de <b>%s</b> canales/grupos: %s" % (valid_groups, groups_text)
+
+        # Raids
+        for g in groups:
+            if g["testgroup"] == 1:
+                continue
+            if g["alias"] != None:
+                group_text = "<a href='https://t.me/%s'>%s</a>" % (g["alias"],g["title"])
+            else:
+                group_text = "<i>%s</i>" % (g["title"])
+            raids = getRaidsforUserGroup(user["id"], g["id"])
+            lastweek_raids = []
+            twoweeksago_raids = []
+            for r in raids:
+                for g in groups:
+                    if g["id"] == r["grupo_id"]:
+                        group = g
+                now = datetime.now(timezone(group["timezone"]))
+                lastweek_start = now - timedelta(days=date.today().weekday(), weeks=1)
+                lastweek_end = now - timedelta(days=date.today().weekday())
+                twoweeksago_start = now - timedelta(days=date.today().weekday(), weeks=2)
+                twoweeksago_end = now - timedelta(days=date.today().weekday(), weeks=1)
+                raidtime = r["timeraid"].replace(tzinfo=timezone(group["timezone"]))
+                if raidtime > lastweek_start and raidtime < lastweek_end:
+                    lastweek_raids.append(r)
+                elif raidtime > twoweeksago_start and raidtime < twoweeksago_end:
+                    twoweeksago_raids.append(r)
+            output = output + "\n\n%s:\n - <b>%s</b> incursiones la semana pasada.\n - <b>%s</b> incursiones hace dos semanas." % (group_text, len(lastweek_raids), len(twoweeksago_raids))
+    else:
+        output = "❌ No tengo información sobre ti."
+    bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def gym(bot, update, args=None):
     logging.debug("detectivepikachubot:gym: %s %s %s" % (bot, update, args))
@@ -1475,6 +1530,7 @@ dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
 dispatcher.add_handler(CommandHandler('register', register))
 dispatcher.add_handler(CommandHandler('profile', profile))
+#dispatcher.add_handler(CommandHandler('stats', stats))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
