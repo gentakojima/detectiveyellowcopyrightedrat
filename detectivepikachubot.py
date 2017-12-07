@@ -720,7 +720,10 @@ def raid(bot, update, args=None):
   group = getGroup(chat_id)
 
   if group == None:
-      bot.sendMessage(chat_id=chat_id, text="Antes de poder crear incursiones, un administrador tiene que configurarme con `/settings`.", parse_mode=telegram.ParseMode.MARKDOWN)
+      if chat_type == "channel":
+          bot.sendMessage(chat_id=chat_id, text="No tengo información de este canal. Un administrador debe utilizar al menos una vez el comando `/settings` antes de poder utilizarme en un canal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+      else:
+          bot.sendMessage(chat_id=chat_id, text="No tengo información de este grupo. ¿He saludado al entrar? Prueba a echarme y a meterme de nuevo. Si lo has promocionado a supergrupo después de entrar yo, esto es normal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
       return
 
   try:
