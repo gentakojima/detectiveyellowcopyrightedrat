@@ -325,7 +325,7 @@ def registerOak(bot, update):
                         bot.sendMessage(chat_id=chat_id, text="❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Envía un correo a `%s` indicando tu alias en telegram y tu nombre de entrenador en el juego para que revisemos el caso manualmente." % config["telegram"]["validationsmail"], parse_mode=telegram.ParseMode.MARKDOWN)
                         return
                 else:
-                    bot.sendMessage(chat_id=chat_id, text="❌ Parece que no estás validado con @profesoroak\_bot. No puedo aceptar tu nivel y equipo hasta que te valides.", parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text="❌ Parece que tu cuenta aún no está completamente validada con @profesoroak\_bot. No puedo aceptar tu nivel y equipo hasta que te valides.", parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 bot.sendMessage(chat_id=chat_id, text="❌ Ese mensaje es demasiado antiguo. ¡Debes reenviarme un mensaje más reciente!", parse_mode=telegram.ParseMode.MARKDOWN)
         else:
