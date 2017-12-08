@@ -497,18 +497,14 @@ def raidVoy(grupo_id, message_id, user_id):
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid["status"] == "ended" or raid["status"] == "old":
-            return False
-        sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
-        cursor.execute(sql, (raid["id"],user_id))
-        result = cursor.fetchone()
-        if result == None:
-            sql = "INSERT INTO voy (incursion_id, usuario_id) VALUES (%s, %s)"
-            cursor.execute(sql, (raid["id"], user_id))
-        else:
-            sql = "UPDATE voy SET plus = 0, estoy = 0, tarde = 0, novoy = 0, lotengo = NULL WHERE incursion_id=%s and usuario_id=%s"
-            cursor.execute(sql, (raid["id"], user_id))
+            return "old_raid"
+        sql = "INSERT INTO voy (incursion_id, usuario_id) VALUES (%s, %s) ON DUPLICATE KEY UPDATE plus = 0, estoy = 0, tarde = 0, novoy = 0, lotengo = NULL"
+        rows_affected = cursor.execute(sql, (raid["id"], user_id))
     db.commit()
-    return True
+    if rows_affected > 0:
+        return True
+    else:
+        return "no_changes"
 
 def raidNovoy(grupo_id, message_id, user_id):
     global db
@@ -516,18 +512,21 @@ def raidNovoy(grupo_id, message_id, user_id):
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid["status"] == "ended" or raid["status"] == "old":
-            return False
+            return "old_raid"
         sql = "SELECT * FROM voy WHERE `incursion_id`=%s and usuario_id=%s and addedtime < timestamp(DATE_SUB(NOW(), INTERVAL 5 MINUTE));"
         cursor.execute(sql, (raid["id"], user_id))
         result = cursor.fetchone()
         if result == None:
             sql = "DELETE FROM voy WHERE `incursion_id`=%s and usuario_id=%s;"
-            cursor.execute(sql, (raid["id"], user_id))
+            rows_affected = cursor.execute(sql, (raid["id"], user_id))
         else:
             sql = "UPDATE voy SET novoy=1, estoy = 0, tarde = 0, lotengo = NULL WHERE `incursion_id`=%s and usuario_id=%s;"
-            cursor.execute(sql, (raid["id"], user_id))
+            rows_affected = cursor.execute(sql, (raid["id"], user_id))
     db.commit()
-    return True
+    if rows_affected > 0:
+        return True
+    else:
+        return "no_changes"
 
 def raidPlus1(grupo_id, message_id, user_id):
     global db
@@ -535,13 +534,13 @@ def raidPlus1(grupo_id, message_id, user_id):
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid["status"] == "ended" or raid["status"] == "old":
-            return False
+            return "old_raid"
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
         if result != None:
             if result["plus"]>5:
-                return False
+                return "demasiados"
             sql = "UPDATE voy SET plus=plus+1, novoy = 0 WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
         else:
@@ -557,18 +556,14 @@ def raidEstoy(grupo_id, message_id, user_id):
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid == None or raid["status"] == "ended" or raid["status"] == "old":
-            return False
-        sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
-        cursor.execute(sql, (raid["id"],user_id))
-        result = cursor.fetchone()
-        if result == None:
-            sql = "INSERT INTO voy (incursion_id, usuario_id, estoy) VALUES (%s, %s, 1)"
-            cursor.execute(sql, (raid["id"], user_id))
-        else:
-            sql = "UPDATE voy SET estoy=1, tarde=0, novoy=0, lotengo=NULL WHERE `incursion_id`=%s and usuario_id=%s;"
-            cursor.execute(sql, (raid["id"], user_id))
+            return "old_raid"
+        sql = "INSERT INTO voy (incursion_id, usuario_id, estoy) VALUES (%s, %s, 1) ON DUPLICATE KEY UPDATE estoy=1, tarde=0, novoy=0, lotengo=NULL;"
+        rows_affected = cursor.execute(sql, (raid["id"], user_id))
     db.commit()
-    return True
+    if rows_affected > 0:
+        return True
+    else:
+        return "no_changes"
 
 def raidLlegotarde(grupo_id, message_id, user_id):
     global db
@@ -576,18 +571,14 @@ def raidLlegotarde(grupo_id, message_id, user_id):
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid == None or raid["status"] == "ended" or raid["status"] == "old":
-            return False
-        sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
-        cursor.execute(sql, (raid["id"],user_id))
-        result = cursor.fetchone()
-        if result == None:
-            sql = "INSERT INTO voy (incursion_id, usuario_id, tarde) VALUES (%s, %s, 1)"
-            cursor.execute(sql, (raid["id"], user_id))
-        else:
-            sql = "UPDATE voy SET tarde=1, estoy=0, novoy=0, lotengo=NULL WHERE `incursion_id`=%s and usuario_id=%s;"
-            cursor.execute(sql, (raid["id"], user_id))
+            return "old_raid"
+        sql = "INSERT INTO voy (incursion_id, usuario_id, tarde) VALUES (%s, %s, 1) ON DUPLICATE KEY UPDATE tarde=1, estoy=0, novoy=0, lotengo=NULL;"
+        rows_affected = cursor.execute(sql, (raid["id"], user_id))
     db.commit()
-    return True
+    if rows_affected > 0:
+        return True
+    else:
+        return "no_changes"
 
 def raidLotengo(grupo_id, message_id, user_id):
     global db
@@ -595,25 +586,25 @@ def raidLotengo(grupo_id, message_id, user_id):
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid == None or raid["status"] == "waiting" or raid["status"] == "old":
-            return False
+            return "old_raid"
         sql = "SELECT `novoy` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s and novoy = 1"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
         if result != None:
-            return False
+            return "not_going"
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
-        if result == None and raid["status"] == "started":
-            sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 1)"
-            cursor.execute(sql, (raid["id"], user_id))
-        elif result != None:
-            sql = "UPDATE voy SET tarde=0, estoy=1, novoy=0, lotengo=1 WHERE `incursion_id`=%s and usuario_id=%s;"
-            cursor.execute(sql, (raid["id"], user_id))
+        if (result == None and raid["status"] == "started") or result != None:
+            sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 1) ON DUPLICATE KEY UPDATE tarde=0, estoy=1, novoy=0, lotengo=1;"
+            rows_affected = cursor.execute(sql, (raid["id"], user_id))
         else:
-            return False
+            return "not_now"
     db.commit()
-    return True
+    if rows_affected > 0:
+        return True
+    else:
+        return "no_changes"
 
 def raidEscapou(grupo_id, message_id, user_id):
     global db
@@ -621,25 +612,25 @@ def raidEscapou(grupo_id, message_id, user_id):
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid == None or raid["status"] == "waiting" or raid["status"] == "old":
-            return False
+            return "old_raid"
         sql = "SELECT `novoy` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s and novoy = 1"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
         if result != None:
-            return False
+            return "not_going"
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
-        if result == None and raid["status"] == "started":
-            sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 0)"
-            cursor.execute(sql, (raid["id"], user_id))
-        elif result != None:
-            sql = "UPDATE voy SET tarde=0, estoy=1, novoy=0, lotengo = 0 WHERE `incursion_id`=%s and usuario_id=%s;"
-            cursor.execute(sql, (raid["id"], user_id))
+        if (result == None and raid["status"] == "started") or result != None:
+            sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 1) ON DUPLICATE KEY UPDATE tarde=0, estoy=1, novoy=0, lotengo=0;"
+            rows_affected = cursor.execute(sql, (raid["id"], user_id))
         else:
-            return False
+            return "not_now"
     db.commit()
-    return True
+    if rows_affected > 0:
+        return True
+    else:
+        return "no_changes"
 
 def deleteRaid(raid_id):
     global db
