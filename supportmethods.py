@@ -46,7 +46,7 @@ iconthemes = [
 ]
 
 validation_pokemons = ["chikorita", "machop", "growlithe", "diglett", "spinarak", "ditto", "teddiursa", "cubone", "sentret", "voltorb"]
-validation_profiles = ["model1", "model2", "model3"]
+validation_profiles = ["model1", "model2", "model3", "model4", "model5"]
 validation_names = ["Calabaza", "Puerro", "Cebolleta", "Remolacha", "Aceituna", "Pimiento", "Zanahoria", "Tomate", "Guisante", "Coliflor", "Pepino", "Berenjena", "Perejil", "Batata", "Aguacate", "Alcaparra", "Escarola", "Lechuga", "Hinojo"]
 
 def is_admin(chat_id, user_id, bot):
@@ -599,7 +599,7 @@ def parse_profile_image(filename, desired_pokemon):
     aspect_ratio = height/width
 
     # Raise error for unsupported aspect ratios
-    if aspect_ratio <= 1.65 or aspect_ratio >= 1.88:
+    if aspect_ratio <= 1.65 or aspect_ratio >= 2.08:
         raise Exception("Aspect ratio not supported")
 
     # Crop large bars
@@ -674,7 +674,10 @@ def parse_profile_image(filename, desired_pokemon):
     upper = np.array(boundaries[chosen_color][1], dtype = "uint8")
 
     # Extract and OCR trainer and Pokémon name
-    nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
+    if aspect_ratio < 1.88:
+        nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
+    else:
+        nick1_img = image[int(height/10+height/80):int(height/10*2-height/40),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
     # find colors within the specified boundaries
     nick1_gray = cv2.inRange(nick1_img, lower, upper)
     nick1_gray = 255 - nick1_gray
@@ -690,8 +693,10 @@ def parse_profile_image(filename, desired_pokemon):
     # Extract and OCR level
     if aspect_ratio < 1.81:
         level1_img = image[int(height/2+2*height/13):int(height-height/4-height/22),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
-    else:
+    elif aspect_ratio < 1.88:
         level1_img = image[int(height/2+height/8):int(height-height/4-height/16),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
+    else:
+        level1_img = image[int(height/2+height/16):int(height-height/3-height/18),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
     # find colors within the specified boundaries
     level1_gray = cv2.inRange(level1_img, lower, upper)
     level1_gray = 255 - level1_gray
@@ -709,8 +714,10 @@ def parse_profile_image(filename, desired_pokemon):
     # Extract Pokemon
     if aspect_ratio < 1.81:
         pokemon_img = image[int(height/3):int(height-height/3),int(width/8):int(width/2)] # y1:y2,x1:x2
-    else:
+    elif aspect_ratio < 1.88:
         pokemon_img = image[int(height/3-height/42):int(height-height/3-height/42),int(width/8):int(width/2)] # y1:y2,x1:x2
+    else:
+        pokemon_img = image[int(height/3-height/20):int(height-height/3-height/12),int(width/8):int(width/2)] # y1:y2,x1:x2
     pokemon_gray = cv2.cvtColor(pokemon_img, cv2.COLOR_BGR2GRAY)
     pokemon_gray = cv2.resize(pokemon_gray, (60,60))
 
