@@ -156,22 +156,6 @@ def getActiveRaidsforUser(user_id):
         result = cursor.fetchall()
     return result
 
-def getRaidsforUserGroup(user_id, group_id):
-    global db
-    logging.debug("storagemethods:getRaidsforUser: %s" % (user_id))
-    with db.cursor() as cursor:
-        sql = "SELECT * \
-        FROM incursiones \
-        LEFT JOIN voy ON voy.incursion_id = incursiones.id \
-        WHERE incursiones.addedtime > 0 \
-            AND timeraid > 0 \
-            AND voy.usuario_id = %s \
-            AND grupo_id = %s \
-            ORDER BY incursiones.timeraid ASC"
-        cursor.execute(sql, (user_id, group_id))
-        result = cursor.fetchall()
-    return result
-
 def getGroupStats(group_id, date_start, date_end):
     global db
     logging.debug("storagemethods:getGroupStats: %s %s %s" % (group_id, date_start, date_end))
