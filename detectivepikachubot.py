@@ -624,7 +624,10 @@ def raids(bot, update):
                 group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], html.escape(group["title"]))
             else:
                 incursion_text = "Incursión"
-                group_text = "<em>%s</em>" % html.escape(group["title"])
+                try:
+                    group_text = "<i>%s</i>" % (html.escape(group["title"]))
+                except:
+                    group_text = "<i>(Grupo sin nombre guardado)</i>"
             if group["locations"] == 1:
                 if "gimnasio_id" in r.keys() and r["gimnasio_id"] != None:
                     gym_emoji="🌎"
@@ -702,7 +705,10 @@ def stats(bot, update):
             if g["alias"] != None:
                 group_text = "<a href='https://t.me/%s'>%s</a>" % (g["alias"],html.escape(g["title"]))
             else:
-                group_text = "<i>%s</i>" % (html.escape(g["title"]))
+                try:
+                    group_text = "<i>%s</i>" % (html.escape(g["title"]))
+                except:
+                    group_text = "<i>(Grupo sin nombre guardado)</i>"
             now = datetime.now(timezone(g["timezone"]))
             lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
             lastweek_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday())
