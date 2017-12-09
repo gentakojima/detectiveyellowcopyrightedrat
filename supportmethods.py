@@ -42,7 +42,7 @@ iconthemes = [
     { "Rojo": "🔴", "Azul": "🔵", "Amarillo": "🌕" },
     { "Rojo": "❤", "Azul": "💙", "Amarillo": "💛" },
     { "Rojo": "🔴", "Azul": "🔵", "Amarillo": "🔶" },
-    { "Rojo": "♦️", "Azul": "🔷", "Amarillo": "🔶" },
+    { "Rojo": "♨️", "Azul": "🌀", "Amarillo": "🔆" },
     { "Rojo": "🦊", "Azul": "🐳", "Amarillo": "🐥" }
 ]
 
