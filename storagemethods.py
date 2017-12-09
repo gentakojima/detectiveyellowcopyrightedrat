@@ -170,7 +170,39 @@ def getRaidsforUserGroup(user_id, group_id):
             ORDER BY incursiones.timeraid ASC"
         cursor.execute(sql, (user_id, group_id))
         result = cursor.fetchall()
-        return result
+    return result
+
+def getGroupStats(group_id, date_start, date_end):
+    global db
+    logging.debug("storagemethods:getGroupStats: %s %s %s" % (group_id, date_start, date_end))
+    with db.cursor() as cursor:
+        sql = "SELECT voy.usuario_id AS user_id, COUNT(incursiones.id) as incursiones \
+        FROM incursiones \
+        LEFT JOIN voy ON voy.incursion_id = incursiones.id \
+        WHERE incursiones.status != 'cancelled' AND incursiones.status != 'deleted' \
+        AND timeraid between %s AND %s \
+        AND grupo_id = %s \
+        GROUP BY voy.usuario_id \
+        ORDER BY incursiones DESC"
+        cursor.execute(sql, (date_start, date_end, group_id))
+        result = cursor.fetchall()
+    return result
+
+def getGroupUserStats(group_id, user_id, date_start, date_end):
+    global db
+    logging.debug("storagemethods:getGroupUserStats: %s %s %s %s" % (group_id, user_id, date_start, date_end))
+    with db.cursor() as cursor:
+        sql = "SELECT voy.usuario_id AS user_id, COUNT(incursiones.id) as incursiones \
+        FROM incursiones \
+        LEFT JOIN voy ON voy.incursion_id = incursiones.id \
+        WHERE incursiones.status != 'cancelled' AND incursiones.status != 'deleted' \
+        AND timeraid between %s AND %s \
+        AND grupo_id = %s \
+        AND voy.usuario_id = %s \
+        GROUP BY voy.usuario_id"
+        cursor.execute(sql, (date_start, date_end, group_id, user_id))
+        result = cursor.fetchone()
+    return result
 
 def getActiveRaidsforGroup(group_id):
     global db

@@ -25,6 +25,7 @@
 # alerts - Configura alertas de incursiones (en privado)
 # raids - Muestra incursiones activas (en privado)
 # profile - Muestra info de tu perfil (en privado)
+# stats - Muestra tus estadísticas semanales (en privado)
 #
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, Filters
@@ -51,7 +52,7 @@ from Levenshtein import distance
 import html
 
 from config import config
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getRaidsforUserGroup
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getRaidsforUserGroup, getGroupUserStats, getGroupStats
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
@@ -688,45 +689,51 @@ def stats(bot, update):
     user = getUser(chat_id)
     if user != None:
         groups = getGroupsByUser(user["id"])
-        # Groups
-        groups_text = ""
+        # Group count
         valid_groups = 0
         for g in groups:
             if g["testgroup"] == 1:
                 continue
-            if g["alias"] != None:
-                groups_text  = groups_text + "\n - <a href='https://t.me/%s'>%s</a>" % (g["alias"],g["title"])
-            else:
-                groups_text  = groups_text + "\n - <i>%s</i>" % (g["title"])
             valid_groups = valid_groups + 1
-        output = "Participas en incursiones de <b>%s</b> canales/grupos: %s" % (valid_groups, groups_text)
-
+        output = "Participas en incursiones de <b>%s</b> canales/grupos." % (valid_groups)
         # Raids
         for g in groups:
             if g["testgroup"] == 1:
                 continue
             if g["alias"] != None:
-                group_text = "<a href='https://t.me/%s'>%s</a>" % (g["alias"],g["title"])
+                group_text = "<a href='https://t.me/%s'>%s</a>" % (g["alias"],html.escape(g["title"]))
             else:
-                group_text = "<i>%s</i>" % (g["title"])
-            raids = getRaidsforUserGroup(user["id"], g["id"])
-            lastweek_raids = []
-            twoweeksago_raids = []
-            for r in raids:
-                for g in groups:
-                    if g["id"] == r["grupo_id"]:
-                        group = g
-                now = datetime.now(timezone(group["timezone"]))
-                lastweek_start = now - timedelta(days=date.today().weekday(), weeks=1)
-                lastweek_end = now - timedelta(days=date.today().weekday())
-                twoweeksago_start = now - timedelta(days=date.today().weekday(), weeks=2)
-                twoweeksago_end = now - timedelta(days=date.today().weekday(), weeks=1)
-                raidtime = r["timeraid"].replace(tzinfo=timezone(group["timezone"]))
-                if raidtime > lastweek_start and raidtime < lastweek_end:
-                    lastweek_raids.append(r)
-                elif raidtime > twoweeksago_start and raidtime < twoweeksago_end:
-                    twoweeksago_raids.append(r)
-            output = output + "\n\n%s:\n - <b>%s</b> incursiones la semana pasada.\n - <b>%s</b> incursiones hace dos semanas." % (group_text, len(lastweek_raids), len(twoweeksago_raids))
+                group_text = "<i>%s</i>" % (html.escape(g["title"]))
+            now = datetime.now(timezone(g["timezone"]))
+            lastweek_start = now - timedelta(days=date.today().weekday(), weeks=1)
+            lastweek_end = now - timedelta(days=date.today().weekday())
+            twoweeksago_start = now - timedelta(days=date.today().weekday(), weeks=2)
+            twoweeksago_end = now - timedelta(days=date.today().weekday(), weeks=1)
+            # Personal stats
+            userstats_lastweek = getGroupUserStats(g["id"], user_id, lastweek_start, lastweek_end)
+            userraids_lastweek = userstats_lastweek["incursiones"] if userstats_lastweek != None else 0
+            userstats_twoweeksago = getGroupUserStats(g["id"], user_id, twoweeksago_start, twoweeksago_end)
+            userraids_twoweeksago = userstats_twoweeksago["incursiones"] if userstats_twoweeksago != None else 0
+            # Group stats
+            groupstats_lastweek = getGroupStats(g["id"], lastweek_start, lastweek_end)
+            groupsize_lastweek = len(groupstats_lastweek)
+            if groupsize_lastweek == 0:
+                continue
+            groupposition_lastweek = 0
+            userposition_lastweek = groupsize_lastweek
+            for gs in groupstats_lastweek:
+                groupposition_lastweek = groupposition_lastweek + 1
+                if gs["user_id"] == user["id"]:
+                    userposition_lastweek = groupposition_lastweek
+                    break
+            relposition_lastweek = 100 - (100*userposition_lastweek/groupsize_lastweek)
+            if userraids_lastweek > userraids_twoweeksago:
+                userraids_moreorless = "%s más" % (userraids_lastweek - userraids_twoweeksago)
+            elif userraids_lastweek < userraids_twoweeksago:
+                userraids_moreorless = "%s menos" % (userraids_twoweeksago - userraids_lastweek)
+            else:
+                userraids_moreorless = "las mismas"
+            output = output + "\n\n%s\n - La semana pasada has hecho <b>%s</b> incursiones (%s que la semana anterior).\n - Eres el <b>%sº</b> que más incursiones ha hecho.\n - Son más incursiones que el <b>%.2f%%</b> de entrenadores activos." % (group_text, userraids_lastweek, userraids_moreorless, userposition_lastweek, relposition_lastweek)
     else:
         output = "❌ No tengo información sobre ti."
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
@@ -1591,7 +1598,7 @@ dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
 dispatcher.add_handler(CommandHandler('register', register))
 dispatcher.add_handler(CommandHandler('profile', profile))
-#dispatcher.add_handler(CommandHandler('stats', stats))
+dispatcher.add_handler(CommandHandler('stats', stats))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
