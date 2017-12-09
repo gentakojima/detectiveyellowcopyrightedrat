@@ -137,7 +137,10 @@ def send_alerts(raid, bot):
             group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], html.escape(group["title"]))
         else:
             incursion_text = "incursión"
-            group_text = "<em>%s</em>" % html.escape(group["title"])
+            try:
+                group_text = "<i>%s</i>" % (html.escape(group["title"]))
+            except:
+                group_text = "<i>(Grupo sin nombre guardado)</i>"
         for alert in alerts:
             bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una %s %s en <b>%s</b> %sa las <b>%s</b> en el grupo %s.\n\n<i>Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando</i> <code>/clearalerts</code>" % (incursion_text, what_text, raid["gimnasio_text"], what_day, extract_time(raid["timeraid"]), group_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
