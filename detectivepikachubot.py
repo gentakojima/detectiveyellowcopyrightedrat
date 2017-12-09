@@ -48,6 +48,7 @@ import tempfile
 import urllib.request
 import random
 from Levenshtein import distance
+import html
 
 from config import config
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getRaidsforUserGroup
@@ -619,10 +620,10 @@ def raids(bot, update):
             gym_emoji = created_text = identifier_text = ""
             if group["alias"] != None:
                 incursion_text = "<a href='https://t.me/%s/%s'>Incursión</a>" % (group["alias"], r["message"])
-                group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], group["title"])
+                group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], html.escape(group["title"]))
             else:
                 incursion_text = "Incursión"
-                group_text = "<em>%s</em>" % group["title"]
+                group_text = "<em>%s</em>" % html.escape(group["title"])
             if group["locations"] == 1:
                 if "gimnasio_id" in r.keys() and r["gimnasio_id"] != None:
                     gym_emoji="🌎"

@@ -154,7 +154,7 @@ def getActiveRaidsforUser(user_id):
             ORDER BY incursiones.timeraid ASC"
         cursor.execute(sql, (user_id))
         result = cursor.fetchall()
-        return result
+    return result
 
 def getRaidsforUserGroup(user_id, group_id):
     global db
@@ -185,7 +185,7 @@ def getActiveRaidsforGroup(group_id):
         ORDER BY incursiones.timeraid ASC"
         cursor.execute(sql, (group_id))
         result = cursor.fetchall()
-        return result
+    return result
 
 def savePlaces(group_id, places):
     global db
@@ -214,24 +214,24 @@ def savePlaces(group_id, places):
 def getAlerts(user_id):
     global db
     logging.debug("storagemethods:getAlerts: %s" % (user_id))
+    alerts = []
     with db.cursor() as cursor:
         sql = "SELECT `id`,`usuario_id`,`gimnasio_id` FROM `alertas` WHERE `usuario_id`=%s"
         cursor.execute(sql, (user_id))
-        alerts = []
         for row in cursor:
             alerts.append({"id":row["id"], "user_id":row["usuario_id"], "place_id":row["gimnasio_id"]})
-        return alerts
+    return alerts
 
 def getAlertsByPlace(place_id):
     global db
     logging.debug("storagemethods:getAlertsByPlace: %s" % (place_id))
+    alerts = []
     with db.cursor() as cursor:
         sql = "SELECT `id`,`usuario_id`,`gimnasio_id` FROM `alertas` WHERE `gimnasio_id`=%s"
         cursor.execute(sql, (place_id))
-        alerts = []
         for row in cursor:
             alerts.append({"id":row["id"], "user_id":row["usuario_id"], "place_id":row["gimnasio_id"]})
-        return alerts
+    return alerts
 
 def addAlert(user_id, place_id):
     global db
@@ -278,6 +278,7 @@ def clearAlerts(user_id):
 def getPlaces(group_id, ordering="name"):
     global db
     logging.debug("storagemethods:getPlaces: %s" % (group_id))
+    gyms = []
     with db.cursor() as cursor:
         sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords` FROM `gimnasios` WHERE `grupo_id`=%s"
         if ordering == "name":
@@ -285,10 +286,9 @@ def getPlaces(group_id, ordering="name"):
         elif ordering == "id":
             sql = sql + " ORDER BY id"
         cursor.execute(sql, (group_id))
-        gyms = []
         for row in cursor:
             gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"])})
-        return gyms
+    return gyms
 
 def getPlace(id):
     global db

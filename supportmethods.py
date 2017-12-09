@@ -18,6 +18,7 @@ import re
 from datetime import datetime
 from pytz import timezone
 import time
+import html
 import logging
 from threading import Thread
 import telegram
@@ -133,10 +134,10 @@ def send_alerts(raid, bot):
         what_day = format_text_day(raid["timeraid"], group["timezone"])
         if group["alias"] != None:
             incursion_text = "<a href='https://t.me/%s/%s'>incursión</a>" % (group["alias"], raid["message"])
-            group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], group["title"])
+            group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], html.escape(group["title"]))
         else:
             incursion_text = "incursión"
-            group_text = "<em>%s</em>" % group["title"]
+            group_text = "<em>%s</em>" % html.escape(group["title"])
         for alert in alerts:
             bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una %s %s en <b>%s</b> %sa las <b>%s</b> en el grupo %s.\n\n<i>Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando</i> <code>/clearalerts</code>" % (incursion_text, what_text, raid["gimnasio_text"], what_day, extract_time(raid["timeraid"]), group_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
