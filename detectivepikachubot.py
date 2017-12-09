@@ -695,7 +695,6 @@ def stats(bot, update):
             if g["testgroup"] == 1:
                 continue
             valid_groups = valid_groups + 1
-        output = "Participas en incursiones de <b>%s</b> canales/grupos." % (valid_groups)
         # Raids
         for g in groups:
             if g["testgroup"] == 1:
@@ -705,10 +704,10 @@ def stats(bot, update):
             else:
                 group_text = "<i>%s</i>" % (html.escape(g["title"]))
             now = datetime.now(timezone(g["timezone"]))
-            lastweek_start = now - timedelta(days=date.today().weekday(), weeks=1)
-            lastweek_end = now - timedelta(days=date.today().weekday())
-            twoweeksago_start = now - timedelta(days=date.today().weekday(), weeks=2)
-            twoweeksago_end = now - timedelta(days=date.today().weekday(), weeks=1)
+            lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
+            lastweek_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday())
+            twoweeksago_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=2)
+            twoweeksago_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday(), weeks=1)
             # Personal stats
             userstats_lastweek = getGroupUserStats(g["id"], user_id, lastweek_start, lastweek_end)
             userraids_lastweek = userstats_lastweek["incursiones"] if userstats_lastweek != None else 0
@@ -733,10 +732,12 @@ def stats(bot, update):
                 userraids_moreorless = "%s menos" % (userraids_twoweeksago - userraids_lastweek)
             else:
                 userraids_moreorless = "las mismas"
-            output = output + "\n\n%s\n - La semana pasada has hecho <b>%s</b> incursiones (%s que la semana anterior).\n - Eres el <b>%sº</b> que más incursiones ha hecho.\n - Son más incursiones que el <b>%.2f%%</b> de entrenadores activos." % (group_text, userraids_lastweek, userraids_moreorless, userposition_lastweek, relposition_lastweek)
+            daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
+            output = "%s\n - La semana del %s has hecho <b>%s</b> incursiones (%s que la semana anterior).\n - Eres el <b>%sº</b> que más incursiones ha hecho.\n - Son más incursiones que el <b>%.2f%%</b> de entrenadores activos." % (group_text, daymonth_text, userraids_lastweek, userraids_moreorless, userposition_lastweek, relposition_lastweek)
+            bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
     else:
         output = "❌ No tengo información sobre ti."
-    bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def gym(bot, update, args=None):
     logging.debug("detectivepikachubot:gym: %s %s %s" % (bot, update, args))
