@@ -148,7 +148,7 @@ def update_message(chat_id, message_id, reply_markup, bot):
     logging.debug("supportmethods:update_message: %s %s %s" % (chat_id, message_id, reply_markup))
     raid = getRaidbyMessage(chat_id, message_id)
     text = format_message(raid)
-    return bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    return bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True, timeout=8)
 
 def format_message(raid):
     logging.debug("supportmethods:format_message: %s" % (raid))
