@@ -606,6 +606,19 @@ def parse_profile_image(filename, desired_pokemon):
     if aspect_ratio <= 1.65 or aspect_ratio >= 2.08:
         raise Exception("Aspect ratio not supported")
 
+    # Crop GalaxyS8+ bars
+    if aspect_ratio > 2.04 and aspect_ratio < 2.06:
+        logging.debug("supportmethods:parse_profile_image: Detected Galaxy 8+ Ratio")
+        bottombar_img = image[int(height-height/12.3):int(height),int(0):int(width)] # y1:y2,x1:x2
+        bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
+        topbar_img = image[int(0):int(height/12.3),int(0):int(width)] # y1:y2,x1:x2
+        topbar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
+        if bottombar_gray.mean() < 40 and topbar_gray.mean() < 40:
+            logging.debug("supportmethods:parse_profile_image: Detected Black bars, cropping!")
+            image = image[int(height/17.2):int(height-height/12.3),int(0):int(width)] # y1:y2,x1:x2
+            height, width, _ = image.shape
+            aspect_ratio = height/width
+
     # Crop large bars
     bottombar_img = image[int(height-height/14):int(height),int(0):int(width)] # y1:y2,x1:x2
     bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
