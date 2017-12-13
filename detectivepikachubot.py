@@ -253,7 +253,7 @@ def refresh(bot, update, args=None):
       if counter > 3000:
           bot.sendMessage(chat_id=chat_id, text="❌ ¡No se permiten más de 3000 gimnasios por grupo!")
           return
-      if len(row) != 4:
+      if len(row) < 4:
           rownumber = counter + 1
           bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! La fila %s no tiene las 4 columnas requeridas." % rownumber)
           return
@@ -270,7 +270,13 @@ def refresh(bot, update, args=None):
         names[i] = names[i].strip()
         if len(names[i]) < 3:
           del names[i]
-      places.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names});
+      if len(row) > 4:
+          tags = row[4].split(",")
+          for i,r in enumerate(tags):
+              tags[i] = tags[i].strip()
+      else:
+          tags = []
+      places.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names, "tags":tags});
       counter = counter + 1
 
     if counter > 1:

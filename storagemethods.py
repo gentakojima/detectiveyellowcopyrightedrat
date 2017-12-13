@@ -217,10 +217,12 @@ def savePlaces(group_id, places):
         sql = "DELETE alertas, gimnasios FROM gimnasios LEFT JOIN alertas ON alertas.gimnasio_id = gimnasios.id WHERE gimnasios.grupo_id=%s AND gimnasios.name NOT IN ("+(",".join(params_vars))+")"
         cursor.execute(sql, params_replacements)
         for place in places:
+            if "tags" not in place.keys():
+                place["tags"] = {}
             try:
-                sql = "INSERT INTO gimnasios (grupo_id,name,latitude,longitude,keywords) \
-                VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE latitude=%s, longitude=%s, keywords=%s;"
-                cursor.execute(sql, (group_id, place["desc"], place["latitude"], place["longitude"], json.dumps(place["names"]), place["latitude"], place["longitude"], json.dumps(place["names"])))
+                sql = "INSERT INTO gimnasios (grupo_id,name,latitude,longitude,keywords,tags) \
+                VALUES (%s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE latitude=%s, longitude=%s, keywords=%s, tags=%s;"
+                cursor.execute(sql, (group_id, place["desc"], place["latitude"], place["longitude"], json.dumps(place["names"]), json.dumps(place["tags"]), place["latitude"], place["longitude"], json.dumps(place["names"]), json.dumps(place["tags"])))
             except IntegrityError:
                 db.rollback()
                 return False
@@ -296,24 +298,28 @@ def getPlaces(group_id, ordering="name"):
     logging.debug("storagemethods:getPlaces: %s" % (group_id))
     gyms = []
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords` FROM `gimnasios` WHERE `grupo_id`=%s"
+        sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords`,`tags` FROM `gimnasios` WHERE `grupo_id`=%s"
         if ordering == "name":
             sql = sql + " ORDER BY name"
         elif ordering == "id":
             sql = sql + " ORDER BY id"
         cursor.execute(sql, (group_id))
         for row in cursor:
-            gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"])})
+            if row["tags"] == None:
+                row["tags"] = "[]"
+            gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"])})
     return gyms
 
 def getPlace(id):
     global db
     logging.debug("storagemethods:getPlace: %s" % (id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`name`,`grupo_id`,`latitude`,`longitude`,`keywords` FROM `gimnasios` WHERE `id`=%s"
+        sql = "SELECT `id`,`name`,`grupo_id`,`latitude`,`longitude`,`keywords`,`tags` FROM `gimnasios` WHERE `id`=%s"
         cursor.execute(sql, (id))
         for row in cursor:
-            return {"id":row["id"], "group_id":row["grupo_id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"])}
+            if row["tags"] == None:
+                row["tags"] = "[]"
+            return {"id":row["id"], "group_id":row["grupo_id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"])}
         return None
 
 def getPlacesByLocation(latitude, longitude, distance=100):
