@@ -620,7 +620,7 @@ def parse_profile_image(filename, desired_pokemon):
     aspect_ratio = height/width
 
     # Raise error for unsupported aspect ratios
-    if aspect_ratio <= 1.65 or aspect_ratio >= 2.08:
+    if aspect_ratio <= 1.64 or aspect_ratio >= 2.08:
         raise Exception("Aspect ratio not supported")
 
     # Crop GalaxyS8+ bars
@@ -700,7 +700,7 @@ def parse_profile_image(filename, desired_pokemon):
     # Prepare color boundaries to extract level, trainer and pokémon name
     boundaries = {
         "Rojo": ([35, 10, 105], [100, 90, 190]),
-        "Azul": ([90, 75, 0], [190, 125, 70]),
+        "Azul": ([90, 75, 0], [190, 155, 70]),
         "Amarillo": ([0, 105, 180], [110, 198, 255])
     }
 	# create NumPy arrays from the boundaries
