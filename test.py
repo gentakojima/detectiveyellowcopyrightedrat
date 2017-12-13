@@ -65,7 +65,7 @@ for root, dirs, filenames in os.walk("testingimgs"):
                 print(" [!] Incorrect Pokémon! '%s' vs. expected '%s'" % (chosen_pokemon, expected_pokemon))
                 failed_tests = failed_tests + 1
             try:
-                assert chosen_color.lower() == expected_color.lower()
+                assert pokemon_name.lower() == expected_pokemon_name.lower()
                 passed_tests = passed_tests + 1
             except AssertionError as e:
                 print(" [!] Incorrect Pokémon name! '%s' vs. expected '%s'" % (pokemon_name, expected_pokemon_name))
