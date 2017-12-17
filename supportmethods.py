@@ -691,7 +691,7 @@ def parse_profile_image(filename, desired_pokemon):
     # Prepare color boundaries to extract team
     team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
     boundaries = {
-        "Rojo": ([0, 0, 150], [85, 45, 255]),
+        "Rojo": ([0, 0, 140], [100, 70, 255]),
         "Azul": ([180, 50, 0], [255, 140, 60]),
         "Amarillo": ([0, 180, 200], [100, 225, 255])
     }
