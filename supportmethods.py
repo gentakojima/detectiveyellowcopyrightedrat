@@ -126,8 +126,12 @@ def count_people_disaggregated(gente):
                 numotros = numotros + 1
     return (numazules, numrojos, numamarillos, numotros, count)
 
+def send_alerts_delayed(raid, bot):
+    time.sleep(2)
+    send_alerts(raid, bot)
+
 def send_alerts(raid, bot):
-    logging.debug("supportmethods:end_alerts: %s" % (raid))
+    logging.debug("supportmethods:send_alerts: %s" % (raid))
     alerts = getAlertsByPlace(raid["gimnasio_id"])
     group = getGroup(raid["grupo_id"])
     if group["alerts"] == 1:
@@ -142,7 +146,9 @@ def send_alerts(raid, bot):
                 group_text = "<i>%s</i>" % (html.escape(group["title"]))
             except:
                 group_text = "<i>(Grupo sin nombre guardado)</i>"
+        logging.debug("supportmethods:send_alerts: Sending %i alerts" % len(alerts))
         for alert in alerts:
+            logging.debug("supportmethods:send_alerts: Sending alert %s" % alert)
             bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una %s %s en <b>%s</b> %sa las <b>%s</b> en el grupo %s.\n\n<i>Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando</i> <code>/clearalerts</code>" % (incursion_text, what_text, raid["gimnasio_text"], what_day, extract_time(raid["timeraid"]), group_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def update_message(chat_id, message_id, reply_markup, bot):
