@@ -686,70 +686,149 @@ def profile(bot, update):
         output = "❌ No tengo información sobre ti."
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
-def stats(bot, update):
+def stats(bot, update, args = None):
     logging.debug("detectivepikachubot:stats: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    if edit_check_private(chat_id, chat_type, user_username, "stats", bot) == False:
-        delete_message(chat_id, message.message_id, bot)
-        return
+    #if edit_check_private(chat_id, chat_type, user_username, "stats", bot) == False:
+    #    delete_message(chat_id, message.message_id, bot)
+    #    return
 
-    user = getUser(chat_id)
-    if user != None:
-        groups = getGroupsByUser(user["id"])
-        # Group count
-        valid_groups = 0
-        for g in groups:
-            if g["testgroup"] == 1:
-                continue
-            valid_groups = valid_groups + 1
-        # Raids
-        for g in groups:
-            if g["testgroup"] == 1:
-                continue
-            if g["alias"] != None:
-                group_text = "<a href='https://t.me/%s'>%s</a>" % (g["alias"],html.escape(g["title"]))
-            else:
-                try:
-                    group_text = "<i>%s</i>" % (html.escape(g["title"]))
-                except:
-                    group_text = "<i>(Grupo sin nombre guardado)</i>"
-            now = datetime.now(timezone(g["timezone"]))
-            lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
-            lastweek_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday())
-            twoweeksago_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=2)
-            twoweeksago_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday(), weeks=1)
-            # Personal stats
-            userstats_lastweek = getGroupUserStats(g["id"], user_id, lastweek_start, lastweek_end)
-            userraids_lastweek = userstats_lastweek["incursiones"] if userstats_lastweek != None else 0
-            userstats_twoweeksago = getGroupUserStats(g["id"], user_id, twoweeksago_start, twoweeksago_end)
-            userraids_twoweeksago = userstats_twoweeksago["incursiones"] if userstats_twoweeksago != None else 0
-            # Group stats
-            groupstats_lastweek = getGroupStats(g["id"], lastweek_start, lastweek_end)
-            groupsize_lastweek = len(groupstats_lastweek)
-            if groupsize_lastweek == 0:
-                continue
-            groupposition_lastweek = 0
-            userposition_lastweek = groupsize_lastweek
-            for gs in groupstats_lastweek:
-                groupposition_lastweek = groupposition_lastweek + 1
-                if gs["user_id"] == user["id"]:
-                    userposition_lastweek = groupposition_lastweek
-                    break
-            relposition_lastweek = 100 - (100*userposition_lastweek/groupsize_lastweek)
-            if userraids_lastweek > userraids_twoweeksago:
-                userraids_moreorless = "%s más" % (userraids_lastweek - userraids_twoweeksago)
-            elif userraids_lastweek < userraids_twoweeksago:
-                userraids_moreorless = "%s menos" % (userraids_twoweeksago - userraids_lastweek)
-            else:
-                userraids_moreorless = "las mismas"
-            daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
-            output = "%s\n - La semana del %s has hecho <b>%s</b> incursiones (%s que la semana anterior).\n - Eres el <b>%sº</b> que más incursiones ha hecho.\n - Son más incursiones que el <b>%.2f%%</b> de entrenadores activos." % (group_text, daymonth_text, userraids_lastweek, userraids_moreorless, userposition_lastweek, relposition_lastweek)
+    if chat_type == "private":
+        # User stats
+        user = getUser(chat_id)
+        if user != None:
+            groups = getGroupsByUser(user["id"])
+            # Group count
+            valid_groups = 0
+            for g in groups:
+                if g["testgroup"] == 1:
+                    continue
+                valid_groups = valid_groups + 1
+            # Raids
+            for g in groups:
+                if g["testgroup"] == 1:
+                    continue
+                if g["alias"] != None:
+                    group_text = "<a href='https://t.me/%s'>%s</a>" % (g["alias"],html.escape(g["title"]))
+                else:
+                    try:
+                        group_text = "<i>%s</i>" % (html.escape(g["title"]))
+                    except:
+                        group_text = "<i>(Grupo sin nombre guardado)</i>"
+                now = datetime.now(timezone(g["timezone"]))
+                lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
+                lastweek_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday())
+                twoweeksago_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=2)
+                twoweeksago_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday(), weeks=1)
+                # Personal stats
+                userstats_lastweek = getGroupUserStats(g["id"], user_id, lastweek_start, lastweek_end)
+                userraids_lastweek = userstats_lastweek["incursiones"] if userstats_lastweek != None else 0
+                userstats_twoweeksago = getGroupUserStats(g["id"], user_id, twoweeksago_start, twoweeksago_end)
+                userraids_twoweeksago = userstats_twoweeksago["incursiones"] if userstats_twoweeksago != None else 0
+                # Group stats
+                groupstats_lastweek = getGroupStats(g["id"], lastweek_start, lastweek_end)
+                groupsize_lastweek = len(groupstats_lastweek)
+                if groupsize_lastweek == 0:
+                    continue
+                groupposition_lastweek = 0
+                userposition_lastweek = groupsize_lastweek
+                for gs in groupstats_lastweek:
+                    groupposition_lastweek = groupposition_lastweek + 1
+                    if gs["user_id"] == user["id"]:
+                        userposition_lastweek = groupposition_lastweek
+                        break
+                relposition_lastweek = 100 - (100*userposition_lastweek/groupsize_lastweek)
+                if userraids_lastweek > userraids_twoweeksago:
+                    userraids_moreorless = "%s más" % (userraids_lastweek - userraids_twoweeksago)
+                elif userraids_lastweek < userraids_twoweeksago:
+                    userraids_moreorless = "%s menos" % (userraids_twoweeksago - userraids_lastweek)
+                else:
+                    userraids_moreorless = "las mismas"
+                daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
+                output = "%s\n - La semana del %s has hecho <b>%s</b> incursiones (%s que la semana anterior).\n - Eres el <b>%sº</b> que más incursiones ha hecho.\n - Son más incursiones que el <b>%.2f%%</b> de entrenadores activos." % (group_text, daymonth_text, userraids_lastweek, userraids_moreorless, userposition_lastweek, relposition_lastweek)
+                bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        else:
+            output = "❌ No tengo información sobre ti. Para poder obtener estadísticas, es necesario estar validado y participar en incursiones."
             bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
     else:
-        output = "❌ No tengo información sobre ti."
-        bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        # Channel/group stats
+        try:
+            bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+            pass
+        # Only for admins
+        if chat_type != "channel" and not is_admin(chat_id, user_id, bot):
+            return
+        # Parse args
+        show_week = True
+        show_month = False
+        if args != None and len(args)>0:
+            if args[0].lower() in ["mes","mensual","month"]:
+                show_month = True
+                show_week = False
+            elif args[0].lower() in ["semana","semanal","week"]:
+                show_month = False
+                show_week = True
+        # Get group info
+        group = getGroup(chat_id)
+        now = datetime.now(timezone(group["timezone"]))
+        # Arrange time periods
+        lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
+        lastweek_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday())
+        lastmonth_start = now.replace(hour=0,minute=0) - timedelta(days=(date.today().day-1))
+        if lastmonth_start.month in [2,4,6,8,9,11,1]:
+            lastmonth_start = lastmonth_start - timedelta(days=31)
+        elif lastmonth_start.month in [5,7,10,12]:
+            lastmonth_start = lastmonth_start - timedelta(days=30)
+        else:
+            lastmonth_start = lastmonth_start - timedelta(days=28) # FIXME leap year
+        lastmonth_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().day)
+        medallas = ["🥇","🥈","🥉"]
+        if show_month:
+            # Last month stats
+            groupstats_lastmonth = getGroupStats(chat_id, lastmonth_start, lastmonth_end)
+            months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+            month_text = "%s" % months[lastmonth_start.month-1 if lastmonth_start.month>1 else 12]
+            # Prepare output
+            output = "TOP 10 mes de <b>%s</b>" % month_text
+            position = 0
+            counter = 0
+            lastraidno = 0
+            for gs in groupstats_lastmonth:
+                counter = counter + 1
+                if gs["incursiones"] != lastraidno:
+                    position = counter
+                    if position > 10:
+                        break
+                lastraidno = gs["incursiones"]
+                trainername = gs["trainername"] if gs["trainername"] != None else "@%s" % gs["username"]
+                user_text = "<a href='https://t.me/%s'>%s</a>" % (gs["username"], trainername)
+                medalla_text = "" if position > 3 else " %s" % medallas[position-1]
+                output = output + "\n %s. %s (%s)%s" % (position, user_text, gs["incursiones"], medalla_text)
+            bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        if show_week:
+            # Last week stats
+            groupstats_lastweek = getGroupStats(chat_id, lastweek_start, lastweek_end)
+            daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
+            # Prepare output
+            output = "TOP 10 <b>semana del %s</b>" % daymonth_text
+            position = 0
+            counter = 0
+            lastraidno = 0
+            for gs in groupstats_lastweek:
+                counter = counter + 1
+                if gs["incursiones"] != lastraidno:
+                    position = counter
+                    if position > 10:
+                        break
+                lastraidno = gs["incursiones"]
+                trainername = gs["trainername"] if gs["trainername"] != None else "@%s" % gs["username"]
+                user_text = "<a href='https://t.me/%s'>%s</a>" % (gs["username"], trainername)
+                medalla_text = "" if position > 3 else " %s" % medallas[position-1]
+                output = output + "\n %s. %s (%s)%s" % (position, user_text, gs["incursiones"], medalla_text)
+            bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def gym(bot, update, args=None):
     logging.debug("detectivepikachubot:gym: %s %s %s" % (bot, update, args))
@@ -1611,7 +1690,7 @@ dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
 dispatcher.add_handler(CommandHandler('register', register))
 dispatcher.add_handler(CommandHandler('profile', profile))
-dispatcher.add_handler(CommandHandler('stats', stats))
+dispatcher.add_handler(CommandHandler('stats', stats, pass_args=True))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))

@@ -160,12 +160,16 @@ def getGroupStats(group_id, date_start, date_end):
     global db
     logging.debug("storagemethods:getGroupStats: %s %s %s" % (group_id, date_start, date_end))
     with db.cursor() as cursor:
-        sql = "SELECT voy.usuario_id AS user_id, COUNT(incursiones.id) as incursiones \
+        sql = "SELECT voy.usuario_id AS user_id, usuarios.trainername AS trainername, \
+        usuarios.username AS username, COUNT(incursiones.id) as incursiones \
         FROM incursiones \
         LEFT JOIN voy ON voy.incursion_id = incursiones.id \
+        LEFT JOIN usuarios ON usuarios.id = voy.usuario_id \
         WHERE incursiones.status != 'cancelled' AND incursiones.status != 'deleted' \
         AND timeraid between %s AND %s \
         AND grupo_id = %s \
+        AND usuarios.id IS NOT NULL \
+        AND usuarios.validation != 'none' \
         GROUP BY voy.usuario_id \
         ORDER BY incursiones DESC"
         cursor.execute(sql, (date_start, date_end, group_id))
@@ -179,10 +183,13 @@ def getGroupUserStats(group_id, user_id, date_start, date_end):
         sql = "SELECT voy.usuario_id AS user_id, COUNT(incursiones.id) as incursiones \
         FROM incursiones \
         LEFT JOIN voy ON voy.incursion_id = incursiones.id \
+        LEFT JOIN usuarios ON usuarios.id = voy.usuario_id \
         WHERE incursiones.status != 'cancelled' AND incursiones.status != 'deleted' \
         AND timeraid between %s AND %s \
         AND grupo_id = %s \
         AND voy.usuario_id = %s \
+        AND voy.usuario_id IS NOT NULL \
+        AND usuarios.validation != 'none' \
         GROUP BY voy.usuario_id"
         cursor.execute(sql, (date_start, date_end, group_id, user_id))
         result = cursor.fetchone()
