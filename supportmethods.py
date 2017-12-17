@@ -599,6 +599,15 @@ def parse_profile_image(filename, desired_pokemon):
     new_file, tmpfilename = tempfile.mkstemp(suffix=".png")
     os.close(new_file)
 
+    # Failed validations will be saved for debugging purposes
+    faileddir = sys.path[0] + "/failed"
+    faileddir_aspectratio = sys.path[0] + "/failed/aspectratio"
+    faileddir_pokemon = sys.path[0] + "/failed/pokemon"
+    faileddir_level = sys.path[0] + "/failed/level"
+    for fd in [faileddir, faileddir_aspectratio, faileddir_pokemon, faileddir_level]:
+        if not os.path.exists(fd):
+            os.makedirs(fd)
+
     # Load possible pokemons
     if desired_pokemon != None:
         thispoke_models = []
@@ -627,6 +636,7 @@ def parse_profile_image(filename, desired_pokemon):
 
     # Raise error for unsupported aspect ratios
     if aspect_ratio <= 1.64 or aspect_ratio >= 2.08:
+        cv2.imwrite(faileddir_aspectratio + "/%s.png" % time.time(), image)
         raise Exception("Aspect ratio not supported")
 
     # Crop GalaxyS8+ bars
@@ -681,7 +691,7 @@ def parse_profile_image(filename, desired_pokemon):
     # Prepare color boundaries to extract team
     team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
     boundaries = {
-        "Rojo": ([0, 0, 150], [70, 20, 255]),
+        "Rojo": ([0, 0, 150], [85, 45, 255]),
         "Azul": ([180, 50, 0], [255, 140, 60]),
         "Amarillo": ([0, 180, 200], [100, 225, 255])
     }
@@ -748,8 +758,14 @@ def parse_profile_image(filename, desired_pokemon):
     if len(numbers)>0:
         level = numbers[0]
     logging.debug("supportmethods:parse_profile_image: Level: %s" % level)
-    if int(level)<5 or int(level)>40:
+    try:
+        if int(level)<5 or int(level)>40:
+            level = None
+    except:
         level = None
+        cv2.imwrite(faileddir_level + "/%s_image.png" % time.time(), image)
+        cv2.imwrite(faileddir_level + "/%s_levelimg.png" % time.time(), level1_gray)
+        cv2.imwrite(faileddir_level + "/%s_levelgray.png" % time.time(), level1_img)
 
     # Extract Pokemon
     if aspect_ratio < 1.81:
