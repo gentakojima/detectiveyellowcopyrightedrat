@@ -545,6 +545,8 @@ def channelCommands(bot, update):
             cambiargimnasio(bot, update, args)
         elif command == "cambiarpokemon" or command == "pokemon":
             cambiarpokemon(bot, update, args)
+        elif command == "stats" or command == "ranking":
+            stats(bot, update, args)
         else:
             # Default to process normal message for babysitter mode
             processMessage(bot,update)
@@ -693,16 +695,12 @@ def profile(bot, update):
 def stats(bot, update, args = None):
     logging.debug("detectivepikachubot:stats: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    user_username = message.from_user.username
-
-    #if edit_check_private(chat_id, chat_type, user_username, "stats", bot) == False:
-    #    delete_message(chat_id, message.message_id, bot)
-    #    return
 
     if chat_type == "private":
         # User stats
+        user_username = message.from_user.username
         user = getUser(chat_id)
-        if user != None:
+        if user != None and user["validation"] != "none":
             groups = getGroupsByUser(user["id"])
             # Group count
             valid_groups = 0
@@ -737,9 +735,14 @@ def stats(bot, update, args = None):
                 if groupsize_lastweek == 0:
                     continue
                 groupposition_lastweek = 0
+                groupcounter_lastweek = 0
+                lastraidno = 0
                 userposition_lastweek = groupsize_lastweek
                 for gs in groupstats_lastweek:
-                    groupposition_lastweek = groupposition_lastweek + 1
+                    groupcounter_lastweek = groupcounter_lastweek + 1
+                    if gs["incursiones"] != lastraidno:
+                        groupposition_lastweek = groupcounter_lastweek
+                    lastraidno = gs["incursiones"]
                     if gs["user_id"] == user["id"]:
                         userposition_lastweek = groupposition_lastweek
                         break
@@ -751,7 +754,7 @@ def stats(bot, update, args = None):
                 else:
                     userraids_moreorless = "las mismas"
                 daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
-                output = "%s\n - La semana del %s has hecho <b>%s</b> incursiones (%s que la semana anterior).\n - Eres el <b>%sº</b> que más incursiones ha hecho.\n - Son más incursiones que el <b>%.2f%%</b> de entrenadores activos." % (group_text, daymonth_text, userraids_lastweek, userraids_moreorless, userposition_lastweek, relposition_lastweek)
+                output = "%s\n - La semana del %s has hecho <b>%s</b> incursiones (%s que la semana anterior).\n - Estás en <b>%sª</b> posición en número de incursiones realizadas.\n - Son más incursiones que el <b>%.2f%%</b> de entrenadores activos." % (group_text, daymonth_text, userraids_lastweek, userraids_moreorless, userposition_lastweek, relposition_lastweek)
                 bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
         else:
             output = "❌ No tengo información sobre ti. Para poder obtener estadísticas, es necesario estar validado y participar en incursiones."
@@ -796,7 +799,7 @@ def stats(bot, update, args = None):
             months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
             month_text = "%s" % months[lastmonth_start.month-1 if lastmonth_start.month>1 else 12]
             # Prepare output
-            output = "TOP 10 mes de <b>%s</b>" % month_text
+            output = "TOP 10 de participación en incursiones <b>mes de %s</b>" % month_text
             position = 0
             counter = 0
             lastraidno = 0
@@ -817,7 +820,7 @@ def stats(bot, update, args = None):
             groupstats_lastweek = getGroupStats(chat_id, lastweek_start, lastweek_end)
             daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
             # Prepare output
-            output = "TOP 10 <b>semana del %s</b>" % daymonth_text
+            output = "TOP 10 de participación en incursiones <b>semana del %s</b>" % daymonth_text
             position = 0
             counter = 0
             lastraidno = 0
@@ -1694,7 +1697,7 @@ dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
 dispatcher.add_handler(CommandHandler('register', register))
 dispatcher.add_handler(CommandHandler('profile', profile))
-dispatcher.add_handler(CommandHandler('stats', stats, pass_args=True))
+dispatcher.add_handler(CommandHandler(['stats','ranking'], stats, pass_args=True))
 # Admin commands
 dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
 dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
