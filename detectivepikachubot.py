@@ -132,6 +132,7 @@ def settimezone(bot, update, args=None):
     if tz != None:
         group = getGroup(chat_id)
         group["timezone"] = tz["name"]
+        group["title"] = chat_title
         group["alias"] = group_alias
         saveGroup(group)
         bot.sendMessage(chat_id=chat_id, text="👌 Establecida zona horaria *%s*." % group["timezone"], parse_mode=telegram.ParseMode.MARKDOWN)
@@ -167,6 +168,7 @@ def settalkgroup(bot, update, args=None):
     group = getGroup(chat_id)
     group["alias"] = group_alias
     if args[0] != "-":
+        group["title"] = chat_title
         group["talkgroup"] = args[0].replace("@","")
         saveGroup(group)
         if re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$",args[0]) != None:
@@ -550,6 +552,7 @@ def channelCommands(bot, update):
 def settings(bot, update):
     logging.debug("detectivepikachubot:settings: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    chat_title = message.chat.title
 
     if chat_type == "private":
       bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
@@ -577,6 +580,7 @@ def settings(bot, update):
     if hasattr(message.chat, 'username') and message.chat.username != None:
         group_alias = message.chat.username
     group["alias"] = group_alias
+    group["title"] = chat_title
 
     settings_markup = get_settings_keyboard(chat_id)
     message = bot.sendMessage(chat_id=chat_id, text="Cargando preferencias del grupo. Un momento...")
