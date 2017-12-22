@@ -61,7 +61,11 @@ def cleanup(signum, frame):
     exit(0)
 signal.signal(signal.SIGINT, cleanup)
 
-logging.basicConfig(filename='/tmp/detectivepikachubot.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
+# Logging
+logdir = sys.path[0] + "/logs"
+if not os.path.exists(logdir):
+    os.makedirs(logdir)
+logging.basicConfig(filename=logdir+'/debug.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
 logging.info("--------------------- Starting bot! -----------------------")
 
 refreshDb()
