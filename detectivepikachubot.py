@@ -70,7 +70,7 @@ logging.info("--------------------- Starting bot! -----------------------")
 
 refreshDb()
 
-updater = Updater(token=config["telegram"]["token"])
+updater = Updater(token=config["telegram"]["token"], workers=8)
 dispatcher = updater.dispatcher
 dispatcher.add_error_handler(error_callback)
 gmaps = googlemaps.Client(key=config["googlemaps"]["key"], retry_timeout=3)
