@@ -24,6 +24,9 @@ def alerts(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(chat_id):
+        return
+
     if user_id!=None and isBanned(user_id):
         return
 
@@ -48,6 +51,9 @@ def addalert(bot, update, args=None):
     logging.debug("detectivepikachubot:addalert: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
+
+    if isBanned(chat_id):
+        return
 
     if user_id!=None and isBanned(user_id):
         return
@@ -85,6 +91,9 @@ def delalert(bot, update, args=None):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(chat_id):
+        return
+
     if user_id!=None and isBanned(user_id):
         return
 
@@ -111,6 +120,9 @@ def clearalerts(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(chat_id):
+        return
+
     if user_id!=None and isBanned(user_id):
         return
 
@@ -127,6 +139,9 @@ def processLocation(bot, update):
     logging.debug("detectivepikachubot:processLocation: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     location = message.location
+
+    if isBanned(chat_id):
+        return
 
     if user_id!=None and isBanned(user_id):
         return

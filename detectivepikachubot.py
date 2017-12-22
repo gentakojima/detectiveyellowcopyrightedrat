@@ -370,7 +370,7 @@ def processMessage(bot, update):
 
     user_username = message.from_user.username
 
-    if isBanned(user_id):
+    if isBanned(user_id) or isBanned(chat_id):
         return
 
     if chat_type == "private":
@@ -620,6 +620,9 @@ def raids(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(chat_id) or isBanned(user_id):
+        return
+
     if edit_check_private(chat_id, chat_type, user_username, "raids", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
@@ -671,6 +674,9 @@ def profile(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
+    if isBanned(chat_id):
+        return
+
     if edit_check_private(chat_id, chat_type, user_username, "profile", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
@@ -695,6 +701,9 @@ def profile(bot, update):
 def stats(bot, update, args = None):
     logging.debug("detectivepikachubot:stats: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if isBanned(chat_id):
+        return
 
     if chat_type == "private":
         # User stats
@@ -840,11 +849,15 @@ def stats(bot, update, args = None):
 def gym(bot, update, args=None):
     logging.debug("detectivepikachubot:gym: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    group = getGroup(chat_id)
+
+    if isBanned(chat_id):
+        return
 
     if chat_type == "private":
         bot.sendMessage(chat_id=chat_id, text="El comando de buscar gimnasios solo funcionan en canales y grupos. Si quieres probarlo, puedes pasarte por @detectivepikachuayuda.")
         return
+
+    group = getGroup(chat_id)
 
     try:
       bot.deleteMessage(chat_id=chat_id,message_id=update.message.message_id)
@@ -891,6 +904,9 @@ def raid(bot, update, args=None):
   if chat_type != "channel":
     user_username = message.from_user.username
     thisuser = refreshUsername(user_id, user_username)
+
+  if isBanned(chat_id) or isBanned(user_id):
+    return
 
   if chat_type == "private":
     bot.sendMessage(chat_id=chat_id, text="Las incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
@@ -1082,6 +1098,9 @@ def cancelar(bot, update, args=None):
     logging.debug("detectivepikachubot:cancelar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
+    if isBanned(chat_id):
+        return
+
     if chat_type != "channel":
         user_username = message.from_user.username
         thisuser = refreshUsername(user_id, user_username)
@@ -1119,6 +1138,9 @@ def borrar(bot, update, args=None):
     logging.debug("detectivepikachubot:borrar: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
+    if isBanned(chat_id):
+        return
+
     if chat_type != "channel":
         user_username = message.from_user.username
         thisuser = refreshUsername(user_id, user_username)
@@ -1153,6 +1175,9 @@ def borrar(bot, update, args=None):
 def cambiarhora(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarHora: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if isBanned(chat_id):
+        return
 
     if chat_type != "channel":
         user_username = message.from_user.username
@@ -1219,6 +1244,9 @@ def cambiarhorafin(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarHoraFin: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
+    if isBanned(chat_id):
+        return
+
     if chat_type != "channel":
         user_username = message.from_user.username
         thisuser = refreshUsername(user_id, user_username)
@@ -1283,6 +1311,9 @@ def cambiarhorafin(bot, update, args=None):
 def cambiargimnasio(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiargimnasio: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if isBanned(chat_id):
+        return
 
     if chat_type != "channel":
         user_username = message.from_user.username
@@ -1366,6 +1397,9 @@ def reflotartodas(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotartodas: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
+    if isBanned(chat_id):
+        return
+
     if chat_type == "private":
       bot.sendMessage(chat_id=chat_id, text="Este comando solo funciona en canales y grupos.")
       return
@@ -1394,6 +1428,9 @@ def reflotartodas(bot, update, args=None):
 def reflotarhoy(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotarhoy: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if isBanned(chat_id):
+        return
 
     if chat_type == "private":
       bot.sendMessage(chat_id=chat_id, text="Este comando solo funciona en canales y grupos.")
@@ -1427,6 +1464,9 @@ def reflotarhoy(bot, update, args=None):
 def reflotar(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if isBanned(chat_id):
+        return
 
     if chat_type != "channel":
         user_username = message.from_user.username
@@ -1474,6 +1514,9 @@ def reflotar(bot, update, args=None):
 def cambiarpokemon(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarpokemon: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if isBanned(chat_id):
+        return
 
     if chat_type != "channel":
         user_username = message.from_user.username
@@ -1536,8 +1579,8 @@ def raidbutton(bot, update):
   chat_id = query.message.chat.id
   message_id = query.message.message_id
 
-  if isBanned(user_id):
-      return
+  if isBanned(user_id) or isBanned(chat_id):
+    return
 
   thisuser = refreshUsername(user_id, user_username)
 

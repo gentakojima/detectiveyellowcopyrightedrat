@@ -418,12 +418,13 @@ def isBanned(user_id):
     global db
     logging.debug("storagemethods:isBanned: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id` FROM `usuarios` WHERE `id`=%s AND banned=1"
-        cursor.execute(sql, (user_id))
+        sql = "SELECT `id` FROM `usuarios` WHERE `id`=%s AND banned=1 UNION SELECT `id` FROM `grupos` WHERE `id`=%s AND banned=1"
+        cursor.execute(sql, (user_id, user_id))
         result = cursor.fetchone()
         if result == None:
             return False
         else:
+            logging.debug("storagemethods:isBanned: Found banned ID %s" % user_id)
             return True
 
 def saveRaid(raid):

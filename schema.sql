@@ -44,7 +44,8 @@ CREATE TABLE `grupos` (
   `babysitter` TINYINT NOT NULL DEFAULT '0',
   `timeformat` TINYINT NOT NULL DEFAULT '0',
   `icontheme` TINYINT NOT NULL DEFAULT '0',
-  `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid'
+  `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid',
+  `banned` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
