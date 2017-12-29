@@ -20,6 +20,15 @@
 from supportmethods import parse_profile_image
 import re
 import os
+import argparse
+import random
+import time
+import sys
+import cv2
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--inspect', help='Examine failed images interactively', action='store_true')
+args = parser.parse_args()
 
 passed_tests = failed_tests = 0
 
@@ -38,7 +47,10 @@ for root, dirs, filenames in os.walk("testingimgs"):
             expected_pokemon = m.group(4)
             expected_pokemon_name = m.group(5)
 
-            (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(os.path.join(root, f), expected_pokemon)
+            inspectFilename = str(time.time()) + "_" + str(random.randrange(100, 999))
+            (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(os.path.join(root, f), expected_pokemon, inspect=True, inspectFilename=inspectFilename)
+
+            failed_test = False
 
             try:
                 assert chosen_color == expected_color
@@ -46,36 +58,51 @@ for root, dirs, filenames in os.walk("testingimgs"):
             except AssertionError as e:
                 print(" [!] Incorrect team! '%s' vs. expected '%s'" % (chosen_color, expected_color))
                 failed_tests = failed_tests + 1
+                failed_test = True
             try:
                 assert level == expected_level
                 passed_tests = passed_tests + 1
             except AssertionError as e:
                 print(" [!] Incorrect level! '%s' vs. expected '%s'" % (level, expected_level))
                 failed_tests = failed_tests + 1
+                failed_test = True
             try:
                 assert trainer_name.lower() == expected_trainer_name.lower()
                 passed_tests = passed_tests + 1
             except AssertionError as e:
                 print(" [!] Incorrect trainer name! '%s' vs. expected '%s'" % (trainer_name, expected_trainer_name))
                 failed_tests = failed_tests + 1
+                failed_test = True
             try:
                 assert chosen_pokemon == expected_pokemon
                 passed_tests = passed_tests + 1
             except AssertionError as e:
                 print(" [!] Incorrect Pokémon! '%s' vs. expected '%s'" % (chosen_pokemon, expected_pokemon))
                 failed_tests = failed_tests + 1
+                failed_test = True
             try:
                 assert pokemon_name.lower() == expected_pokemon_name.lower()
                 passed_tests = passed_tests + 1
             except AssertionError as e:
                 print(" [!] Incorrect Pokémon name! '%s' vs. expected '%s'" % (pokemon_name, expected_pokemon_name))
                 failed_tests = failed_tests + 1
+                failed_test = True
             try:
                 assert chosen_profile != None
                 passed_tests = passed_tests + 1
             except AssertionError as e:
                 print(" [!] Incorrect Profile model! No match at all!")
                 failed_tests = failed_tests + 1
+                failed_test = True
+
+            if failed_test == True and args.inspect == True:
+                inspectdir = sys.path[0] + "/inspectimages"
+                for dirname, dirnames, filenames in os.walk(inspectdir):
+                    for f in filenames:
+                        if re.match(r'%s' % inspectFilename, f) != None:
+                            i = cv2.imread(inspectdir + "/" + f)
+                            cv2.imshow("Inspecting %s" % f, i)
+                cv2.waitKey(0)
 
 print("Passed tests: %s" % passed_tests)
 print("Failed tests: %s" % failed_tests)

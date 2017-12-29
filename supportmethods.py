@@ -593,20 +593,16 @@ def extract_day(timeraid, tzone):
     else:
         return None
 
-def parse_profile_image(filename, desired_pokemon):
+def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilename="failed"):
     logging.debug("supportmethods:parse_profile_image %s" % filename)
 
     new_file, tmpfilename = tempfile.mkstemp(suffix=".png")
     os.close(new_file)
 
-    # Failed validations will be saved for debugging purposes
-    faileddir = sys.path[0] + "/failed"
-    faileddir_aspectratio = sys.path[0] + "/failed/aspectratio"
-    faileddir_pokemon = sys.path[0] + "/failed/pokemon"
-    faileddir_level = sys.path[0] + "/failed/level"
-    for fd in [faileddir, faileddir_aspectratio, faileddir_pokemon, faileddir_level]:
-        if not os.path.exists(fd):
-            os.makedirs(fd)
+    # Validations will be saved for debugging purposes if passed inspect=True
+    inspectdir = sys.path[0] + "/inspectimages"
+    if not os.path.exists(inspectdir):
+        os.makedirs(inspectdir)
 
     # Load possible pokemons
     if desired_pokemon != None:
@@ -635,8 +631,9 @@ def parse_profile_image(filename, desired_pokemon):
     aspect_ratio = height/width
 
     # Raise error for unsupported aspect ratios
-    if aspect_ratio <= 1.64 or aspect_ratio >= 2.08:
-        cv2.imwrite(faileddir_aspectratio + "/%s.png" % time.time(), image)
+    if aspect_ratio <= 1.64 or aspect_ratio >= 2.17:
+        if inspect==True:
+            cv2.imwrite(inspectdir + "/%s_img.png" % inspectFilename, image)
         raise Exception("Aspect ratio not supported")
 
     # Crop GalaxyS8+ bars
@@ -651,6 +648,8 @@ def parse_profile_image(filename, desired_pokemon):
             image = image[int(height/17.2):int(height-height/12.3),int(0):int(width)] # y1:y2,x1:x2
             height, width, _ = image.shape
             aspect_ratio = height/width
+            if inspect==True:
+                cv2.imwrite(inspectdir + "/%s_img_s8.png" % inspectFilename, image)
 
     # Crop large bars
     bottombar_img = image[int(height-height/14):int(height),int(0):int(width)] # y1:y2,x1:x2
@@ -658,6 +657,8 @@ def parse_profile_image(filename, desired_pokemon):
     if bottombar_gray.mean() < 40:
         image = image[int(0):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
         height, width, _ = image.shape
+        if inspect==True:
+            cv2.imwrite(inspectdir + "/%s_img_largebar.png" % inspectFilename, image)
 
     # Crop small bars
     bottombar_img = image[int(height-height/17):int(height),int(0):int(width)] # y1:y2,x1:x2
@@ -665,6 +666,8 @@ def parse_profile_image(filename, desired_pokemon):
     if bottombar_gray.mean() < 40:
         image = image[int(0):int(height-height/17),int(0):int(width)] # y1:y2,x1:x2
         height, width, _ = image.shape
+        if inspect==True:
+            cv2.imwrite(inspectdir + "/%s_img_smallbar.png" % inspectFilename, image)
 
     # Extract profile layout for profile Testing
     profile_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -711,11 +714,13 @@ def parse_profile_image(filename, desired_pokemon):
 
         if chosen_color == None or values[color] > values[chosen_color]:
             chosen_color = color
+    if inspect==True:
+        cv2.imwrite(inspectdir + "/%s_team.png" % inspectFilename, team1_img)
     logging.debug("supportmethods:parse_profile_image: Chosen color: %s" % chosen_color)
 
     # Prepare color boundaries to extract level, trainer and pokémon name
     boundaries = {
-        "Rojo": ([35, 10, 105], [100, 90, 190]),
+        "Rojo": ([35, 10, 105], [110, 100, 190]),
         "Azul": ([90, 75, 0], [190, 155, 70]),
         "Amarillo": ([0, 105, 180], [110, 198, 255])
     }
@@ -726,8 +731,10 @@ def parse_profile_image(filename, desired_pokemon):
     # Extract and OCR trainer and Pokémon name
     if aspect_ratio < 1.88:
         nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
-    else:
+    elif aspect_ratio < 2.15:
         nick1_img = image[int(height/10+height/80):int(height/10*2-height/40),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
+    else:
+        nick1_img = image[int(height/11+height/80):int(height/11*2-height/60),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
     # find colors within the specified boundaries
     nick1_gray = cv2.inRange(nick1_img, lower, upper)
     nick1_gray = 255 - nick1_gray
@@ -735,8 +742,11 @@ def parse_profile_image(filename, desired_pokemon):
     cv2.imwrite(tmpfilename, nick1_gray)
     text = pytesseract.image_to_string(Image.open(tmpfilename))
     trainer_name = re.sub(r'\n+.*$','',text)
-    trainer_name = trainer_name.replace(" ","").replace("|","l").replace("ﬁ","ri")
+    trainer_name = trainer_name.replace(" ","").replace("|","l").replace("ﬁ","ri").replace("ﬂ","ri")
     pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text).replace(" ","")
+    if inspect==True:
+        cv2.imwrite(inspectdir + "/%s_names_img.png" % inspectFilename, nick1_img)
+        cv2.imwrite(inspectdir + "/%s_names_gray.png" % inspectFilename, nick1_gray)
     logging.debug("supportmethods:parse_profile_image: Trainer name: %s" % trainer_name)
     logging.debug("supportmethods:parse_profile_image: Pokemon name: %s" % pokemon_name)
 
@@ -745,8 +755,10 @@ def parse_profile_image(filename, desired_pokemon):
         level1_img = image[int(height/2+2*height/13):int(height-height/4-height/22),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
     elif aspect_ratio < 1.88:
         level1_img = image[int(height/2+height/8):int(height-height/4-height/16),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
-    else:
+    elif aspect_ratio < 2.15:
         level1_img = image[int(height/2+height/16):int(height-height/3-height/18),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
+    else:
+        level1_img = image[int(height/2+height/32):int(height-height/3-height/12),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
     # find colors within the specified boundaries
     level1_gray = cv2.inRange(level1_img, lower, upper)
     level1_gray = 255 - level1_gray
@@ -763,17 +775,19 @@ def parse_profile_image(filename, desired_pokemon):
             level = None
     except:
         level = None
-        cv2.imwrite(faileddir_level + "/%s_image.png" % time.time(), image)
-        cv2.imwrite(faileddir_level + "/%s_levelimg.png" % time.time(), level1_gray)
-        cv2.imwrite(faileddir_level + "/%s_levelgray.png" % time.time(), level1_img)
+    if inspect==True:
+        cv2.imwrite(inspectdir + "/%s_level_img.png" % inspectFilename, level1_img)
+        cv2.imwrite(inspectdir + "/%s_level_gray.png" % inspectFilename, level1_gray)
 
     # Extract Pokemon
     if aspect_ratio < 1.81:
         pokemon_img = image[int(height/3):int(height-height/3),int(width/8):int(width/2)] # y1:y2,x1:x2
     elif aspect_ratio < 1.88:
         pokemon_img = image[int(height/3-height/42):int(height-height/3-height/42),int(width/8):int(width/2)] # y1:y2,x1:x2
-    else:
+    elif aspect_ratio < 2.15:
         pokemon_img = image[int(height/3-height/20):int(height-height/3-height/12),int(width/8):int(width/2)] # y1:y2,x1:x2
+    else:
+        pokemon_img = image[int(height/3-height/20):int(height-height/3-height/8),int(width/8):int(width/2)] # y1:y2,x1:x2
     pokemon_gray = cv2.cvtColor(pokemon_img, cv2.COLOR_BGR2GRAY)
     pokemon_gray = cv2.resize(pokemon_gray, (60,60))
 
@@ -792,6 +806,10 @@ def parse_profile_image(filename, desired_pokemon):
                    break
     else:
         chosen_pokemon = None
+
+    if inspect==True:
+        cv2.imwrite(inspectdir + "/%s_pokemon_img.png" % inspectFilename, pokemon_img)
+        cv2.imwrite(inspectdir + "/%s_pokemon_gray.png" % inspectFilename, pokemon_gray)
     logging.debug("supportmethods:parse_profile_image: Chosen Pokemon: %s" % chosen_pokemon)
 
     # Cleanup and return
