@@ -352,7 +352,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
             elif warntype == "borrar":
                 text = "🚫 %s ha <b>borrado</b> la incursión de %s a las %s en %s" % (user_text, raid["pokemon"], extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarhora":
-                text_day = format_text_day(raid["timeraid"], group["timezone"])
+                text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
                 if text_day != "":
                     text_day = " " + text_day
                 text = "⚠️ %s ha cambiado la hora de la %s de %s en %s para las <b>%s</b>%s" % (user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]), text_day)
@@ -363,7 +363,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
             elif warntype == "cambiargimnasio":
                 text = "⚠️ %s ha cambiado el gimnasio de la %s de %s para las %s a <b>%s</b>" % (user_text, incursion_text, raid["pokemon"], extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarpokemon":
-                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"])
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
                 text = "⚠️ %s ha cambiado la %s para las %s en %s a incursión %s" % (user_text, incursion_text, extract_time(raid["timeraid"]), raid["gimnasio_text"], text_pokemon)
             bot.sendMessage(chat_id=p["id"], text=text, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
             warned.append(p["username"])
