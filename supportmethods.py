@@ -689,6 +689,8 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
             chosen_similarity = profiles[i]["similarity"]
             if profiles[i]["similarity"] > 0.9:
                 break
+    if inspect==True:
+        cv2.imwrite(inspectdir + "/%s_profile.png" % inspectFilename, profile_gray)
     logging.debug("supportmethods:parse_profile_image: Chosen profile: %s" % chosen_profile)
 
     # Prepare color boundaries to extract team
