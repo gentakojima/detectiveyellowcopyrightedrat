@@ -52,7 +52,7 @@ from Levenshtein import distance
 import html
 
 from config import config
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, refreshDb, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats
+from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
@@ -67,8 +67,6 @@ if not os.path.exists(logdir):
     os.makedirs(logdir)
 logging.basicConfig(filename=logdir+'/debug.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
 logging.info("--------------------- Starting bot! -----------------------")
-
-refreshDb()
 
 updater = Updater(token=config["telegram"]["token"], workers=8)
 dispatcher = updater.dispatcher
@@ -1606,12 +1604,16 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡Ya te habías apuntado antes!", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "old_raid":
           bot.answerCallbackQuery(text="Ya no te puedes apuntar a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+      elif result == "not_raid":
+          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       else:
           bot.answerCallbackQuery(text="¡No has podido apuntarte! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   elif data == "plus1":
       result = raidPlus1(chat_id, message_id, user_id)
       if result == "old_raid":
           bot.answerCallbackQuery(text="Ya no te puedes apuntar a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+      elif result == "not_raid":
+          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "demasiados":
           bot.answerCallbackQuery(text="No puedes apuntarte con más de 6 personas. Si quieres borrar personas, pulsa en el botón «Voy».", callback_query_id=update.callback_query.id, show_alert="true")
       elif str(result).isdigit():
@@ -1626,6 +1628,8 @@ def raidbutton(bot, update):
           update_text = True
       elif result == "old_raid":
           bot.answerCallbackQuery(text="Ya no te puedes desapuntar de esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+      elif result == "not_raid":
+          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "no_changes":
           bot.answerCallbackQuery(text="¡Ya te habías desapuntado antes! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
       else:
@@ -1639,6 +1643,8 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡Ya habías marcado antes que estás! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "old_raid":
           bot.answerCallbackQuery(text="Ya no puedes marcar que estás en esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+      elif result == "not_raid":
+          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       else:
           bot.answerCallbackQuery(text="¡No has podido marcar como llegado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   elif data == "llegotarde":
@@ -1650,6 +1656,8 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡Ya habías marcado que llegas tarde! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "old_raid":
           bot.answerCallbackQuery(text="Ya no puedes decir que has llegado tarde a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+      elif result == "not_raid":
+          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       else:
           bot.answerCallbackQuery(text="¡No has podido marcar como que llegas tarde! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   elif data == "lotengo":
@@ -1661,6 +1669,8 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡Ya habías marcado antes que lo has capturado!", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "old_raid":
           bot.answerCallbackQuery(text="Ya no puedes marcar que has capturado este Pokémon.", callback_query_id=update.callback_query.id, show_alert="true")
+      elif result == "not_raid":
+          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "not_going":
           bot.answerCallbackQuery(text="No pudes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "not_now":
@@ -1676,6 +1686,8 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡Ya habías marcado antes que se te ha escapado!", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "old_raid":
           bot.answerCallbackQuery(text="Ya no puedes marcar que se te ha escapado este Pokémon.", callback_query_id=update.callback_query.id, show_alert="true")
+      elif result == "not_raid":
+          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "not_going":
           bot.answerCallbackQuery(text="No pudes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "not_now":
