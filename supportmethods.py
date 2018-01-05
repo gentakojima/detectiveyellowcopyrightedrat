@@ -678,7 +678,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     cv2.rectangle(profile_gray,(8,5),(60,20),(255,255,255),-1)   # delete nickname
     cv2.rectangle(profile_gray,(48,75),(72,85),(255,255,255),-1) # delete level
 
-    # Test extracted profile leyout against possible profile models
+    # Test extracted profile layout against possible profile models
     chosen_profile = None
     chosen_similarity = 0.0
     for i in validation_profiles:
@@ -721,7 +721,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     # Prepare color boundaries to extract level, trainer and pokémon name
     boundaries = {
         "Rojo": ([35, 10, 105], [110, 100, 190]),
-        "Azul": ([90, 75, 0], [190, 155, 70]),
+        "Azul": ([90, 75, 0], [190, 145, 80]),
         "Amarillo": ([0, 105, 180], [110, 198, 255])
     }
 	# create NumPy arrays from the boundaries
@@ -738,12 +738,25 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     # find colors within the specified boundaries
     nick1_gray = cv2.inRange(nick1_img, lower, upper)
     nick1_gray = 255 - nick1_gray
+    # Find boundaries and clean small artifacts
+    cim, contours, chier = cv2.findContours(nick1_gray, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    for c in contours:
+        x, y, w, h = cv2.boundingRect(c)
+        if w*h > 15:
+            continue
+        # draw a white rectangle to mask the unwanted artifact
+        cv2.rectangle(nick1_gray, (x, y), (x+w, y+h), (255, 255, 255), -1)
     # Do the OCR
     cv2.imwrite(tmpfilename, nick1_gray)
     text = pytesseract.image_to_string(Image.open(tmpfilename))
+    if inspect==True:
+        print("Originally recognized text: %s" % text)
     trainer_name = re.sub(r'\n+.*$','',text)
     trainer_name = trainer_name.replace(" ","").replace("|","l").replace("ﬁ","ri").replace("ﬂ","ri")
     pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text).replace(" ","")
+    if pokemon_name == "":
+        # Alternative pokemon name parsing
+        pokemon_name = re.sub(r'^.*\n+(et|&|y|e)[ ]*','',text)
     if inspect==True:
         cv2.imwrite(inspectdir + "/%s_names_img.png" % inspectFilename, nick1_img)
         cv2.imwrite(inspectdir + "/%s_names_gray.png" % inspectFilename, nick1_gray)
