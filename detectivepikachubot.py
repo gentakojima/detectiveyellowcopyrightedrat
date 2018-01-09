@@ -539,6 +539,8 @@ def channelCommands(bot, update):
             reflotartodas(bot, update, args)
         elif command == "reflotarhoy":
             reflotarhoy(bot, update, args)
+        elif command == "reflotaractivas" or command=="reflotaractivo":
+            reflotaractivas(bot, update, args)
         elif command == "cambiarhora" or command == "hora":
             cambiarhora(bot, update, args)
         elif command == "cambiarhorafin" or command == "horafin":
@@ -1463,6 +1465,42 @@ def reflotarhoy(bot, update, args=None):
             if user_id != None:
                 bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
+def reflotaractivas(bot, update, args=None):
+    logging.debug("detectivepikachubot:reflotaractivas: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if isBanned(chat_id):
+        return
+
+    if chat_type == "private":
+      bot.sendMessage(chat_id=chat_id, text="Este comando solo funciona en canales y grupos.")
+      return
+
+    delete_message(chat_id, message.message_id, bot)
+
+    if chat_type != "channel" and not is_admin(chat_id, user_id, bot):
+        return
+
+    group = getGroup(chat_id)
+    intwohours_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) + timedelta(minutes = 90)
+    raids = getActiveRaidsforGroup(chat_id)
+
+    for raid in raids:
+        timeraid = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
+        if raid["id"] != None and raid["status"] != "ended" and timeraid <= intwohours_datetime:
+            try:
+                bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+            except Exception as e:
+                logging.debug("detectivepikachubot:reflotar: error borrando post antiguo %s" % raid["message"])
+            raid["refloated"] = 1
+            text = format_message(raid)
+            reply_markup = get_keyboard(raid)
+            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            raid["message"] = sent_message.message_id
+            saveRaid(raid)
+            if user_id != None:
+                bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+
 def reflotar(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1775,6 +1813,7 @@ dispatcher.add_handler(CommandHandler(['cambiarpokemon','pokemon'], cambiarpokem
 dispatcher.add_handler(CommandHandler(['borrar','delete','remove'], borrar, pass_args=True))
 dispatcher.add_handler(CommandHandler('reflotar', reflotar, pass_args=True))
 dispatcher.add_handler(CommandHandler(['reflotartodo','reflotartodas'], reflotartodas, pass_args=True))
+dispatcher.add_handler(CommandHandler(['reflotaractivo','reflotaractivas'], reflotaractivas, pass_args=True))
 dispatcher.add_handler(CommandHandler(['reflotarhoy'], reflotarhoy, pass_args=True))
 dispatcher.add_handler(CommandHandler('gym', gym, pass_args=True))
 # Commands related to alerts
