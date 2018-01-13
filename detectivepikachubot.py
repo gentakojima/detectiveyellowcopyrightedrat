@@ -1000,7 +1000,7 @@ def raid(bot, update, args=None):
       Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
       return
 
-  current_raid["timeend"] = parse_time(args[-1], group["timezone"])
+  current_raid["timeend"] = parse_time(args[-1], group["timezone"], strict=True)
   if current_raid["timeend"] != None:
       del args[-1]
       try:

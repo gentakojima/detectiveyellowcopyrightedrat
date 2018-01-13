@@ -518,9 +518,12 @@ def parse_pokemon(pokestr):
 
     return (ret_pok, ret_egg)
 
-def parse_time(st, tz):
+def parse_time(st, tz, strict=False):
     logging.debug("supportmethods:parse_time %s %s" % (st,tz))
-    m = re.match("([0-9]{1,2}/)?([0-9]{1,2})[:.]?([0-9]{0,2})h?", st, flags=re.IGNORECASE)
+    if strict == True:
+        m = re.match("([0-9]{1,2}/)?([0-9]{1,2})[:.]([0-9]{1,2})h?", st, flags=re.IGNORECASE)
+    else:
+        m = re.match("([0-9]{1,2}/)?([0-9]{1,2})[:.]?([0-9]{0,2})h?", st, flags=re.IGNORECASE)
     if m != None:
         hour = str(m.group(2))
         minute = m.group(3) or "00"
