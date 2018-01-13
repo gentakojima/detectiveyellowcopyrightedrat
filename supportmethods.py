@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
 import time
 import html
@@ -33,7 +33,7 @@ from PIL import Image, ImageOps
 from skimage.measure import compare_ssim as ssim
 from unidecode import unidecode
 
-from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus, getPlace
+from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
@@ -310,7 +310,32 @@ def update_validations_status(bot):
             bot.sendMessage(chat_id=v["usuario_id"], text="⚠ El proceso de validación pendiente ha caducado porque han pasado 6 horas desde que empezó. Si quieres validarte, debes volver a empezar el proceso.", parse_mode=telegram.ParseMode.MARKDOWN)
         except Exception as e:
             logging.debug("supportmethods:update_validations_status error: %s" % str(e))
-    time.sleep(0.05)
+        time.sleep(0.05)
+
+def auto_refloat(bot):
+    logging.debug("supportmethods:auto_refloat")
+    groups = getAutorefloatGroups()
+    for g in groups:
+        logging.debug("supportmethods:auto_refloat auto refloat group %s %s" % (g["id"],g["title"]))
+        updateLastAutorefloat(g["id"])
+        group = getGroup(g["id"])
+        intwohours_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) + timedelta(minutes = 90)
+        raids = getActiveRaidsforGroup(g["id"])
+        for raid in raids:
+            timeraid = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
+            if raid["id"] != None and raid["status"] != "ended" and timeraid <= intwohours_datetime:
+                try:
+                    bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+                except Exception as e:
+                    logging.debug("supportmethods:auto_refloat: error borrando post antiguo %s" % raid["message"])
+                raid["refloated"] = 1
+                text = format_message(raid)
+                reply_markup = get_keyboard(raid)
+                sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+                raid["message"] = sent_message.message_id
+                saveRaid(raid)
+                logging.debug("supportmethods:auto_refloat: auto reflotada incursión %s mensaje %s" % (raid["id"], raid["message"]))
+                time.sleep(0.05)
 
 def error_callback(bot, update, error):
     try:
@@ -427,19 +452,42 @@ def get_settings_keyboard(chat_id):
         timeformat_text = "✅ Horas AM/PM"
     else:
         timeformat_text = "▪️ Horas AM/PM"
+    if group["plusmax"] == 1:
+        plusmax_text = "✅Botón +1 máx 1"
+    elif group["plusmax"] == 2:
+        plusmax_text = "✅ Botón +1 máx 2"
+    elif group["plusmax"] == 3:
+        plusmax_text = "✅ Botón +1 máx 3"
+    elif group["plusmax"] == 5:
+        plusmax_text = "✅ Botón +1 máx 5"
+    elif group["plusmax"] == 10:
+        plusmax_text = "✅ Botón +1 máx 10"
+    else:
+        plusmax_text = "▪️ Botón +1"
+    if group["refloatauto"] == 5:
+        refloatauto_text = "✅ Reflotar auto 5m"
+    elif group["refloatauto"] == 10:
+        refloatauto_text = "✅ Reflotar auto 10m"
+    elif group["refloatauto"] == 15:
+        refloatauto_text = "✅ Reflotar auto 15m"
+    else:
+        refloatauto_text = "▪️ Reflotar automático"
     icons = iconthemes[group["icontheme"]]
     icontheme_text = "%s%s%s Iconos" % (icons["Rojo"],icons["Azul"],icons["Amarillo"])
 
     settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
     [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
-    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme'), InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')]]
+    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme'), InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')],[InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax'), InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
 def get_keyboard(raid):
     group = getGroup(raid["grupo_id"])
     if raid["status"] == "started" or raid["status"] == "waiting":
-        keyboard_row1 = [InlineKeyboardButton("🙋 Voy", callback_data='voy'), InlineKeyboardButton("👭 +1", callback_data='plus1'), InlineKeyboardButton("🙅 No voy", callback_data='novoy')]
+        keyboard_row1 = [InlineKeyboardButton("🙋 Voy", callback_data='voy')]
+        if group["plusmax"]>0:
+            keyboard_row1.append(InlineKeyboardButton("👭 +1", callback_data='plus1'))
+        keyboard_row1.append(InlineKeyboardButton("🙅 No voy", callback_data='novoy'))
         keyboard_row2 = [InlineKeyboardButton("✅ Estoy ahí", callback_data='estoy')]
         if group["latebutton"] == 1:
             keyboard_row2.append(InlineKeyboardButton("🕒 Tardo", callback_data='llegotarde'))

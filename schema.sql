@@ -35,6 +35,8 @@ CREATE TABLE `grupos` (
   `disaggregated` TINYINT NOT NULL DEFAULT '0',
   `latebutton` TINYINT NOT NULL DEFAULT '0',
   `refloat` TINYINT NOT NULL DEFAULT '0',
+  `refloatauto` TINYINT NOT NULL DEFAULT '0',
+  `lastrefloatauto` datetime DEFAULT NULL,
   `candelete` TINYINT NOT NULL DEFAULT '1',
   `gotitbuttons` TINYINT NOT NULL DEFAULT '0',
   `locations` TINYINT NOT NULL DEFAULT '1',
@@ -44,6 +46,7 @@ CREATE TABLE `grupos` (
   `babysitter` TINYINT NOT NULL DEFAULT '0',
   `timeformat` TINYINT NOT NULL DEFAULT '0',
   `icontheme` TINYINT NOT NULL DEFAULT '0',
+  `plusmax` TINYINT NOT NULL DEFAULT '5',
   `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid',
   `banned` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

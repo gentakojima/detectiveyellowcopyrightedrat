@@ -74,16 +74,18 @@ def saveGroup(group):
     for k in ["settings_message","spreadsheet","talkgroup","alias"]:
         if k not in group.keys():
             group[k] = None
-    for k in ["disaggregated","latebutton","refloat","gotitbuttons","gymcommand","babysitter","timeformat","icontheme"]:
+    for k in ["disaggregated","latebutton","refloat","gotitbuttons","gymcommand","babysitter","timeformat","icontheme","refloatauto"]:
         if k not in group.keys():
             group[k] = 0
     for k in ["alerts","candelete","locations","raidcommand"]:
         if k not in group.keys():
             group[k] = 1
+    if "plusmax" not in group.keys():
+        group["plusmax"] = 5
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, alias, spreadsheet) VALUES (%s, %s, %s, %s) \
-        ON DUPLICATE KEY UPDATE title = %s, alias = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s, talkgroup = %s, timeformat = %s, icontheme = %s;"
-        cursor.execute(sql, (group["id"], group["title"], group["alias"], group["spreadsheet"], group["title"], group["alias"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["babysitter"], group["timezone"], group["talkgroup"], group["timeformat"], group["icontheme"]))
+        ON DUPLICATE KEY UPDATE title = %s, alias = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s, talkgroup = %s, timeformat = %s, icontheme = %s, plusmax = %s, refloatauto = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["alias"], group["spreadsheet"], group["title"], group["alias"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["babysitter"], group["timezone"], group["talkgroup"], group["timeformat"], group["icontheme"], group["plusmax"], group["refloatauto"]))
     db.commit()
     db.close()
 
@@ -91,7 +93,7 @@ def getGroup(group_id, reconnect=True):
     db = getDbConnection()
     logging.debug("storagemethods:getGroup: %s" % (group_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`title`,`alias`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timeformat`, `talkgroup`, `icontheme`, `timezone` FROM `grupos` WHERE `id`=%s"
+        sql = "SELECT `id`,`title`,`alias`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timeformat`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `refloatauto` FROM `grupos` WHERE `id`=%s"
         try:
             cursor.execute(sql, (group_id))
             result = cursor.fetchone()
@@ -240,6 +242,32 @@ def getActiveRaidsforGroup(group_id):
         result = cursor.fetchall()
     db.close()
     return result
+
+def getAutorefloatGroups():
+    db = getDbConnection()
+    logging.debug("storagemethods:getAutorefloatGroups")
+    with db.cursor() as cursor:
+        sql = "SELECT id, title FROM grupos WHERE \
+            (refloatauto = 5 AND (lastrefloatauto IS NULL OR \
+                lastrefloatauto < timestamp(DATE_SUB(NOW(), INTERVAL 5 MINUTE)))) OR \
+            (refloatauto = 10 AND (lastrefloatauto IS NULL OR \
+                lastrefloatauto < timestamp(DATE_SUB(NOW(), INTERVAL 10 MINUTE)))) OR \
+            (refloatauto = 15 AND (lastrefloatauto IS NULL OR \
+                lastrefloatauto < timestamp(DATE_SUB(NOW(), INTERVAL 15 MINUTE))))"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    db.close()
+    return result
+
+def updateLastAutorefloat(group_id):
+    db = getDbConnection()
+    logging.debug("storagemethods:updateLastAutorefloat %s" % group_id)
+    with db.cursor() as cursor:
+        sql = "UPDATE grupos SET lastrefloatauto = NOW() WHERE id = %s AND refloatauto > 0"
+        cursor.execute(sql, group_id)
+    db.commit()
+    db.close()
+    return
 
 def savePlaces(group_id, places):
     db = getDbConnection()
@@ -639,8 +667,9 @@ def raidPlus1(grupo_id, message_id, user_id):
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
+        group = getGroup(grupo_id)
         if result != None:
-            if result["plus"]>5:
+            if result["plus"] >= group["plusmax"]:
                 db.close()
                 return "demasiados"
             sql = "UPDATE voy SET plus=plus+1, novoy = 0 WHERE `incursion_id`=%s and usuario_id=%s;"

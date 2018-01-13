@@ -53,7 +53,7 @@ import html
 
 from config import config
 from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats
-from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
 def cleanup(signum, frame):
@@ -1636,7 +1636,11 @@ def raidbutton(bot, update):
   if data == "voy":
       result = raidVoy(chat_id, message_id, user_id)
       if result == True:
-          bot.answerCallbackQuery(text="¡Te has apuntado! Si vas con más gente, pulsa +1", callback_query_id=update.callback_query.id)
+          group = getGroup(chat_id)
+          if group["plusmax"]>0:
+              bot.answerCallbackQuery(text="¡Te has apuntado! Si vas con más gente, pulsa +1", callback_query_id=update.callback_query.id)
+          else:
+              bot.answerCallbackQuery(text="¡Te has apuntado correctamente!", callback_query_id=update.callback_query.id)
           update_text = True
       elif result == "no_changes":
           bot.answerCallbackQuery(text="¡Ya te habías apuntado antes!", callback_query_id=update.callback_query.id, show_alert="true")
@@ -1653,7 +1657,8 @@ def raidbutton(bot, update):
       elif result == "not_raid":
           bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "demasiados":
-          bot.answerCallbackQuery(text="No puedes apuntarte con más de 6 personas. Si quieres borrar personas, pulsa en el botón «Voy».", callback_query_id=update.callback_query.id, show_alert="true")
+          group = getGroup(chat_id)
+          bot.answerCallbackQuery(text="No puedes apuntarte con más de %s personas. Si quieres borrar personas, pulsa en el botón «Voy»." % group["plusmax"], callback_query_id=update.callback_query.id, show_alert="true")
       elif str(result).isdigit():
           bot.answerCallbackQuery(text="¡Te has apuntado con %i más! Si sois más, pulsa +1" % result, callback_query_id=update.callback_query.id)
           update_text = True
@@ -1789,6 +1794,41 @@ def raidbutton(bot, update):
           saveGroup(group)
           update_settings_message(chat_id, bot)
 
+  if data=="settings_plusmax":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          group = getGroup(chat_id)
+          if group["plusmax"] == 0:
+              group["plusmax"] = 1
+          elif group["plusmax"] == 1:
+              group["plusmax"] = 2
+          elif group["plusmax"] == 2:
+              group["plusmax"] = 3
+          elif group["plusmax"] == 3:
+              group["plusmax"] = 5
+          elif group["plusmax"] == 5:
+              group["plusmax"] = 10
+          else:
+              group["plusmax"] = 0
+          saveGroup(group)
+          update_settings_message(chat_id, bot)
+  if data=="settings_refloatauto":
+    if not is_admin(chat_id, user_id, bot):
+        bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+    else:
+        group = getGroup(chat_id)
+        if group["refloatauto"] == 0:
+            group["refloatauto"] = 5
+        elif group["refloatauto"] == 5:
+            group["refloatauto"] = 10
+        elif group["refloatauto"] == 10:
+            group["refloatauto"] = 15
+        else:
+            group["refloatauto"] = 0
+        saveGroup(group)
+        update_settings_message(chat_id, bot)
+
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', start))
@@ -1838,5 +1878,8 @@ job = j.run_repeating(callback_update_raids_status, interval=60, first=8)
 def callback_update_validations_status(bot, job):
     Thread(target=update_validations_status, args=(bot,)).start()
 job2 = j.run_repeating(callback_update_validations_status, interval=60, first=16)
+def callback_auto_refloat(bot, job):
+    Thread(target=auto_refloat, args=(bot,)).start()
+job2 = j.run_repeating(callback_auto_refloat, interval=60, first=26)
 
 updater.start_polling()
