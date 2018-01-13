@@ -1567,7 +1567,7 @@ def cambiarpokemon(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cambiargimnasio", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cambiarpokemon", bot)
     if raid == None:
         return
 
@@ -1602,7 +1602,7 @@ def cambiarpokemon(bot, update, args=None):
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                     what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
                     if user_id != None:
-                        bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha cambiado el Pokémon/nivel de la incursión `%s` a %s correctamente!" % (raid["id"], what_text), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha cambiado el Pokémon/nivel de la incursión `%s` a incursión %s correctamente!" % (raid["id"], what_text), parse_mode=telegram.ParseMode.MARKDOWN)
                     warn_people("cambiarpokemon", raid, user_username, user_id, bot)
                 else:
                     user_id = chat_id if user_id == None else user_id
