@@ -1464,6 +1464,7 @@ def reflotarhoy(bot, update, args=None):
             saveRaid(raid)
             if user_id != None:
                 bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+            time.sleep(0.05)
 
 def reflotaractivas(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotaractivas: %s %s %s" % (bot, update, args))
@@ -1500,6 +1501,7 @@ def reflotaractivas(bot, update, args=None):
             saveRaid(raid)
             if user_id != None:
                 bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+            time.sleep(0.05)
 
 def reflotar(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotar: %s %s %s" % (bot, update, args))

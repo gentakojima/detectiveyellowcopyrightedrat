@@ -298,7 +298,7 @@ def update_raids_status(bot):
             logging.debug(updated)
         except Exception as e:
             logging.debug("supportmethods:update_raids_status error: %s" % str(e))
-    time.sleep(0.05)
+        time.sleep(0.05)
 
 def update_validations_status(bot):
     logging.debug("supportmethods:update_validations_status")
