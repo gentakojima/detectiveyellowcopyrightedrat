@@ -15,7 +15,8 @@ CREATE TABLE `gimnasios` (
   `latitude` varchar(20) NOT NULL,
   `longitude` varchar(20) NOT NULL,
   `keywords` varchar(512) NOT NULL,
-  `tags` varchar(45) DEFAULT NULL
+  `tags` varchar(45) DEFAULT NULL,
+  `address` varchar(128) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

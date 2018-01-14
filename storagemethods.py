@@ -388,15 +388,24 @@ def getPlace(id):
     db = getDbConnection()
     logging.debug("storagemethods:getPlace: %s" % (id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`name`,`grupo_id`,`latitude`,`longitude`,`keywords`,`tags` FROM `gimnasios` WHERE `id`=%s"
+        sql = "SELECT `id`,`name`,`grupo_id`,`latitude`,`longitude`,`keywords`,`tags`,`address` FROM `gimnasios` WHERE `id`=%s"
         cursor.execute(sql, (id))
         for row in cursor:
             if row["tags"] == None:
                 row["tags"] = "[]"
             db.close()
-            return {"id":row["id"], "group_id":row["grupo_id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"])}
+            return {"id":row["id"], "group_id":row["grupo_id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"]), "address":row["address"]}
         db.close()
         return None
+
+def savePlace(place):
+    db = getDbConnection()
+    logging.debug("storagemethods:savePlace: %s" % (place["id"]))
+    with db.cursor() as cursor:
+        sql = "UPDATE `gimnasios` SET `address`=%s WHERE `id`=%s"
+        cursor.execute(sql, (raid["address"], raid["id"]))
+    db.commit()
+    db.close()
 
 def getPlacesByLocation(latitude, longitude, distance=100):
     db = getDbConnection()

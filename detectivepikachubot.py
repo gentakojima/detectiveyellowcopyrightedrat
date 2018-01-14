@@ -52,7 +52,7 @@ from Levenshtein import distance
 import html
 
 from config import config
-from storagemethods import saveGroup, savePlaces, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats
+from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
@@ -1749,12 +1749,19 @@ def raidbutton(bot, update):
       try:
         gym = getPlace(raid["gimnasio_id"])
         if gym != None:
-          try:
-            reverse_geocode_result = gmaps.reverse_geocode((gym["latitude"], gym["longitude"]))
-            address = reverse_geocode_result[0]["formatted_address"]
-          except:
-            address = "-"
-          bot.sendVenue(chat_id=user_id, latitude=gym["latitude"], longitude=gym["longitude"], title=gym["desc"], address=address)
+          if gym["address"] == None:
+              logging.debug("detectivepikachubot:raidbutton:ubicacion Fetching address of gym %s..." % gym["id"])
+              try:
+                reverse_geocode_result = gmaps.reverse_geocode((gym["latitude"], gym["longitude"]))
+                address = reverse_geocode_result[0]["formatted_address"]
+                gym["address"] = address
+                savePlace(gym)
+              except:
+                logging.debug("detectivepikachubot:raidbutton:ubicacion Error fetching address! Key limit reached?")
+                gym["address"] = "-"
+          else:
+              logging.debug("detectivepikachubot:raidbutton:ubicacion Using cached address of gym %s" % gym["id"])
+          bot.sendVenue(chat_id=user_id, latitude=gym["latitude"], longitude=gym["longitude"], title=gym["desc"], address=gym["address"])
           if not already_sent_location(user_id, raid["gimnasio_id"]):
               bot.answerCallbackQuery(text="🌎 Te envío la ubicación por privado", callback_query_id=update.callback_query.id)
           else:
