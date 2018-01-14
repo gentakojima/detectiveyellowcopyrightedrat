@@ -942,6 +942,11 @@ def raid(bot, update, args=None):
       Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
       return
 
+  if chat_type != "channel" and thisuser["validation"] == "none" and group["validationrequired"] == 1:
+      sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero en este grupo es obligatorio validarse antes de poder crear incursiones o participar en ellas!\nAbre un privado con @detectivepikachubot y escribe `/help` para saber cómo puedes validarte.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
+      Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+      return
+
   if args == None or len(args)<3:
     if chat_type != "channel":
         sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text), parse_mode=telegram.ParseMode.MARKDOWN)
@@ -1635,10 +1640,16 @@ def raidbutton(bot, update):
     bot.answerCallbackQuery(text="No puedes unirte a una incursión si no tienes definido un alias.\nEn Telegram, ve a 'Ajustes' y selecciona la opción 'Alias'.", show_alert="true", callback_query_id=update.callback_query.id)
     return
 
+  group = getGroup(chat_id)
+
+  if (data == "voy" or data == "plus1" or data == "novoy" or data == "estoy" or data == "lotengo" or data == "escapou" or data == "llegotarde") \
+    and (group["validationrequired"] == 1 and thisuser["validation"] == "none"):
+    bot.answerCallbackQuery(text="No puedes unirte a una incursión en este grupo si no te has validado antes.\nAbre un privado con @detectivepikachubot y escribe '/help' para saber cómo puedes hacerlo.", show_alert="true", callback_query_id=update.callback_query.id)
+    return
+
   if data == "voy":
       result = raidVoy(chat_id, message_id, user_id)
       if result == True:
-          group = getGroup(chat_id)
           if group["plusmax"]>0:
               bot.answerCallbackQuery(text="¡Te has apuntado! Si vas con más gente, pulsa +1", callback_query_id=update.callback_query.id)
           else:
@@ -1773,7 +1784,7 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat"}
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired"}
 
   for k in settings:
       if data==k:

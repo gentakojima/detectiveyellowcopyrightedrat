@@ -436,6 +436,10 @@ def get_settings_keyboard(chat_id):
         locations_text = "✅ Ubicaciones"
     else:
         locations_text = "▪️ Ubicaciones"
+    if group["validationrequired"] == 1:
+        validationrequired_text = "✅ Validación obligatoria"
+    else:
+        validationrequired_text = "▪️ Validación obligatoria"
     if group["gymcommand"] == 1:
         gymcommand_text = "✅ Comando /gym"
     else:
@@ -477,7 +481,7 @@ def get_settings_keyboard(chat_id):
 
     settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
     [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
-    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme'), InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')],[InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax'), InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')]]
+    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme'), InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')],[InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax'), InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')], [InlineKeyboardButton(validationrequired_text, callback_data='settings_validationrequired')]]
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
