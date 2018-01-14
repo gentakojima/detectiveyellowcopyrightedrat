@@ -1125,7 +1125,7 @@ def cancelar(bot, update, args=None):
 
     if raid != None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
-            response = cancelRaid(raid["id"])
+            response = cancelRaid(raid["id"], force=is_admin(raid["grupo_id"], user_id, bot))
             if response == True:
                 update_message(raid["grupo_id"], raid["message"], None, bot)
                 if user_id != None:

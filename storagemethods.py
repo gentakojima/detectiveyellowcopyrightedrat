@@ -814,14 +814,14 @@ def deleteRaid(raid_id):
     db.close()
     return True
 
-def cancelRaid(raid_id):
+def cancelRaid(raid_id, force=False):
     db = getDbConnection()
     logging.debug("storagemethods:cancelRaid: %s" % (raid_id))
     with db.cursor() as cursor:
         raid = getRaid(raid_id)
         if raid["status"] == "cancelled":
             return "already_cancelled"
-        elif raid["status"] == "old" or raid["status"] == "ended":
+        elif (raid["status"] == "old" or raid["status"] == "ended") and force == False:
             return "too_old"
         elif raid["status"] == "deleted":
             return "already_deleted"
