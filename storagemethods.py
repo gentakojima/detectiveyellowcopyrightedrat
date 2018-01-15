@@ -403,7 +403,7 @@ def savePlace(place):
     logging.debug("storagemethods:savePlace: %s" % (place["id"]))
     with db.cursor() as cursor:
         sql = "UPDATE `gimnasios` SET `address`=%s WHERE `id`=%s"
-        cursor.execute(sql, (raid["address"], raid["id"]))
+        cursor.execute(sql, (place["address"], place["id"]))
     db.commit()
     db.close()
 
