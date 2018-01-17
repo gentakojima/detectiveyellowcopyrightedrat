@@ -883,7 +883,7 @@ def gym(bot, update, args=None):
     gyms = getPlaces(chat_id, ordering="id")
     for p in gyms:
         for n in p["names"]:
-            if re.search(unidecode(n),unidecode(gym_text),flags=re.IGNORECASE) != None:
+            if re.search(re.escape(unidecode(n)),unidecode(gym_text),flags=re.IGNORECASE) != None:
                 logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(gym_text)))
                 chosengym = p
                 break
@@ -1039,7 +1039,7 @@ def raid(bot, update, args=None):
   for p in gyms:
     logging.debug("Testing gym «%s»»" % (p["desc"]))
     for n in p["names"]:
-      if re.search(unidecode(n),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) != None:
+      if re.search(re.escape(unidecode(n)),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) != None:
         logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(current_raid["gimnasio_text"])))
         chosengym = p
         break
@@ -1368,7 +1368,7 @@ def cambiargimnasio(bot, update, args=None):
                     for p in gyms:
                         logging.debug("Testing gym «%s»»" % (p["desc"]))
                         for n in p["names"]:
-                            if re.search(unidecode(n), unidecode(new_gymtext), flags=re.IGNORECASE) != None:
+                            if re.search(re.escape(unidecode(n)), unidecode(new_gymtext), flags=re.IGNORECASE) != None:
                                 logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(new_gymtext)))
                                 chosengym = p
                                 break
