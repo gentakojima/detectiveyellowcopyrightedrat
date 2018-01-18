@@ -486,6 +486,7 @@ def get_settings_keyboard(chat_id):
     return settings_markup
 
 def get_keyboard(raid):
+    logging.debug("supportmethods:get_keyboard")
     group = getGroup(raid["grupo_id"])
     if raid["status"] == "started" or raid["status"] == "waiting":
         keyboard_row1 = [InlineKeyboardButton("🙋 Voy", callback_data='voy')]

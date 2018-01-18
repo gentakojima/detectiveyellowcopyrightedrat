@@ -454,6 +454,7 @@ def refreshUsername(user_id, username):
     if thisuser == None:
         thisuser = {}
         thisuser["id"] = user_id
+        thisuser["validation"] = "none"
     if username != None and username != "None":
         thisuser["username"] = username
     saveUser(thisuser)
