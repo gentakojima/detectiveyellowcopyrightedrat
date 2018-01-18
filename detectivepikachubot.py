@@ -1751,12 +1751,16 @@ def raidbutton(bot, update):
       else:
           bot.answerCallbackQuery(text="¡No has podido marcar que se te ha escapado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   if update_text == True:
-      reply_markup = get_keyboard(getRaidbyMessage(chat_id, message_id))
-      update_message(chat_id, message_id, reply_markup, bot)
+      raid = getRaidbyMessage(chat_id, message_id)
+      if raid != None:
+        reply_markup = get_keyboard(raid)
+        update_message(chat_id, message_id, reply_markup, bot)
+      else:
+        bot.answerCallbackQuery(text="Error actualizando incursión", callback_query_id=update.callback_query.id, show_alert="true")
 
   if data=="ubicacion":
     raid = getRaidbyMessage(chat_id, message_id)
-    if raid["gimnasio_id"] != None:
+    if raid != None and raid["gimnasio_id"] != None:
       try:
         gym = getPlace(raid["gimnasio_id"])
         if gym != None:
@@ -1782,7 +1786,7 @@ def raidbutton(bot, update):
       except:
         bot.answerCallbackQuery(text="Para que te pueda enviar la ubicación, debes abrir un privado antes con @%s y pulsar en 'Iniciar'" % config["telegram"]["botalias"], callback_query_id=update.callback_query.id, show_alert="true")
     else:
-      bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id)
+      bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id, show_alert="true")
 
   settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired"}
 
