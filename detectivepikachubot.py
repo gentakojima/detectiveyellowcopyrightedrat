@@ -370,6 +370,12 @@ def processMessage(bot, update):
     if chat_type == "channel":
         return
 
+    if chat_type == "group" or chat_type == "supergroup":
+        group = getGroup(chat_id)
+        if group == None or group["babysitter"] == 0:
+            logging.debug("detectivepikachubot:processMessage ignoring message")
+            return
+
     user_username = message.from_user.username
 
     if isBanned(user_id) or isBanned(chat_id):
@@ -485,7 +491,6 @@ def processMessage(bot, update):
             logging.debug(text)
             registerOak(bot, update)
     else:
-        group = getGroup(chat_id)
         if group != None and group["babysitter"] == 1 and not is_admin(chat_id, user_id, bot):
             delete_message(chat_id, message.message_id, bot)
             if group["talkgroup"] != None:

@@ -59,7 +59,7 @@ def is_admin(chat_id, user_id, bot):
     return is_admin
 
 def extract_update_info(update):
-    logging.debug("supportmethods:extract_update_info: %s" % (update))
+    logging.debug("supportmethods:extract_update_info")
     try:
         message = update.message
     except:
