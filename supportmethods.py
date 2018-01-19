@@ -375,6 +375,9 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
             if warntype == "cancelar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
                 text = "❌ %s ha <b>cancelado</b> la %s de %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+            elif warntype == "descancelar":
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+                text = "⚠️ %s ha <b>descancelado</b> la %s de %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "borrar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
                 text = "🚫 %s ha <b>borrado</b> la incursión de %s a las %s en %s" % (user_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
@@ -528,7 +531,7 @@ def edit_check_private(chat_id, chat_type, user_username, command, bot):
 
 def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, command, bot):
     logging.debug("supportmethods:edit_check_private_or_reply")
-    if command == "borrar" or command == "cancelar" or command == "reflotar":
+    if command == "borrar" or command == "cancelar" or command == "reflotar" or command == "descancelar":
         expectedargs = 0
     else:
         expectedargs = 1
