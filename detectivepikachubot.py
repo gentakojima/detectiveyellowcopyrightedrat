@@ -1893,6 +1893,8 @@ def raidbutton(bot, update):
             group["refloatauto"] = 10
         elif group["refloatauto"] == 10:
             group["refloatauto"] = 15
+        elif group["refloatauto"] == 15:
+            group["refloatauto"] = 30
         else:
             group["refloatauto"] = 0
         saveGroup(group)

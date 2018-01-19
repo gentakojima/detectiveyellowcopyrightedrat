@@ -247,13 +247,15 @@ def getAutorefloatGroups():
     db = getDbConnection()
     logging.debug("storagemethods:getAutorefloatGroups")
     with db.cursor() as cursor:
-        sql = "SELECT id, title FROM grupos WHERE \
+        sql = "SELECT id, title, refloatauto FROM grupos WHERE \
             (refloatauto = 5 AND (lastrefloatauto IS NULL OR \
                 lastrefloatauto < timestamp(DATE_SUB(NOW(), INTERVAL 5 MINUTE)))) OR \
             (refloatauto = 10 AND (lastrefloatauto IS NULL OR \
                 lastrefloatauto < timestamp(DATE_SUB(NOW(), INTERVAL 10 MINUTE)))) OR \
             (refloatauto = 15 AND (lastrefloatauto IS NULL OR \
-                lastrefloatauto < timestamp(DATE_SUB(NOW(), INTERVAL 15 MINUTE))))"
+                lastrefloatauto < timestamp(DATE_SUB(NOW(), INTERVAL 15 MINUTE)))) OR \
+            (refloatauto = 30 AND (lastrefloatauto IS NULL OR \
+                lastrefloatauto < timestamp(DATE_SUB(NOW(), INTERVAL 30 MINUTE))))"
         cursor.execute(sql)
         result = cursor.fetchall()
     db.close()
