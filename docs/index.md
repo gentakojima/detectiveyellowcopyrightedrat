@@ -5,12 +5,12 @@ Detective Pikachu es un bot de Telegram especializado en crear listados de parti
 Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepikachuayuda) y estar informado de las novedades en el canal [@detectivepikachunews](https://t.me/detectivepikachunews).
 
 1. [Ayuda para entrenadores](#ayuda-para-entrenadores)
- 1. [Registrarse en el bot](#registrarse-en-el-bot)
- 2. [Crear una incursión](#crear-una-incursion)
- 3. [Editar, cancelar y borrar una incursión](#editar-cancelar-y-borrar-una-incursion)
- 4. [Apuntarse a una incursión](#apuntarse-a-una-incursion)
- 5. [Alertas de incursiones](#alertas-de-incursiones)
- 6. [Más ayuda](#mas-ayuda)
+  1. [Registrarse en el bot](#registrarse-en-el-bot)
+  2. [Crear una incursión](#crear-una-incursión)
+  3. [Editar, cancelar, borrar y reflotar una incursión](#editar-cancelar-borrar-y-borrar-una-incursión)
+  4. [Apuntarse a una incursión](#apuntarse-a-una-incursión)
+  5. [Alertas de incursiones](#alertas-de-incursiones)
+  6. [Más ayuda](#más-ayuda)
 2. [Ayuda para administradores](#ayuda-para-administradores)
 
 
