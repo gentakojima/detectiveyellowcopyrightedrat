@@ -1124,7 +1124,7 @@ def cancelar(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "borrar", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cancelar", bot)
     if raid == None:
         return
 
@@ -1144,7 +1144,7 @@ def cancelar(bot, update, args=None):
                 bot.sendMessage(chat_id=user_id, text="❌ No se puede cancelar la incursión `%s` porque ha sido borrada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
             elif response == "too_old":
                 user_id = chat_id if user_id == None else user_id
-                bot.sendMessage(chat_id=user_id, text="❌ No se puede borrar la incursión `%s` porque ya ha terminado." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede cancelar la incursión `%s` porque ya ha terminado." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para cancelar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
