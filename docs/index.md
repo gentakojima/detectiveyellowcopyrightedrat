@@ -1,5 +1,6 @@
 ---
 title: Bot de Telegram Detective Pikachu
+layout: default
 ---
 
 Detective Pikachu es un bot de Telegram especializado en crear listados de participantes en incursiones de Pokémon GO.
