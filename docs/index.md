@@ -126,12 +126,17 @@ Para **añadir el bot a un canal** las opciones son más limitadas. Tienes que i
 
 Para hacer la configuración básica del bot utiliza el comando `/settings`. La configuración está dividida en varios submenús:
 
+<<<<<<< HEAD
 #### Funcionamiento del grupo/canal ####
+=======
+#### Funcionamiento del grupo/canal ###
+>>>>>>> 7ef68354cf9ed84e97816a55565bd5ddcaaf1ed2
 
 1. **Ubicaciones**. Activa o desactiva la integración de las ubicaciones. Para poder utilizar esta opción, debes [configurar las ubicaciones](#ubicaciones). Si no vas a hacerlo, es mejor que la desactives. Opción activada por defecto.
 
 2. **Permitir configurar alertas**. Permite o no que los usuarios encuentren los gimnasios configurados en este grupo/canal a la hora de configurarse alertas por privado. Opción activada por defecto.
 
+<<<<<<< HEAD
 3. **Modo niñero**. Borra todos los mensajes excepto los mensajes de creación de incursiones y los comandos permitidos. Mira el  [apartado del modo niñero](#modo-niñero) para más información. Opción desactivada por defecto.
 
 4. **Validación obligatoria**. Si está activada, obliga a todos los usuarios a validarse en el bot antes de poder participar en incursiones o crearlas. Opción desactivada por defecto.
@@ -163,6 +168,13 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 2. **Botones de «¡Lo tengo!»**. Si está activada, aparecerán unos botones que permiten mostrar si has capturado o no el Pokémon de la incursión. Los botones solo aparecen a partir de la hora de inicio de la incursión y durante las siguientes tres horas. Opción desactivada por defecto. 
 
 3. **Botón «+1»**. Si está activada, aparecerá un botón que permite indicar que vas con acompañantes a la incursión. Se puede configurar un máximo de 1, 2, 3, 5 y 10 acompañantes. Opción activada por defecto y configurada con 5 acompañantes como máximo.
+=======
+3. **Modo niñero**. Borra todos los mensajes excepto los mensajes de creación de incursiones y los comandos permitidos. Mira el  [apartado del modo niñero](#modo-niñero) para más información.
+
+4. **Validación obligatoria**. Si está activada, obliga a todos los usuarios a validarse en el bot antes de poder participar en incursiones o crearlas.
+
+5. **Reflotar automático**. Si está activada, esta opción hace que el bot reflote todas las incursiones activas cada 5, 10, 15 o 30 minutos. Las incursiones se consideran activas si falta **menos de una hora y media para que comiencen** o si acaban de comenzar (una vez comenzadas, se reflotarán una única vez).
+>>>>>>> 7ef68354cf9ed84e97816a55565bd5ddcaaf1ed2
 
 ### Ubicaciones ###
 
