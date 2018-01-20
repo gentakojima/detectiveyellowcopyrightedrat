@@ -1,3 +1,7 @@
+---
+title: Bot de Telegram Detective Pikachu
+---
+
 Detective Pikachu es un bot de Telegram especializado en crear listados de participantes en incursiones de Pokémon GO.
 
 Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepikachuayuda) y estar informado de las novedades en el canal [@detectivepikachunews](https://t.me/detectivepikachunews).
@@ -178,7 +182,7 @@ Esta lista se puede generar a partir de los gimnasios de Gymhuntr [siguiendo est
 
 Por defecto, Google intenta formatear los números y los estropea. Antes de empezar a escribir los datos, debes seleccionar las columnas B y C y eliminar el formato, como se muestra en la siguiente animación.
 
-![Esto nos pasa por utilizar las hojas de cálculo como tablas][gsp.gif]
+![Esto nos pasa por utilizar las hojas de cálculo como tablas](gsp.gif)
 
 La cuarta columna es **muy importante**, ya que es la que permite encontrar los gimnasios. Revisa la sección sobre [mejorar la búsqueda de ubicaciones](#mejorar-la-búsqueda-de-ubicaciones) con calma.
 
