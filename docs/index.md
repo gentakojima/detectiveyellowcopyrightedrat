@@ -205,15 +205,27 @@ Para listar todos los gimnasios conocidos puedes usar el comando `/list`. Este c
 
 #### Mejorar la búsqueda de ubicaciones ####
 
-Cuando crees las palabras clave ten en cuenta que las tildes se ignoran. Los caracteres como «ç» y «ñ» se transforman a «c» y «n». Es decir, la palabra clave *Peñíscola* a efectos de búsqueda es la misma que *peniscola*.
+Cuando crees las palabras clave ten en cuenta que las tildes y mayúsculas se ignoran. Además, los caracteres como «ç» y «ñ» se transforman a «c» y «n». Es decir, la palabra clave *Peñíscola* a efectos de búsqueda es la misma que *peniscola*. Puede haber varias palabras clave separadas por comas y se ignoran los espacios entre las comas y las palabras.
 
-El bot utiliza las palabras clave de la cuarta columna para encontrar la ubicaciones. Busca por orden si alguna de las palabras clave esté **contenida** en el texto que escribe el usuario.
+El bot utiliza las palabras clave para encontrar la ubicaciones. Busca por orden de arriba a abajo en el documento y empezando por la primera hasta la última palabra clave si alguna de las palabras clave esté **contenida** en el texto que escribe el usuario.
 
-Por ejemplo, el usuario puede buscar *Estación de trenes*. Supongamos que se llama así. Unas buenas palabras clave serían: *estación tren, estación de tren*.
+Por ejemplo, el usuario puede buscar *Estación de trenes*. Supongamos que además el gimnasio se llama así. Unas buenas palabras clave serían: *estación tren, estación de tren*.
 
 Supongamos que el gimnasio en realidad se llama *Escultura al trabajo bien hecho*, pero el usuario se ha referido a él como *Estación de trenes* porque habitualmente se le llama así. Unas buenas palabras clave en este caso serían: *estación tren, estación de tren, escultura al trabajo, escultura trabajo, trabajo bien*.
 
-Por un momento supongamos que hay otro gimnasio en una estación de autobuses. El gimnasio se llama *Monolito de piedra* por un monolito que hay allí, pero la gente habitualmente le llama *estación de autobuses*. Es importante en este caso que **no** se utilice ni en el ejemplo anterior ni en este la palabra *estación* de forma independiente, porque podría saltar el gimnasio equivocado.
+Por un momento supongamos que hay otro gimnasio en una estación de autobuses. El gimnasio se llama *Monolito de piedra* por un monolito que hay allí, pero la gente habitualmente le llama *estación de autobuses*. Unas buenas palabras clave serían: *estación auto, estación de auto, monolito piedra, monolito de piedra*.
+
+Habiendo dos estaciones, es importante que **no** se utilice la palabra *estación* suelta, porque podría coincidir el gimnasio equivocado. Tendría que ir acompañada siempre de otras palabras.
+
+##### ¿Qué hacer si se reconoce el gimnasio equivocado? #####
+
+Te recomendamos leer con atención el apartado anterior, pero lo explicamos una vez más con otro ejemplo un poco más complicado.
+
+Supongamos que hay dos gimnasios llamados *Fuente*. Si utilizas como palabra clave *Fuente* de forma suelta, reconocerá uno de los dos, el primero que hayas puesto en el listado.
+
+Si ambos gimnasios tienen la misma importancia, deberías mejorar las palabras clave añadiendo más información. Aunque se llamen igual en el juego, la gente los llamará de otra forma para diferenciarlos. Aprovecha eso para mejorar las palabras clave. Por ejemplo, una podría tener de palabra clave *fuente de la alameda* y la otra *fuente de la plaza de toros*.
+
+Si uno de los gimnasios apenas se utiliza porque está muy lejos o no suelen salir incursiones allí, puedes hacer esto mismo pero dejando la palabra clave *fuente* al gimnasio con mayor importancia.
 
 #### Etiquetas ####
 
@@ -235,7 +247,7 @@ El comando `/settalkgroup` permite definir un grupo para hablar. Si está el mod
 
 ### Zona horaria ###
 
-El bot hace reconoce la hora que escriben los usuarios y hace operaciones con ellas, por lo que es importante que la hora que utilice el bot se corresponda con la hora de tu grupo.
+El bot reconoce la hora que escriben los usuarios y hace operaciones con ellas, por lo que es importante que la hora que utilice el bot se corresponda con la hora real de tu grupo.
 
 Para establecer la zona horaria correcta se debe utilizar el comando `/settimezone` con la zona horaria correspondiente como parámetro siguiendo el formato del [listado de zonas horarias de la IANA](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Por ejemplo:
 
