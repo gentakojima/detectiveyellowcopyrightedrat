@@ -1,8 +1,3 @@
----
-title: Bot de Telegram Detective Pikachu
-layout: default
----
-
 Detective Pikachu es un bot de Telegram especializado en crear listados de participantes en incursiones de Pokémon GO.
 
 Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepikachuayuda) y estar informado de las novedades en el canal [@detectivepikachunews](https://t.me/detectivepikachunews).
@@ -17,7 +12,7 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
 2. [Ayuda para administradores](#ayuda-para-administradores)
    1. [Grupos y canales](#grupos-y-canales)
    2. [Añadir el bot a un grupo o canal](#añadir-el-bot-a-un-grupo-o-canal)
-   3. [Configuración](#configuracion)
+   3. [Configuración](#configuración)
    4. [Ubicaciones](#ubicaciones)
    5. [Modo niñero](#modo-niñero)
    6. [Zona horaria](#zona-horaria)
@@ -111,7 +106,9 @@ Si necesitas ayuda que no se encuentre en este manual, puedes preguntar en [@det
 
 El bot se puede añadir a grupos y a canales, pero funciona de manera ligeramente distinta en ambos casos, en parte por el propio funcionamiento de Telegram.
 
-En **canales** el bot tiene algunas limitaciones y funciona algo más lento, pero es una opción sencilla si se quiere integrar con otros bots, ya que un bot no puede leer el mensaje de otro bot en un grupo.
+En **grupos** el bot ya se puede utilizar tan pronto como saluda al grupo. Conviene configurarlo, no obstante. Ten cuidado porque, si una vez añadas el bot conviertes el grupo a supergrupo, tendrás que volver a configurarlo. Un supergrupo es la mejor opción en la mayoría de los casos.
+
+En **canales** el bot tiene algunas diferencias y funciona algo más lento, pero es una opción sencilla si se quiere integrar con otros bots, ya que un bot no puede leer el mensaje de otro bot en un grupo. En un canal, no mostrará el creador de la incursión porque la incursión siempre la crea el canal, no un usuario. Además, algunas de las opciones no tienen sentido para canales.
 
 ### Añadir el bot a un grupo o canal ###
 
