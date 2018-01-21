@@ -415,33 +415,33 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
     if len(notwarned)>0:
         bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: @%s" % ensure_escaped(", @".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
 
-def get_settings_keyboard(chat_id):
+def get_settings_keyboard(chat_id, keyboard="main"):
     logging.debug("supportmethods:get_settings_keyboard")
     group = getGroup(chat_id)
     if group["alerts"] == 1:
-        alertas_text = "✅ Alertas"
+        alertas_text = "✅ Permitir configurar alertas"
     else:
-        alertas_text = "▪️ Alertas"
+        alertas_text = "▪️ Permitir configurar alertas"
     if group["disaggregated"] == 1:
-        disaggregated_text = "✅ Total disgregado"
+        disaggregated_text = "✅ Mostrar totales disgregados"
     else:
-        disaggregated_text = "▪️ Total disgregado"
+        disaggregated_text = "▪️ Mostrar totales disgregados"
     if group["latebutton"] == 1:
-        latebutton_text = "✅ ¡Llego tarde!"
+        latebutton_text = "✅ Botón de «Llego tarde»"
     else:
-        latebutton_text = "▪️ ¡Llego tarde!"
+        latebutton_text = "▪️ Botón de «Llego tarde»"
     if group["refloat"] == 1:
-        refloat_text = "✅ Reflotar incursiones"
+        refloat_text = "✅ Reflotar incursiones (comando /reflotar)"
     else:
-        refloat_text = "▪️ Reflotar incursiones"
+        refloat_text = "▪️ Reflotar incursiones (comando /reflotar)"
     if group["candelete"] == 1:
-        candelete_text = "✅ Borrar incursiones"
+        candelete_text = "✅ Borrar incursiones (comando /borrar)"
     else:
-        candelete_text = "▪️ Borrar incursiones"
+        candelete_text = "▪️ Borrar incursiones (comando /borrar)"
     if group["gotitbuttons"] == 1:
-        gotitbuttons_text = "✅ ¡Lo tengo!"
+        gotitbuttons_text = "✅ Botones de «¡Lo tengo!»"
     else:
-        gotitbuttons_text = "▪️ ¡Lo tengo!"
+        gotitbuttons_text = "▪️ Botones de «¡Lo tengo!»"
     if group["locations"] == 1:
         locations_text = "✅ Ubicaciones"
     else:
@@ -451,49 +451,57 @@ def get_settings_keyboard(chat_id):
     else:
         validationrequired_text = "▪️ Validación obligatoria"
     if group["gymcommand"] == 1:
-        gymcommand_text = "✅ Comando /gym"
+        gymcommand_text = "✅ Consultar gimnasios (comando /gym)"
     else:
-        gymcommand_text = "▪️ Comando /gym"
+        gymcommand_text = "▪️ Consultar gimnasios (comando /gym)"
     if group["raidcommand"] == 1:
-        raidcommand_text = "✅ Comando /raid"
+        raidcommand_text = "✅ Crear incursiones (comando /raid)"
     else:
-        raidcommand_text = "▪️ Comando /raid"
+        raidcommand_text = "▪️ Crear incursiones (comando /raid)"
     if group["babysitter"] == 1:
-        babysitter_text = "✅ Modo niñero"
+        babysitter_text = "✅ Modo niñero (borra mensajes)"
     else:
-        babysitter_text = "▪️ Modo niñero"
+        babysitter_text = "▪️ Modo niñero (borra mensajes)"
     if group["timeformat"] == 1:
-        timeformat_text = "✅ Horas AM/PM"
+        timeformat_text = "✅ Mostrar horas en formato AM/PM"
     else:
-        timeformat_text = "▪️ Horas AM/PM"
+        timeformat_text = "▪️ Mostrar horas en formato AM/PM"
     if group["plusmax"] == 1:
-        plusmax_text = "✅Botón +1 máx 1"
+        plusmax_text = "✅ Botón «+1» (máx. 1 acompañante)"
     elif group["plusmax"] == 2:
-        plusmax_text = "✅ Botón +1 máx 2"
+        plusmax_text = "✅ Botón «+1» (máx. 2 acompañantes)"
     elif group["plusmax"] == 3:
-        plusmax_text = "✅ Botón +1 máx 3"
+        plusmax_text = "✅ Botón «+1» (máx. 3 acompañantes)"
     elif group["plusmax"] == 5:
-        plusmax_text = "✅ Botón +1 máx 5"
+        plusmax_text = "✅ Botón «+1» (máx. 5 acompañantes)"
     elif group["plusmax"] == 10:
-        plusmax_text = "✅ Botón +1 máx 10"
+        plusmax_text = "✅ Botón «+1» (máx. 10 acompañantes)"
     else:
         plusmax_text = "▪️ Botón +1"
     if group["refloatauto"] == 5:
-        refloatauto_text = "✅ Reflotar auto 5m"
+        refloatauto_text = "✅ Reflotar automático (5 minutos)"
     elif group["refloatauto"] == 10:
-        refloatauto_text = "✅ Reflotar auto 10m"
+        refloatauto_text = "✅ Reflotar automático (10 minutos)"
     elif group["refloatauto"] == 15:
-        refloatauto_text = "✅ Reflotar auto 15m"
+        refloatauto_text = "✅ Reflotar automático (15 minutos)"
     elif group["refloatauto"] == 30:
-        refloatauto_text = "✅ Reflotar auto 30m"
+        refloatauto_text = "✅ Reflotar automático (30 minutos)"
     else:
         refloatauto_text = "▪️ Reflotar automático"
     icons = iconthemes[group["icontheme"]]
-    icontheme_text = "%s%s%s Iconos" % (icons["Rojo"],icons["Azul"],icons["Amarillo"])
+    icontheme_text = "%s%s%s Tema de iconos" % (icons["Rojo"],icons["Azul"],icons["Amarillo"])
 
-    settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations'), InlineKeyboardButton(alertas_text, callback_data='settings_alertas')],
-    [InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand'), InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')],
-    [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar'), InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde'), InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado'), InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme'), InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')],[InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax'), InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')], [InlineKeyboardButton(validationrequired_text, callback_data='settings_validationrequired')]]
+    if keyboard == "main":
+        settings_keyboard = [[InlineKeyboardButton("Funcionamiento del grupo/canal »", callback_data='settings_goto_behaviour')], [InlineKeyboardButton("Comandos disponibles para usuarios »", callback_data='settings_goto_commands')], [InlineKeyboardButton("Opciones de vista de incursiones »", callback_data='settings_goto_raids')], [InlineKeyboardButton("Funcionamiento de incursiones »", callback_data='settings_goto_raidbehaviour')], [InlineKeyboardButton("Terminado", callback_data='settings_done')]]
+    elif keyboard == "behaviour":
+        settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations')], [InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')], [InlineKeyboardButton(validationrequired_text, callback_data='settings_validationrequired')], [InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+    elif keyboard == "commands":
+        settings_keyboard = [[InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand')], [InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar')], [InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+    elif keyboard == "raidbehaviour":
+        settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+    elif keyboard == "raids":
+        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
@@ -518,12 +526,23 @@ def get_keyboard(raid):
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
-def update_settings_message(chat_id, bot):
-    logging.debug("supportmethods:update_settings_message")
+def update_settings_message(chat_id, bot, keyboard = "main"):
+    logging.debug("supportmethods:update_settings_message: %s %s" % (chat_id, keyboard))
     group = getGroup(chat_id)
 
-    settings_markup = get_settings_keyboard(chat_id)
-    return bot.edit_message_text(text="Pulsa en los botones de las opciones para cambiarlas. Cuando acabes, puedes borrar el mensaje.\n\nTen en cuenta que los <strong>administradores de un grupo o canal</strong> pueden usar algunos comandos aunque estén desactivados.\n\nPara más información sobre estas funciones, <a href='http://telegra.ph/Detective-Pikachu-09-28'>consulta la ayuda</a>.", chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    settings_markup = get_settings_keyboard(chat_id, keyboard = keyboard)
+    if keyboard == "main":
+        text = "Elige una categoría para ver las opciones disponibles. Cuando termines, pulsa el botón <b>Terminado</b> para borrar el mensaje."
+    elif keyboard == "raids":
+        text = "Estas opciones permiten cambiar la forma en la que se muestran los listados de las incursiones."
+    elif keyboard == "commands":
+        text = "Estas opciones definen qué comandos pueden utilizar los usuarios que no son administradores. Los administradores siempre pueden utilizarlos igualmente."
+    elif keyboard == "raidbehaviour":
+        text = "Estas opciones permiten configurar características opcionales de las incursiones."
+    elif keyboard == "behaviour":
+        text = "Estas opciones son muy importantes porque definen el funcionamiento general del bot en el grupo/canal. Revisa la ayuda en caso de duda."
+
+    return bot.edit_message_text(text=text, chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def edit_check_private(chat_id, chat_type, user_username, command, bot):
     logging.debug("supportmethods:edit_check_private")

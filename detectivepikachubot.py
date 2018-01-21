@@ -1833,7 +1833,24 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id, show_alert="true")
 
+  settings_goto = {"settings_goto_main":"main", "settings_goto_raids":"raids", "settings_goto_commands":"commands", "settings_goto_behaviour": "behaviour", "settings_goto_raidbehaviour": "raidbehaviour"}
+
+  for k in settings_goto:
+      if data==k:
+        if not is_admin(chat_id, user_id, bot):
+            bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            update_settings_message(chat_id, bot, keyboard = settings_goto[k])
+
+  if data=="settings_done":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          delete_message(chat_id, message_id, bot)
+
   settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired"}
+
+  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour"}
 
   for k in settings:
       if data==k:
@@ -1850,7 +1867,7 @@ def raidbutton(bot, update):
                   if k == "settings_alertas":
                       group["locations"] = 1
               saveGroup(group)
-              update_settings_message(chat_id, bot)
+              update_settings_message(chat_id, bot, settings_categories[k])
 
   if data=="settings_icontheme":
       if not is_admin(chat_id, user_id, bot):
@@ -1861,7 +1878,7 @@ def raidbutton(bot, update):
           if group["icontheme"] >= len(iconthemes):
               group["icontheme"] = 0
           saveGroup(group)
-          update_settings_message(chat_id, bot)
+          update_settings_message(chat_id, bot, settings_categories[data])
 
   if data=="settings_plusmax":
       if not is_admin(chat_id, user_id, bot):
@@ -1881,7 +1898,8 @@ def raidbutton(bot, update):
           else:
               group["plusmax"] = 0
           saveGroup(group)
-          update_settings_message(chat_id, bot)
+          update_settings_message(chat_id, bot, settings_categories[data])
+
   if data=="settings_refloatauto":
     if not is_admin(chat_id, user_id, bot):
         bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
@@ -1898,7 +1916,7 @@ def raidbutton(bot, update):
         else:
             group["refloatauto"] = 0
         saveGroup(group)
-        update_settings_message(chat_id, bot)
+        update_settings_message(chat_id, bot, settings_categories[data])
 
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
