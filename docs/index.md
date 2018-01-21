@@ -92,13 +92,13 @@ Para poder apuntarse a una incursión es **necesario tener un alias** definido e
 
 ### Alertas de incursiones ###
 
-Cuando se creen incursiones en determinados gimnasios se pueden recibir alertas por mensaje privado. Para configurarlas, utiliza el comando `/alerts` y sigue las instrucciones.
+Los usuarios pueden configurar alertas por mensaje privado cuando se creen incursiones en determinados gimnasios. Para configurarlas, utiliza el comando `/alerts` por privado al bot y sigue las instrucciones.
 
-Ten en cuenta que antes de configurar las alertas tienes que haber participado en alguna incursión y el grupo tiene que tener configuradas las ubicaciones de los gimnasios.
+Ten en cuenta que antes de configurar las alertas tienes que haber participado en alguna incursión en un grupo con las ubicaciones de los gimnasios coniguradas y la opción de permitir alertas activada.
 
 ### Más ayuda ###
 
-Si necesitas ayuda que no se encuentre en este manual, puedes preguntar en [@detectivepikachuayuda](https://t.me/detectivepikachuayuda). Si estás administrando un grupo o un canal, mira más abajo para la ayuda para ver administradores.
+Si necesitas ayuda que no se encuentre en este manual, puedes preguntar en [@detectivepikachuayuda](https://t.me/detectivepikachuayuda). Si estás administrando un grupo o un canal, mira más abajo para ver la ayuda para administradores.
 
 ## Ayuda para administradores ##
 
@@ -108,7 +108,7 @@ El bot se puede añadir a grupos y a canales, pero funciona de manera ligerament
 
 En **grupos** el bot ya se puede utilizar tan pronto como saluda al grupo. Conviene configurarlo, no obstante. Ten cuidado porque, si una vez añadas el bot conviertes el grupo a supergrupo, tendrás que volver a configurarlo. Un supergrupo es la mejor opción en la mayoría de los casos.
 
-En **canales** el bot tiene algunas diferencias y funciona algo más lento, pero es una opción sencilla si se quiere integrar con otros bots, ya que un bot no puede leer el mensaje de otro bot en un grupo. En un canal, no mostrará el creador de la incursión porque la incursión siempre la crea el canal, no un usuario. Además, algunas de las opciones no tienen sentido para canales.
+En **canales** el bot necesita configurarse con `/settings` antes de poder utilizarse. También funciona algo más lento y hay algunas diferencias más. En un canal, no mostrará el creador de la incursión porque la incursión siempre la crea el canal, no un usuario. Además, algunas de las opciones no tienen sentido para canales. Usar un canal es una opción sencilla si se quiere integrar con otros bots, ya que un bot no puede leer el mensaje de otro bot en un grupo.
 
 ### Añadir el bot a un grupo o canal ###
 
