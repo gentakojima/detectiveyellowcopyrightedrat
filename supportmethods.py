@@ -188,8 +188,6 @@ def format_message(raid):
                         tags_emojis = tags_emojis + "🌷"
                     if unidecode(t).lower() == "parque":
                         tags_emojis = tags_emojis + "🌳"
-                    if unidecode(t).lower() == "universidad":
-                        tags_emojis = tags_emojis + "🏫"
                     if unidecode(t).lower() == "patrocinado":
                         tags_emojis = tags_emojis + "💵"
                     if unidecode(t).lower() == "ex":
