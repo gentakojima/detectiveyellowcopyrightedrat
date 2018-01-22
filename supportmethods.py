@@ -720,6 +720,8 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     height, width, _ = image.shape
     aspect_ratio = height/width
 
+    logging.debug("supportmethods:parse_profile_image: Preprocessing image...")
+
     # Raise error for unsupported aspect ratios
     if aspect_ratio <= 1.64 or aspect_ratio >= 2.17:
         if inspect==True:
@@ -728,18 +730,34 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
 
     # Crop GalaxyS8+ bars
     if aspect_ratio > 2.04 and aspect_ratio < 2.06:
-        logging.debug("supportmethods:parse_profile_image: Detected Galaxy 8+ Ratio")
-        bottombar_img = image[int(height-height/12.3):int(height),int(0):int(width)] # y1:y2,x1:x2
+        logging.debug("supportmethods:parse_profile_image: Detected Galaxy S8+ Ratio")
+        bottombar_img = image[int(height-height/15):int(height),int(0):int(width)] # y1:y2,x1:x2
         bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
-        topbar_img = image[int(0):int(height/12.3),int(0):int(width)] # y1:y2,x1:x2
-        topbar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
+        topbar_img = image[int(height/60):int(height/15),int(0):int(width)] # y1:y2,x1:x2
+        topbar_gray = cv2.cvtColor(topbar_img, cv2.COLOR_BGR2GRAY)
+        if inspect==True:
+            cv2.imwrite(inspectdir + "/%s_img_s8_topbar.png" % inspectFilename, topbar_img)
+            cv2.imwrite(inspectdir + "/%s_img_s8_bottombar.png" % inspectFilename, bottombar_img)
         if bottombar_gray.mean() < 40 and topbar_gray.mean() < 40:
             logging.debug("supportmethods:parse_profile_image: Detected Black bars, cropping!")
-            image = image[int(height/17.2):int(height-height/12.3),int(0):int(width)] # y1:y2,x1:x2
+            image = image[int(height/14):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
             height, width, _ = image.shape
             aspect_ratio = height/width
             if inspect==True:
                 cv2.imwrite(inspectdir + "/%s_img_s8.png" % inspectFilename, image)
+
+    # Partially crop Oneplus T5S top bar
+    if aspect_ratio > 1.99 and aspect_ratio < 2.01:
+        logging.debug("supportmethods:parse_profile_image: Detected OnePlus T5S Ratio")
+        topbar_img = image[int(height/44):int(height/22),int(0):int(width)] # y1:y2,x1:x2
+        topbar_gray = cv2.cvtColor(topbar_img, cv2.COLOR_BGR2GRAY)
+        if topbar_gray.mean() < 40:
+            logging.debug("supportmethods:parse_prof ile_image: Detected Black top bar, cropping!")
+            image = image[int(height/18):int(height),int(0):int(width)] # y1:y2,x1:x2
+            height, width, _ = image.shape
+            aspect_ratio = height/width
+            if inspect==True:
+                cv2.imwrite(inspectdir + "/%s_img_oneplus.png" % inspectFilename, image)
 
     # Crop large bars
     bottombar_img = image[int(height-height/14):int(height),int(0):int(width)] # y1:y2,x1:x2
@@ -747,6 +765,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     if bottombar_gray.mean() < 40:
         image = image[int(0):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
         height, width, _ = image.shape
+        aspect_ratio = height/width
         if inspect==True:
             cv2.imwrite(inspectdir + "/%s_img_largebar.png" % inspectFilename, image)
 
@@ -756,8 +775,12 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     if bottombar_gray.mean() < 40:
         image = image[int(0):int(height-height/17),int(0):int(width)] # y1:y2,x1:x2
         height, width, _ = image.shape
+        aspect_ratio = height/width
         if inspect==True:
             cv2.imwrite(inspectdir + "/%s_img_smallbar.png" % inspectFilename, image)
+
+    logging.debug("supportmethods:parse_profile_image: Ratio: %.2f" % aspect_ratio)
+    logging.debug("supportmethods:parse_profile_image: Extracting image info...")
 
     # Extract profile layout for profile Testing
     profile_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

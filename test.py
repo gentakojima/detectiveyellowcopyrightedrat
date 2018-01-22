@@ -25,6 +25,9 @@ import random
 import time
 import sys
 import cv2
+import logging
+
+logging.basicConfig(filename='/dev/stdout', filemode='w', format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--inspect', help='Examine failed images interactively', action='store_true')
@@ -67,7 +70,7 @@ for root, dirs, filenames in os.walk("testingimgs"):
                 failed_tests = failed_tests + 1
                 failed_test = True
             try:
-                assert trainer_name.lower() == expected_trainer_name.lower()
+                assert trainer_name.replace("I","l").replace("1","l").lower() == expected_trainer_name.replace("1","l").lower()
                 passed_tests = passed_tests + 1
             except AssertionError as e:
                 print(" [!] Incorrect trainer name! '%s' vs. expected '%s'" % (trainer_name, expected_trainer_name))
