@@ -1069,11 +1069,11 @@ def raid(bot, update, args=None):
   else:
       show_endtime = extract_time(current_raid["timeraid"])
   if group["refloat"] == 1 or is_admin(current_raid["grupo_id"], user_id, bot):
-      text_refloat="\n\n🎈 *Reflotar incursión*:\n`/reflotar %s`" % current_raid["id"]
+      text_refloat="\n🎈 *Reflotar incursión*: `/reflotar`"
   else:
       text_refloat=""
   if group["candelete"] == 1 or is_admin(current_raid["grupo_id"], user_id, bot):
-      text_delete="\n\n❌ *Borrar incursión*:\n`/borrar %s`" % current_raid["id"]
+      text_delete="\n❌ *Borrar incursión*: `/borrar`"
   else:
       text_delete=""
 
@@ -1089,24 +1089,33 @@ def raid(bot, update, args=None):
           pokemon = current_raid["egg"]
       else:
           pokemon = current_raid["pokemon"]
-      bot.send_message(chat_id=user_id, text="Para editar/borrar la incursión %s %sa las *%s* en *%s* pon aquí los siguientes comandos manteniendo el identificador *%s*:\n\n🕒 *Cambiar día/hora*:\n`/hora %s %s%s`\n\n🕒 *Cambiar hora a la que desaparece*:\n`/horafin %s %s`\n_(Pon un guión _`-`_ para borrarla)_\n\n🌎 *Cambiar gimnasio*:\n`/gimnasio %s %s`\n\n👿 *Cambiar Pokémon/nivel*:\n`/pokemon %s %s`\n\n🚫 *Cancelar incursión*:\n`/cancelar %s`%s%s\n\nTambién puedes contestar a los mensajes de las incursiones con estos comandos, omitiendo el identificador." % (what_text, what_day, extract_time(current_raid["timeraid"]), current_raid["gimnasio_text"], current_raid["id"], current_raid["id"], daystr, extract_time(current_raid["timeraid"]), current_raid["id"], show_endtime, current_raid["id"], current_raid["gimnasio_text"], current_raid["id"], pokemon, current_raid["id"], text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+      try:
+          bot.send_message(chat_id=user_id, text="Puedes editar la incursión %s %sa las *%s* en *%s* (identificador `%s`) contestando al mensaje de la incursión con los siguientes comandos:\n\n🕒 *Día/hora*: `/hora %s%s`\n🕒 *Hora a la que desaparece*: `/horafin %s`\n🌎 *Gimnasio*: `/gimnasio %s`\n👿 *Pokémon/nivel*: `/pokemon %s`\n\n🚫 *Cancelar incursión*: `/cancelar`%s%s" % (what_text, what_day, extract_time(current_raid["timeraid"]), current_raid["gimnasio_text"], current_raid["id"], daystr, extract_time(current_raid["timeraid"]), show_endtime, current_raid["gimnasio_text"], pokemon, text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+      except:
+          logging.debug("Error sending instructions in private. Maybe conversation not started?")
 
   if group["locations"] == 1:
       if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] != None:
           Thread(target=send_alerts_delayed, args=(current_raid, bot)).start()
       elif chat_type != "channel":
           if group["alerts"] == 1:
-               text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
+              text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
           else:
-               text_alertas = ""
-          bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _%s_\n\nDebes cambiarlo por un gimnasio reconocido para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto del final:\n\n`/cambiargimnasio %s %s`\n\nSi no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente." % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+              text_alertas = ""
+          try:
+              bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _%s_\n\nDebes cambiarlo por un gimnasio reconocido para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto del final:\n\n`/cambiargimnasio %s %s`\n\nSi no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente." % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+          except:
+              logging.debug("Error sending warning in private. Maybe conversation not started?")
 
   raid_difftime = raid_datetime - now_datetime
   if raid_difftime.total_seconds() < 900:
     suggested_datetime = raid_datetime + timedelta(minutes = 20)
     suggested_datetime_str = suggested_datetime.strftime("%Y-%m-%d %H:%M:%S")
     suggested_time = extract_time(suggested_datetime_str)
-    bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Has creado la incursión para dentro de muy poco tiempo, *solo faltan %s minutos*. ¿Quizás prefieras cambiarla para más tarde para que se pueda unir más gente? Para hacerlo, pon aquí este comando:\n\n`/cambiarhora %s %s`" % (int(raid_difftime.total_seconds()/60), current_raid["id"], suggested_time), parse_mode=telegram.ParseMode.MARKDOWN)
+    try:
+        bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Has creado la incursión para dentro de muy poco tiempo, *solo faltan %s minutos*. ¿Quizás prefieras cambiarla para más tarde para que se pueda unir más gente? Para hacerlo, pon aquí este comando:\n\n`/cambiarhora %s %s`" % (int(raid_difftime.total_seconds()/60), current_raid["id"], suggested_time), parse_mode=telegram.ParseMode.MARKDOWN)
+    except:
+        logging.debug("Error sending warning in private. Maybe conversation not started?")
 
 def cancelar(bot, update, args=None):
     logging.debug("detectivepikachubot:cancelar: %s %s %s" % (bot, update, args))
