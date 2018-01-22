@@ -18,6 +18,7 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    5. [Modo niñero](#modo-niñero)
    6. [Zona horaria](#zona-horaria)
    7. [Rankings](#rankings)
+   8. [Comandos exclusivos para administradores](#comandos-exclusivos-para-administradores)
 
 ## Ayuda para entrenadores ##
 
@@ -264,3 +265,11 @@ Para establecer la zona horaria correcta se debe utilizar el comando `/settimezo
 El bot puede mostrar los rankings de la **semana pasada** (contando de lunes a domingo) y del **mes pasado**, con los comandos `/ranking week` (o simplemente `/ranking`) y `/ranking month`.
 
 En estos rankings aparecen solo los 10 usuarios con mayor participación en incursiones. En caso de empate en número de incursiones, se muestran en la misma posición. Solo se tienen en cuenta los usuarios que se han apuntado a la incursión **antes de la hora de inicio** y que han pulsado el botón de **Estoy**.
+
+### Comandos exclusivos para administradores ###
+
+Para revertir la cancelación de una incursión puedes usar el comando `/descancelar`. Se utiliza exactamente igual que el `/cancelar`, pero sobre incursiones canceladas.
+
+Un administrador siempre puede cancelar incursiones con el comando `/cancelar`, aunque sean antiguas. Normalmente, un creador de incursión solo puede cancelar incursiones que no sean más antiguas de tres horas.
+
+Para reflotar todas las incursiones activas una vez, sin necesidad de usar el reflotado automático, se puede usar el comando `/reflotaractivas`. También se pueden reflotar todas las incursiones, incluídas las EX que transcurrirán dentro de varias horas o días, con `/reflotartodas`.
