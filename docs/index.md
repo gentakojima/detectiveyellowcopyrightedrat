@@ -8,7 +8,8 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    3. [Editar, cancelar, borrar y reflotar una incursión](#editar-cancelar-borrar-y-reflotar-una-incursión)
    4. [Apuntarse a una incursión](#apuntarse-a-una-incursión)
    5. [Alertas de incursiones](#alertas-de-incursiones)
-   6. [Más ayuda](#más-ayuda)
+   6. [Estadístcas y rankings](#estadísticas-y-rankings)
+   7. [Más ayuda](#más-ayuda)
 2. [Ayuda para administradores](#ayuda-para-administradores)
    1. [Grupos y canales](#grupos-y-canales)
    2. [Añadir el bot a un grupo o canal](#añadir-el-bot-a-un-grupo-o-canal)
@@ -16,6 +17,7 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    4. [Ubicaciones](#ubicaciones)
    5. [Modo niñero](#modo-niñero)
    6. [Zona horaria](#zona-horaria)
+   7. [Rankings](#rankings)
 
 ## Ayuda para entrenadores ##
 
@@ -95,6 +97,12 @@ Para poder apuntarse a una incursión es **necesario tener un alias** definido e
 Los usuarios pueden configurar alertas por mensaje privado cuando se creen incursiones en determinados gimnasios. Para configurarlas, utiliza el comando `/alerts` por privado al bot y sigue las instrucciones.
 
 Ten en cuenta que antes de configurar las alertas tienes que haber participado en alguna incursión en un grupo con las ubicaciones de los gimnasios coniguradas y la opción de permitir alertas activada.
+
+### Estadísticas y rankings ###
+
+Los usuarios pueden solicitar sus estadísticas de participación de la semana pasada con el comando `/stats`. Las estadísticas tan sólo cuentan las incursiones en las que ha pulsado el botón de **Estoy** y se ha apuntado antes de la hora de inicio de la incursión.
+
+Los rankings por grupo solo puede pedirlos un administrador en cada grupo, con el comando `/ranking`.
 
 ### Más ayuda ###
 
@@ -250,3 +258,9 @@ Para establecer la zona horaria correcta se debe utilizar el comando `/settimezo
 
     /settimezone Europe/Madrid
     /settimezone Atlantic/Canary
+
+### Rankings ###
+
+El bot puede mostrar los rankings de la **semana pasada** (contando de lunes a domingo) y del **mes pasado**, con los comandos `/ranking week` (o simplemente `/ranking`) y `/ranking month`.
+
+En estos rankings aparecen solo los 10 usuarios con mayor participación en incursiones. En caso de empate en número de incursiones, se muestran en la misma posición. Solo se tienen en cuenta los usuarios que se han apuntado a la incursión **antes de la hora de inicio** y que han pulsado el botón de **Estoy**.
