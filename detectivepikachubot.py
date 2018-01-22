@@ -1135,7 +1135,11 @@ def cancelar(bot, update, args=None):
                 update_message(raid["grupo_id"], raid["message"], None, bot)
                 if user_id != None:
                     bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha cancelado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
-                warn_people("cancelar", raid, user_username, user_id, bot)
+                group = getGroup(raid["grupo_id"])
+                raid_datetime = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
+                threehoursago_datetime = datetime.now(timezone(group["timezone"])) - timedelta(minutes = 180)
+                if raid_datetime > threehoursago_datetime:
+                    warn_people("cancelar", raid, user_username, user_id, bot)
             elif response == "already_cancelled":
                 user_id = chat_id if user_id == None else user_id
                 bot.sendMessage(chat_id=user_id, text="❌ No se puede cancelar la incursión `%s` porque ya ha sido cancelada previamente." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
