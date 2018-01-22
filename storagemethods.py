@@ -21,9 +21,11 @@ import pymysql.cursors
 from pymysql.err import InterfaceError, IntegrityError
 from datetime import datetime, timedelta
 from pytz import timezone
+from tzlocal import get_localzone
 import time
 import threading
 from config import config
+import math
 
 def getDbConnection():
     try:
@@ -186,9 +188,38 @@ def getActiveRaidsforUser(user_id):
     db.close()
     return result
 
+def getGroupTimezoneOffsetFromServer(group_id):
+    db = getDbConnection()
+    logging.debug("storagemethods:getGroupTimezoneOffsetFromServer: %s" % (group_id))
+    with db.cursor() as cursor:
+        sql = "SELECT timezone FROM grupos WHERE id = %s"
+        cursor.execute(sql, (group_id))
+        result = cursor.fetchone()
+        if result == None:
+            logging.debug("storagemethods:getGroupTimezoneOffsetFromServer: Unknown offset")
+            return 0
+        else:
+            localtz = get_localzone()
+            grouptz = result["timezone"]
+            localtz_datetime = datetime.now(timezone(str(localtz)))
+            grouptz_datetime = datetime.now(timezone(str(grouptz)))
+            localtz_datetime = localtz_datetime.replace(tzinfo=timezone("UTC"))
+            grouptz_datetime = grouptz_datetime.replace(tzinfo=timezone("UTC"))
+            if grouptz_datetime > localtz_datetime:
+                difference = grouptz_datetime - localtz_datetime
+                seconds = difference.seconds
+            else:
+                difference = localtz_datetime - grouptz_datetime
+                seconds = -difference.seconds
+            offset = round(seconds/3600.0)
+            logging.debug("storagemethods:getGroupTimezoneOffsetFromServer: Offset %s" % offset)
+            return offset
+
+
 def getGroupStats(group_id, date_start, date_end):
     db = getDbConnection()
     logging.debug("storagemethods:getGroupStats: %s %s %s" % (group_id, date_start, date_end))
+    diff_hours = - getGroupTimezoneOffsetFromServer(group_id)
     with db.cursor() as cursor:
         sql = "SELECT voy.usuario_id AS user_id, usuarios.trainername AS trainername, \
         usuarios.username AS username, COUNT(incursiones.id) as incursiones \
@@ -200,9 +231,12 @@ def getGroupStats(group_id, date_start, date_end):
         AND grupo_id = %s \
         AND usuarios.id IS NOT NULL \
         AND usuarios.validation != 'none' \
+        AND voy.novoy = 0 \
+        AND voy.estoy = 1 \
+        AND voy.addedtime < DATE_ADD(incursiones.timeraid, INTERVAL %s HOUR) \
         GROUP BY voy.usuario_id \
         ORDER BY incursiones DESC"
-        cursor.execute(sql, (date_start, date_end, group_id))
+        cursor.execute(sql, (date_start, date_end, group_id, diff_hours))
         result = cursor.fetchall()
     db.close()
     return result
@@ -210,6 +244,7 @@ def getGroupStats(group_id, date_start, date_end):
 def getGroupUserStats(group_id, user_id, date_start, date_end):
     db = getDbConnection()
     logging.debug("storagemethods:getGroupUserStats: %s %s %s %s" % (group_id, user_id, date_start, date_end))
+    diff_hours = - getGroupTimezoneOffsetFromServer(group_id)
     with db.cursor() as cursor:
         sql = "SELECT voy.usuario_id AS user_id, COUNT(incursiones.id) as incursiones \
         FROM incursiones \
@@ -220,9 +255,12 @@ def getGroupUserStats(group_id, user_id, date_start, date_end):
         AND grupo_id = %s \
         AND voy.usuario_id = %s \
         AND voy.usuario_id IS NOT NULL \
+        AND voy.novoy = 0 \
+        AND voy.estoy = 1 \
+        AND voy.addedtime < DATE_ADD(incursiones.timeraid, INTERVAL %s HOUR) \
         AND usuarios.validation != 'none' \
         GROUP BY voy.usuario_id"
-        cursor.execute(sql, (date_start, date_end, group_id, user_id))
+        cursor.execute(sql, (date_start, date_end, group_id, user_id, diff_hours))
         result = cursor.fetchone()
     db.close()
     return result
