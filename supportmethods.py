@@ -373,7 +373,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
     else:
         incursion_text = "incursión"
     for p in people:
-        if p["username"] == user_username:
+        if p["username"] == user_username or p["novoy"] > 0:
             continue
         try:
             user_text = "@%s" % user_username if user_username != None else "Se"
