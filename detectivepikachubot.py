@@ -75,7 +75,19 @@ dispatcher.add_error_handler(error_callback)
 @run_async
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
-    bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='%s'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nEscríbeme por privado en @%s el comando <code>/register</code>. Alternativamente, puedes preguntar <code>quién soy?</code> a @profesoroak_bot y reenviarme su respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @%s el comando <code>/alerts</code>." % (config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"]), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if chat_type != "private":
+        deletion_text = "\n\n<i>(Este mensaje se borrará en 60 segundos)</i>"
+        try:
+            bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+            pass
+    else:
+        deletion_text = ""
+    sent_message = bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='%s'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nEscríbeme por privado en @%s el comando <code>/register</code>. En vez de eso, puedes preguntar <code>quién soy?</code> a @profesoroak_bot y reenviarme su respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @%s el comando <code>/alerts</code>.%s" % (config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"], deletion_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    if chat_type != "private":
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 40, bot)).start()
 
 @run_async
 def pikaping(bot, update):
