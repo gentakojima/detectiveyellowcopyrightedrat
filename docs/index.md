@@ -8,7 +8,7 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    3. [Editar, cancelar, borrar y reflotar una incursión](#editar-cancelar-borrar-y-reflotar-una-incursión)
    4. [Apuntarse a una incursión](#apuntarse-a-una-incursión)
    5. [Alertas de incursiones](#alertas-de-incursiones)
-   6. [Estadístcas y rankings](#estadísticas-y-rankings)
+   6. [Estadístcas](#estadísticas)
    7. [Más ayuda](#más-ayuda)
 2. [Ayuda para administradores](#ayuda-para-administradores)
    1. [Grupos y canales](#grupos-y-canales)
@@ -99,11 +99,9 @@ Los usuarios pueden configurar alertas por mensaje privado cuando se creen incur
 
 Ten en cuenta que antes de configurar las alertas tienes que haber participado en alguna incursión en un grupo con las ubicaciones de los gimnasios coniguradas y la opción de permitir alertas activada.
 
-### Estadísticas y rankings ###
+### Estadísticas ###
 
 Los usuarios pueden solicitar sus estadísticas de participación de la semana pasada con el comando `/stats`. Las estadísticas tan sólo cuentan las incursiones en las que ha pulsado el botón de **Estoy** y se ha apuntado antes de la hora de inicio de la incursión.
-
-Los rankings por grupo solo puede pedirlos un administrador en cada grupo, con el comando `/ranking`.
 
 ### Más ayuda ###
 
@@ -205,7 +203,7 @@ Se pueden probar las ubicaciones preguntando por ellas con el comando `/gym`. Po
 
     /gym león de boca abierta
 
-Para listar todos los gimnasios conocidos puedes usar el comando `/list`. Este comando podría fallar si la lista es demasiado larga, sobre 120 gimnasios o más.
+Para listar todos los gimnasios conocidos puedes usar el comando `/list`. Este comando puede mostrar la lista cortada si hay demasiados gimnasios, sobre 120 gimnasios o más.
 
 **¡Importante!** Si les cambias el nombre (primera columna), los gimnasios se borran y se vuelven a crear, y todas las alertas que los usuarios tuvieran creadas se pierden. También puede afectar a incursiones en curso.
 
