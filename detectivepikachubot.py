@@ -30,6 +30,7 @@
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, Filters
 from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext.dispatcher import run_async
 
 import re
 import time
@@ -67,14 +68,34 @@ if not os.path.exists(logdir):
 logging.basicConfig(filename=logdir+'/debug.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
 logging.info("--------------------- Starting bot! -----------------------")
 
-updater = Updater(token=config["telegram"]["token"], workers=8)
+updater = Updater(token=config["telegram"]["token"], workers=6)
 dispatcher = updater.dispatcher
 dispatcher.add_error_handler(error_callback)
 
+@run_async
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
     bot.sendMessage(chat_id=update.message.chat_id, text="📖 ¡Echa un vistazo a <a href='%s'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nEscríbeme por privado en @%s el comando <code>/register</code>. Alternativamente, puedes preguntar <code>quién soy?</code> a @profesoroak_bot y reenviarme su respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @%s el comando <code>/alerts</code>." % (config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"]), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
+@run_async
+def pikaping(bot, update):
+    logging.debug("detectivepikachubot:pikaping: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    sent_dt = message.date
+    now_dt = datetime.now()
+    timediff = now_dt - sent_dt
+
+    if chat_type != "private":
+        try:
+            bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+            pass
+    sent_message = bot.sendMessage(chat_id=update.message.chat_id, text="Pikapong! %ds" % (timediff.seconds), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    if chat_type != "private":
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot)).start()
+
+@run_async
 def register(bot, update):
     logging.debug("detectivepikachubot:raids: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -104,6 +125,7 @@ def register(bot, update):
 
     bot.sendMessage(chat_id=chat_id, text="¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 6 horas, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esas 6 horas._", parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def settimezone(bot, update, args=None):
     logging.debug("detectivepikachubot:settimezone: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -141,6 +163,7 @@ def settimezone(bot, update, args=None):
     else:
         bot.sendMessage(chat_id=chat_id, text="❌ No se ha encontrado ninguna zona horaria válida con ese nombre.", parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def settalkgroup(bot, update, args=None):
     logging.debug("detectivepikachubot:settalkgroup: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -180,7 +203,7 @@ def settalkgroup(bot, update, args=None):
         saveGroup(group)
         bot.sendMessage(chat_id=chat_id, text="👌 Eliminada la referencia al grupo de charla.", parse_mode=telegram.ParseMode.MARKDOWN)
 
-
+@run_async
 def setspreadsheet(bot, update, args=None):
   logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -217,6 +240,7 @@ def setspreadsheet(bot, update, args=None):
     saveGroup(group)
     bot.sendMessage(chat_id=chat_id, text="👌 Establecido documento con identificador %s.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos." % spreadsheet_id )
 
+@run_async
 def refresh(bot, update, args=None):
   logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -295,6 +319,7 @@ def refresh(bot, update, args=None):
   else:
     bot.sendMessage(chat_id=chat_id, text="❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?")
 
+@run_async
 def registerOak(bot, update):
     logging.debug("detectivepikachubot:registerOak: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -344,6 +369,7 @@ def registerOak(bot, update):
         if forward_id == 201760961:
             bot.sendMessage(chat_id=chat_id, text="❌ No he reconocido ese mensaje de @profesoroak\_bot. ¿Seguro que le has preguntado `Quién soy?` y no otra cosa?", parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def joinedChat(bot, update):
     logging.debug("detectivepikachubot:joinedChat: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -361,7 +387,7 @@ def joinedChat(bot, update):
         pass
     return
 
-
+@run_async
 def processMessage(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
@@ -506,6 +532,7 @@ def processMessage(bot, update):
             Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 13, bot)).start()
     return
 
+@run_async
 def channelCommands(bot, update):
     logging.debug("detectivepikachubot:channelCommands: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -558,6 +585,7 @@ def channelCommands(bot, update):
             # Default to process normal message for babysitter mode
             processMessage(bot,update)
 
+@run_async
 def settings(bot, update):
     logging.debug("detectivepikachubot:settings: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -597,6 +625,7 @@ def settings(bot, update):
     saveGroup(group)
     update_settings_message(chat_id, bot)
 
+@run_async
 def list(bot, update):
   logging.debug("detectivepikachubot:list: %s %s" % (bot, update))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -624,6 +653,7 @@ def list(bot, update):
       output = output[:4006].rsplit('\n', 1)[0]+"...\n_(El mensaje se ha cortado porque era demasiado largo)_"
   bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def raids(bot, update):
     logging.debug("detectivepikachubot:raids: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -678,6 +708,7 @@ def raids(bot, update):
         output = "🐲 No hay incursiones activas en los grupos en los que has participado recientemente"
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
+@run_async
 def profile(bot, update):
     logging.debug("detectivepikachubot:profile: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -707,6 +738,7 @@ def profile(bot, update):
         output = "❌ No tengo información sobre ti."
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def stats(bot, update, args = None):
     logging.debug("detectivepikachubot:stats: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -855,6 +887,7 @@ def stats(bot, update, args = None):
                 output = output + "\n %s. %s (%s)%s" % (position, user_text, gs["incursiones"], medalla_text)
             bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
+@run_async
 def gym(bot, update, args=None):
     logging.debug("detectivepikachubot:gym: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -904,6 +937,7 @@ def gym(bot, update, args=None):
     else:
         bot.sendMessage(chat_id=chat_id, text="Lo siento, pero no he encontrado el gimnasio _%s_." % gym_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def raid(bot, update, args=None):
   logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
   (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1114,6 +1148,7 @@ def raid(bot, update, args=None):
     except:
         logging.debug("Error sending warning in private. Maybe conversation not started?")
 
+@run_async
 def cancelar(bot, update, args=None):
     logging.debug("detectivepikachubot:cancelar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1158,6 +1193,7 @@ def cancelar(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para cancelar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def descancelar(bot, update, args=None):
     logging.debug("detectivepikachubot:descancelar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1197,7 +1233,7 @@ def descancelar(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para descancelar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
-
+@run_async
 def borrar(bot, update, args=None):
     logging.debug("detectivepikachubot:borrar: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1236,6 +1272,7 @@ def borrar(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para borrar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def cambiarhora(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarHora: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1304,6 +1341,7 @@ def cambiarhora(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para editar la incursión `%s`." % raid["id"],parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def cambiarhorafin(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarHoraFin: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1372,6 +1410,7 @@ def cambiarhorafin(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para editar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def cambiargimnasio(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiargimnasio: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1456,6 +1495,7 @@ def cambiargimnasio(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para editar la incursión `%s`." % raid["id"],parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def reflotartodas(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotartodas: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1488,6 +1528,7 @@ def reflotartodas(bot, update, args=None):
             if user_id != None:
                 bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def reflotarhoy(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotarhoy: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1525,6 +1566,7 @@ def reflotarhoy(bot, update, args=None):
                 bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
             time.sleep(0.05)
 
+@run_async
 def reflotaractivas(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotaractivas: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1562,6 +1604,7 @@ def reflotaractivas(bot, update, args=None):
                 bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
             time.sleep(0.05)
 
+@run_async
 def reflotar(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1612,6 +1655,7 @@ def reflotar(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para reflotar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def cambiarpokemon(bot, update, args=None):
     logging.debug("detectivepikachubot:cambiarpokemon: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -1671,6 +1715,7 @@ def cambiarpokemon(bot, update, args=None):
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para editar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
+@run_async
 def raidbutton(bot, update):
   query = update.callback_query
   original_text = query.message.text
@@ -1919,6 +1964,7 @@ def raidbutton(bot, update):
 
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
+dispatcher.add_handler(CommandHandler('pikaping', pikaping))
 dispatcher.add_handler(CommandHandler('help', start))
 dispatcher.add_handler(CommandHandler('register', register))
 dispatcher.add_handler(CommandHandler('profile', profile))
