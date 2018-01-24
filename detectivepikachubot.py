@@ -32,7 +32,6 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryH
 from telegram import ChatAction, InlineKeyboardButton, InlineKeyboardMarkup
 
 import re
-import googlemaps
 import time
 import logging
 import requests
@@ -53,7 +52,7 @@ import html
 
 from config import config
 from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats
-from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
 def cleanup(signum, frame):
@@ -71,7 +70,6 @@ logging.info("--------------------- Starting bot! -----------------------")
 updater = Updater(token=config["telegram"]["token"], workers=8)
 dispatcher = updater.dispatcher
 dispatcher.add_error_handler(error_callback)
-gmaps = googlemaps.Client(key=config["googlemaps"]["key"], retry_timeout=3)
 
 def start(bot, update):
     logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
@@ -621,8 +619,10 @@ def list(bot, update):
   output = "Lista de gimnasios conocidos (%i):" % len(gyms)
   bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
   for p in gyms:
-    output = output + ("\n - %s" % p["desc"])
-  bot.sendMessage(chat_id=chat_id, text=output)
+    output = output + ("\n - %s%s" % (p["desc"], format_gym_emojis(p["tags"])))
+  if len(output) > 4096:
+      output = output[:4006].rsplit('\n', 1)[0]+"...\n_(El mensaje se ha cortado porque era demasiado largo)_"
+  bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 def raids(bot, update):
     logging.debug("detectivepikachubot:raids: %s %s" % (bot, update))
@@ -897,12 +897,10 @@ def gym(bot, update, args=None):
     if chosengym != None:
         bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
         logging.info("Encontrado: %s" % chosengym["desc"])
-        try:
-            reverse_geocode_result = gmaps.reverse_geocode((chosengym["latitude"], chosengym["longitude"]))
-            address = reverse_geocode_result[0]["formatted_address"]
-        except:
-            address = "-"
-        bot.sendVenue(chat_id=chat_id, latitude=chosengym["latitude"], longitude=chosengym["longitude"], title=chosengym["desc"], address=address)
+        if chosengym["address"] == None:
+            chosengym = fetch_gym_address(chosengym)
+        tags_emojis = format_gym_emojis(chosengym["tags"])
+        bot.sendVenue(chat_id=chat_id, latitude=chosengym["latitude"], longitude=chosengym["longitude"], title=tags_emojis + chosengym["desc"], address=chosengym["address"])
     else:
         bot.sendMessage(chat_id=chat_id, text="Lo siento, pero no he encontrado el gimnasio _%s_." % gym_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
@@ -1042,7 +1040,6 @@ def raid(bot, update, args=None):
   chosengym = None
   gyms = getPlaces(chat_id, ordering="id")
   for p in gyms:
-    logging.debug("Testing gym «%s»»" % (p["desc"]))
     for n in p["names"]:
       if re.search(re.escape(unidecode(n)),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) != None:
         logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(current_raid["gimnasio_text"])))
@@ -1424,7 +1421,6 @@ def cambiargimnasio(bot, update, args=None):
                 if group["locations"] == 1:
                     gyms = getPlaces(raid["grupo_id"], ordering="id")
                     for p in gyms:
-                        logging.debug("Testing gym «%s»»" % (p["desc"]))
                         for n in p["names"]:
                             if re.search(re.escape(unidecode(n)), unidecode(new_gymtext), flags=re.IGNORECASE) != None:
                                 logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(new_gymtext)))
@@ -1823,17 +1819,7 @@ def raidbutton(bot, update):
         gym = getPlace(raid["gimnasio_id"])
         if gym != None:
           if gym["address"] == None:
-              logging.debug("detectivepikachubot:raidbutton:ubicacion Fetching address of gym %s..." % gym["id"])
-              try:
-                reverse_geocode_result = gmaps.reverse_geocode((gym["latitude"], gym["longitude"]))
-                address = reverse_geocode_result[0]["formatted_address"]
-                gym["address"] = address
-                savePlace(gym)
-              except:
-                logging.debug("detectivepikachubot:raidbutton:ubicacion Error fetching address! Key limit reached?")
-                gym["address"] = "-"
-          else:
-              logging.debug("detectivepikachubot:raidbutton:ubicacion Using cached address of gym %s" % gym["id"])
+              gym = fetch_gym_address(gym)
           bot.sendVenue(chat_id=user_id, latitude=gym["latitude"], longitude=gym["longitude"], title=gym["desc"], address=gym["address"])
           if not already_sent_location(user_id, raid["gimnasio_id"]):
               bot.answerCallbackQuery(text="🌎 Te envío la ubicación por privado", callback_query_id=update.callback_query.id)

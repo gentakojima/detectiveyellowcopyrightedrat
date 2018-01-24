@@ -32,8 +32,10 @@ import pytesseract
 from PIL import Image, ImageOps
 from skimage.measure import compare_ssim as ssim
 from unidecode import unidecode
+import googlemaps
 
-from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat
+from config import config
+from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
@@ -157,6 +159,32 @@ def update_message(chat_id, message_id, reply_markup, bot):
     text = format_message(raid)
     return bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True, timeout=8)
 
+def format_gym_emojis(tags):
+    tags_emojis = ""
+    for t in tags:
+        if unidecode(t).lower() == "jardin":
+            tags_emojis = tags_emojis + "🌷"
+        if unidecode(t).lower() == "parque":
+            tags_emojis = tags_emojis + "🌳"
+        if unidecode(t).lower() == "patrocinado":
+            tags_emojis = tags_emojis + "💵"
+        if unidecode(t).lower() == "ex":
+            tags_emojis = tags_emojis + "🌟"
+    return tags_emojis
+
+def fetch_gym_address(gym):
+    logging.debug("supportmethods:fetch_gym_address %s" % gym["id"])
+    try:
+      gmaps = googlemaps.Client(key=config["googlemaps"]["key"], retry_timeout=3)
+      reverse_geocode_result = gmaps.reverse_geocode((gym["latitude"], gym["longitude"]))
+      address = reverse_geocode_result[0]["formatted_address"]
+      gym["address"] = address
+      savePlace(gym)
+    except:
+      logging.debug("detectivepikachubot:raidbutton:ubicacion Error fetching address! Key limit reached?")
+      gym["address"] = "-"
+    return gym
+
 def format_message(raid):
     logging.debug("supportmethods:format_message: %s" % (raid))
     creador = getCreadorRaid(raid["id"])
@@ -182,16 +210,7 @@ def format_message(raid):
             gym_emoji="🌎"
             place = getPlace(raid["gimnasio_id"])
             if place["tags"] != None:
-                tags_emojis = ""
-                for t in place["tags"]:
-                    if unidecode(t).lower() == "jardin":
-                        tags_emojis = tags_emojis + "🌷"
-                    if unidecode(t).lower() == "parque":
-                        tags_emojis = tags_emojis + "🌳"
-                    if unidecode(t).lower() == "patrocinado":
-                        tags_emojis = tags_emojis + "💵"
-                    if unidecode(t).lower() == "ex":
-                        tags_emojis = tags_emojis + "🌟"
+                tags_emojis = format_gym_emojis(place["tags"])
             if len(tags_emojis) > 0:
                 gym_emoji = tags_emojis
         else:

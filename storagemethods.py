@@ -411,7 +411,7 @@ def getPlaces(group_id, ordering="name"):
     logging.debug("storagemethods:getPlaces: %s" % (group_id))
     gyms = []
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords`,`tags` FROM `gimnasios` WHERE `grupo_id`=%s"
+        sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords`,`tags`,`address` FROM `gimnasios` WHERE `grupo_id`=%s"
         if ordering == "name":
             sql = sql + " ORDER BY name"
         elif ordering == "id":
@@ -420,7 +420,7 @@ def getPlaces(group_id, ordering="name"):
         for row in cursor:
             if row["tags"] == None:
                 row["tags"] = "[]"
-            gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"])})
+            gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"]), "address":row["address"]})
     db.close()
     return gyms
 
