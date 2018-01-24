@@ -728,23 +728,40 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
             cv2.imwrite(inspectdir + "/%s_img.png" % inspectFilename, image)
         raise Exception("Aspect ratio not supported")
 
-    # Crop GalaxyS8+ bars
+    # Crop GalaxyS8+ fullscreen and normal mode bars
     if aspect_ratio > 2.04 and aspect_ratio < 2.06:
         logging.debug("supportmethods:parse_profile_image: Detected Galaxy S8+ Ratio")
-        bottombar_img = image[int(height-height/15):int(height),int(0):int(width)] # y1:y2,x1:x2
+        bottombar_img = image[int(height-height/12.3):int(height),int(0):int(width)] # y1:y2,x1:x2
         bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
-        topbar_img = image[int(height/60):int(height/15),int(0):int(width)] # y1:y2,x1:x2
-        topbar_gray = cv2.cvtColor(topbar_img, cv2.COLOR_BGR2GRAY)
+        topbar_img = image[int(0):int(height/12.3),int(0):int(width)] # y1:y2,x1:x2
+        topbar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
         if inspect==True:
-            cv2.imwrite(inspectdir + "/%s_img_s8_topbar.png" % inspectFilename, topbar_img)
-            cv2.imwrite(inspectdir + "/%s_img_s8_bottombar.png" % inspectFilename, bottombar_img)
+            cv2.imwrite(inspectdir + "/%s_img_s8_topbar_nml.png" % inspectFilename, topbar_img)
+            cv2.imwrite(inspectdir + "/%s_img_s8_bottombar_nml.png" % inspectFilename, bottombar_img)
         if bottombar_gray.mean() < 40 and topbar_gray.mean() < 40:
-            logging.debug("supportmethods:parse_profile_image: Detected Black bars, cropping!")
-            image = image[int(height/14):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
+            logging.debug("supportmethods:parse_profile_image: Detected Normal Black bars, cropping!")
+            image = image[int(height/17.2):int(height-height/12.3),int(0):int(width)] # y1:y2,x1:x2
             height, width, _ = image.shape
             aspect_ratio = height/width
             if inspect==True:
-                cv2.imwrite(inspectdir + "/%s_img_s8.png" % inspectFilename, image)
+                cv2.imwrite(inspectdir + "/%s_img_s8_nml.png" % inspectFilename, image)
+        else:
+            bottombar_img = image[int(height-height/15):int(height),int(0):int(width)] # y1:y2,x1:x2
+            bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
+            bottombar_img = image[int(height-height/15):int(height),int(0):int(width)] # y1:y2,x1:x2
+            bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
+            topbar_img = image[int(height/60):int(height/15),int(0):int(width)] # y1:y2,x1:x2
+            topbar_gray = cv2.cvtColor(topbar_img, cv2.COLOR_BGR2GRAY)
+            if inspect==True:
+                cv2.imwrite(inspectdir + "/%s_img_s8_topbar_fs.png" % inspectFilename, topbar_img)
+                cv2.imwrite(inspectdir + "/%s_img_s8_bottombar_fs.png" % inspectFilename, bottombar_img)
+            if bottombar_gray.mean() < 40 and topbar_gray.mean() < 40:
+                logging.debug("supportmethods:parse_profile_image: Detected Fullscreen Black bars, cropping!")
+                image = image[int(height/14):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
+                height, width, _ = image.shape
+                aspect_ratio = height/width
+                if inspect==True:
+                    cv2.imwrite(inspectdir + "/%s_img_s8_fs.png" % inspectFilename, image)
 
     # Partially crop Oneplus T5S top bar
     if aspect_ratio > 1.99 and aspect_ratio < 2.01:
