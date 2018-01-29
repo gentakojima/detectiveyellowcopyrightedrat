@@ -309,6 +309,26 @@ def updateLastAutorefloat(group_id):
     db.close()
     return
 
+def getRemovedAlerts(group_id, places):
+    db = getDbConnection()
+    logging.debug("storagemethods:getRemovedAlerts: %s %s" % (group_id, places))
+    with db.cursor() as cursor:
+        params_vars = []
+        params_replacements = [group_id]
+        for place in places:
+            params_vars.append("%s")
+            params_replacements.append(place["desc"])
+        sql = "SELECT usuarios.id AS usuario_id, grupos.title AS grupo_title, grupos.alias AS grupo_alias, \
+            gimnasios.name AS gimnasio_name FROM alertas \
+            LEFT JOIN gimnasios ON gimnasios.id = alertas.gimnasio_id \
+            LEFT JOIN grupos ON grupos.id = gimnasios.grupo_id \
+            LEFT JOIN usuarios ON usuarios.id = alertas.usuario_id \
+            WHERE gimnasios.grupo_id=%s AND gimnasios.name NOT IN ("+(",".join(params_vars))+")"
+        cursor.execute(sql, params_replacements)
+        removedPlaces = cursor.fetchall()
+    db.close()
+    return removedPlaces
+
 def savePlaces(group_id, places):
     db = getDbConnection()
     logging.debug("storagemethods:savePlaces: %s %s" % (group_id, places))

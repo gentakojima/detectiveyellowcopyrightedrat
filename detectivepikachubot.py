@@ -52,7 +52,7 @@ from Levenshtein import distance
 import html
 
 from config import config
-from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats
+from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats, getRemovedAlerts
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
@@ -321,9 +321,18 @@ def refresh(bot, update, args=None):
       grupo["title"] = chat_title
       grupo["alias"] = group_alias
       saveGroup(grupo)
+      removedalerts = getRemovedAlerts(chat_id, places)
       if savePlaces(chat_id, places):
           places = getPlaces(grupo["id"])
           bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
+          # Warn users with removed alerts due to deleted/replaced gyms
+          if removedalerts != None and len(removedalerts)>0:
+              for ra in removedalerts:
+                  try:
+                      bot.sendMessage(chat_id=ra["usuario_id"], text="🚫 Se ha borrado una alerta que tenías programada para el gimnasio <b>%s</b> del grupo <b>%s</b> porque un administrador lo ha borrado o reemplazado por otro con un nombre diferente." % (ra["gimnasio_name"],ra["grupo_title"]), parse_mode=telegram.ParseMode.HTML)
+                  except:
+                      logging.debug("detectivepikachubot:refresh: Can't alert user %s about deleted alert on %s" % (ra["usuario_id"],ra["gimnasio_name"]))
+                      pass
       else:
           bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre.")
     else:
@@ -924,6 +933,11 @@ def gym(bot, update, args=None):
     if chat_type != "channel" and isBanned(user_id):
         return
 
+    if len(args) < 1:
+        sent_message = bot.sendMessage(chat_id=chat_id, text="Debes indicar un texto para buscar un gimnasio como parámetro. Por ejemplo, `/gym alameda`.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+        return
+
     gym_text = ""
     for i in range (0,len(args)):
         gym_text = gym_text + "%s " % args[i]
@@ -947,8 +961,8 @@ def gym(bot, update, args=None):
         tags_emojis = format_gym_emojis(chosengym["tags"])
         bot.sendVenue(chat_id=chat_id, latitude=chosengym["latitude"], longitude=chosengym["longitude"], title=tags_emojis + chosengym["desc"], address=chosengym["address"])
     else:
-        bot.sendMessage(chat_id=chat_id, text="Lo siento, pero no he encontrado el gimnasio _%s_." % gym_text, parse_mode=telegram.ParseMode.MARKDOWN)
-
+        sent_message = bot.sendMessage(chat_id=chat_id, text="Lo siento, pero no he encontrado el gimnasio _%s_.\n\n_(Este mensaje se borrará en unos segundos)_" % gym_text, parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
 @run_async
 def raid(bot, update, args=None):
   logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
