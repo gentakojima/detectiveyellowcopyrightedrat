@@ -619,7 +619,7 @@ def getRaidPeople(raid_id):
     db = getDbConnection()
     logging.debug("storagemethods:getRaidPeople: %s" % (raid_id))
     with db.cursor() as cursor:
-        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `estoy`, `tarde`, `level`, `team`, `lotengo`, `novoy` FROM `incursiones` \
+        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `estoy`, `tarde`, `level`, `team`, `lotengo`, `novoy`, `voy`.`addedtime` AS `addedtime` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
         LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s \
         ORDER BY `voy`.`addedtime` ASC"

@@ -1069,6 +1069,19 @@ def raid(bot, update, args=None):
       return
 
   current_raid["timeend"] = parse_time(args[-1], group["timezone"], strict=True)
+
+  if current_raid["timeend"] != None:
+      raidend_datetime = datetime.strptime(current_raid["timeend"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(group["timezone"]))
+      if raidend_datetime < raid_datetime or raidend_datetime > (raid_datetime + timedelta(minutes = 180)):
+          now_datetime_str = now_datetime.strftime("%Y-%m-%d %H:%M:%S")
+          now_time = extract_time(now_datetime_str)
+          if chat_type != "channel":
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s si no he entendido mal quieres poner la hora de finalización de la incursión a las *%s*, pero la incursión es a las *%s*. ¿Has puesto bien la hora de finalización?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), extract_time(current_raid["timeend"]), extract_time(current_raid["timeraid"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
+          else:
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ Si no he entendido mal quieres poner la hora de finalización de la incursión a las *%s*, pero la incursión es a las *%s*. ¿Has puesto bien la hora de finalización?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (extract_time(current_raid["timeend"]), extract_time(current_raid["timeraid"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
+          Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
+          return
+
   if current_raid["timeend"] != None:
       del args[-1]
       try:
@@ -1426,6 +1439,14 @@ def cambiarhorafin(bot, update, args=None):
                     user_id = chat_id if user_id == None else user_id
                     bot.sendMessage(chat_id=user_id, text="❌ La incursión `%s` ya tiene esa misma hora de fin." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
                     return
+
+                raid_datetime = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
+                raidend_datetime = datetime.strptime(raid["timeend"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(group["timezone"]))
+                if raidend_datetime < raid_datetime or raidend_datetime > (raid_datetime + timedelta(minutes = 180)):
+                    user_id = chat_id if user_id == None else user_id
+                    bot.sendMessage(chat_id=user_id, text="❌ Si no he entendido mal quieres cambiar la hora de finalización de la incursión para las *%s*, pero la incursión es a las las *%s*. ¿Has puesto bien la hora?" % (extract_time(raid["timeend"]),extract_time(raid["timeraid"])), parse_mode=telegram.ParseMode.MARKDOWN)
+                    return
+
                 raid["edited"] = 1
                 saveRaid(raid)
                 reply_markup = get_keyboard(raid)

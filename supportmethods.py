@@ -35,7 +35,7 @@ from unidecode import unidecode
 import googlemaps
 
 from config import config
-from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace
+from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace, getGroupTimezoneOffsetFromServer
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
@@ -202,8 +202,11 @@ def format_message(raid):
         text_refloated = ""
     if "timeend" in raid.keys() and raid["timeend"] != None:
         t = extract_time(raid["timeend"], group["timeformat"])
-        text_endtime = "\n<em>Desaparece a las %s</em>" % t
+        raidend_near = raidend_is_near_raidtime(raid["timeraid"], raid["timeend"], group["timezone"])
+        timeend_warn = "⚠️" if raidend_near >= 0 else ""
+        text_endtime = "\n%s<em>Desaparece a las %s</em>" % (timeend_warn, t)
     else:
+        timeend_warn = ""
         text_endtime = ""
     if group["locations"] == 1:
         if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] != None:
@@ -226,7 +229,7 @@ def format_message(raid):
             created_text = "\nCreada por @%s%s%s" % (creador["username"], text_edited, text_refloated)
     else:
         created_text = ""
-    text = "Incursión %s %sa las <b>%s</b> en %s<b>%s</b>%s%s\n" % (what_text, what_day, extract_time(raid["timeraid"], group["timeformat"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
+    text = "Incursión %s %sa las %s<b>%s</b> en %s<b>%s</b>%s%s\n" % (what_text, what_day, timeend_warn, extract_time(raid["timeraid"], group["timeformat"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
     if raid["status"] == "cancelled":
         text = text + "❌ <b>Incursión cancelada</b>"
     else:
@@ -237,6 +240,7 @@ def format_message(raid):
             numgente = count_people(gente)
             text = text + "%s entrenadores apuntados:" % numgente
     if raid["status"] != "cancelled" and gente != None:
+        diff_hours = getGroupTimezoneOffsetFromServer(group["id"])
         for user in gente:
             if user["plus"] != None and user["plus"]>0:
                 plus_text = " +%i" % user["plus"]
@@ -250,6 +254,12 @@ def format_message(raid):
                 estoy_text = "❌ "
             else:
                 estoy_text = "▪️ "
+            user_addedtime = user["addedtime"].replace(tzinfo=timezone(group["timezone"]))
+            raid_starttime = raid["timeraid"].replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes=diff_hours*60) - timedelta(minutes=1)
+            if user_addedtime > raid_starttime:
+                lateadded_text = "🐌"
+            else:
+                lateadded_text = ""
             if user["lotengo"] == 0:
                 lotengo_text = "👎"
             elif user["lotengo"] == 1:
@@ -265,11 +275,11 @@ def format_message(raid):
                     else:
                         team_badge = icons["Azul"]
                 if user["trainername"] != None:
-                    text = text + "\n%s%s%s <a href='https://t.me/%s'>%s</a>%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["trainername"],lotengo_text,plus_text)
+                    text = text + "\n%s%s%s <a href='https://t.me/%s'>%s</a>%s%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["trainername"],lateadded_text,lotengo_text,plus_text)
                 else:
-                    text = text + "\n%s%s%s <a href='https://t.me/%s'>@%s</a>%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["username"],lotengo_text,plus_text)
+                    text = text + "\n%s%s%s <a href='https://t.me/%s'>@%s</a>%s%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["username"],lateadded_text,lotengo_text,plus_text)
             else:
-                text = text + "\n%s➖ - - <a href='https://t.me/%s'>@%s</a>%s%s" % (estoy_text,user["username"],user["username"],lotengo_text,plus_text)
+                text = text + "\n%s➖ - - <a href='https://t.me/%s'>@%s</a>%s%s%s" % (estoy_text,user["username"],user["username"],lotengo_text,lateadded_text,plus_text)
     return text
 
 def format_text_pokemon(pokemon, egg, format="markdown"):
@@ -701,6 +711,21 @@ def extract_day(timeraid, tzone):
         return raid_datetime.day
     else:
         return None
+
+def raidend_is_near_raidtime(timeraid, timeend, tzone):
+    try:
+        raid_datetime = datetime.strptime(timeraid,"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(tzone))
+    except:
+        raid_datetime = timeraid.replace(tzinfo=timezone(tzone))
+    try:
+        raidend_datetime = datetime.strptime(timeend,"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(tzone))
+    except:
+        raidend_datetime = timeend.replace(tzinfo=timezone(tzone))
+    difftime = raidend_datetime - raid_datetime
+    if difftime.seconds < 780:
+        return round(difftime.seconds/60)
+    else:
+        return -1
 
 def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilename="failed"):
     logging.debug("supportmethods:parse_profile_image %s" % filename)
