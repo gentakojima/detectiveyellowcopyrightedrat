@@ -18,7 +18,7 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    5. [Modo niñero](#modo-niñero)
    6. [Zona horaria](#zona-horaria)
    7. [Rankings](#rankings)
-   8. [Comandos exclusivos para administradores](#comandos-exclusivos-para-administradores)
+   8. [Otros comandos exclusivos para administradores](#otros-comandos-exclusivos-para-administradores)
 
 ## Ayuda para entrenadores ##
 
@@ -81,7 +81,7 @@ Ten en cuenta que los comandos `/borrar` y `/reflotar` por defecto solo están a
 
 ### Apuntarse a una incursión ###
 
-Una vez creada la incursión, puedes apuntarse pulsando en el botón **Voy**.
+Una vez creada la incursión, puedes apuntarse pulsando en el botón **Voy**. Si te apuntas en el **último minuto** antes de la hora fijada, o incluso después, aparecerás con un icono de un caracol 🐌 en el listado.
 
 Si vas con acompañantes, puedes pulsar el botón **+1** por cada acompañante adicional. Si te has pasado, pulsa en **Voy** para poner esta cuenta a cero y volver a empezar. Ten en cuenta que los administradores de los grupos pueden limitar el número de acompañantes permitidos o deshabilitar completamente esta opción.
 
@@ -153,7 +153,7 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 3. **Reflotar incursiones (comando /reflotar)**. Si está activada, permite que los creadores de las incursiones las refloten utilizando el comando `/reflotar`. Opción desactivada por defecto.
 
-4. **Borrar incursiones (comando /borrar)**. Si está activada, permite que los creadores de las incursiones las borren utilizando el comando `/reflotar`. Si desactivas esta opción, todavía pueden cancelarlas con el comando `/cancelar`. Opción activada por defecto.
+4. **Borrar incursiones (comando /borrar)**. Si está activada, permite que los creadores de las incursiones las borren utilizando el comando `/borrar`. Si desactivas esta opción, todavía pueden cancelarlas con el comando `/cancelar`. Opción activada por defecto.
 
 #### Opciones de vista de incursiones ####
 
@@ -162,6 +162,8 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 2. **Mostrar horas en formato AM/PM**. Si está activada, muestra las horas con el formato de 12 horas seguido de AM o PM. Solo afecta a la visualización de las incursiones. Opción desactivada por defecto.
 
 3. **Tema de iconos**. Permite cambiar el tema de iconos entre uno de los disponibles. Cada vez que lo pulsas, cambia el tema por otro entre los temas disponibles.
+
+4. **Agrupar apuntados por nivel/equipo**. En lugar de mostrar los apuntados por orden temporal, los agrupa por equipo y por nivel. Opción desactivada por defecto.
 
 #### Funcionamiento de incursiones ####
 
@@ -264,7 +266,7 @@ El bot puede mostrar los rankings de la **semana pasada** (contando de lunes a d
 
 En estos rankings aparecen solo los 10 usuarios con mayor participación en incursiones. En caso de empate en número de incursiones, se muestran en la misma posición. Solo se tienen en cuenta los usuarios que se han apuntado a la incursión **antes de la hora de inicio** y que han pulsado el botón de **Estoy**.
 
-### Comandos exclusivos para administradores ###
+### Otros comandos exclusivos para administradores ###
 
 Para revertir la cancelación de una incursión puedes usar el comando `/descancelar`. Se utiliza exactamente igual que el `/cancelar`, pero sobre incursiones canceladas.
 
