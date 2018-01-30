@@ -19,6 +19,7 @@ import logging
 from supportmethods import delete_message, edit_check_private, extract_update_info
 from storagemethods import getAlerts, getPlace, getGroup, isBanned, delAlert, addAlert, clearAlerts, getPlacesByLocation, getGroupsByUser
 
+
 def alerts(bot, update, args=None):
     logging.debug("detectivepikachubot:alerts: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -27,25 +28,30 @@ def alerts(bot, update, args=None):
     if isBanned(chat_id):
         return
 
-    if user_id!=None and isBanned(user_id):
+    if user_id is not None and isBanned(user_id):
         return
 
-    if edit_check_private(chat_id, chat_type, user_username, "alerts", bot) == False:
+    if not edit_check_private(chat_id, chat_type, user_username, "alerts", bot):
         delete_message(chat_id, message.message_id, bot)
         return
 
-    alerts=getAlerts(user_id)
-    if len(alerts)==0:
+    alerts = getAlerts(user_id)
+
+    if not len(alerts):
         text_message = "🔔 No tienes ninguna alerta de incursión definida."
+
     else:
         text_message = "🔔 Tienes definidas %s alertas para los siguientes gimnasios:\n" % len(alerts)
+
         for alert in alerts:
             place = getPlace(alert["place_id"])
             group = getGroup(place["group_id"])
             text_message = text_message + "\n✅ `%s` %s - Grupo %s" % (place["id"], place["desc"], group["title"])
+
         text_message = text_message + "\n\nPara borrar una alerta, envíame `/delalert` seguido del identificador numérico, o `/clearalerts` para borrarlas todas."
     text_message = text_message + "\n\nPara añadir alertas de incursión nuevas, *envíame una ubicación* con gimnasios cercanos (_usando la función de Telegram de enviar ubicaciones_) y te explico."
     bot.send_message(chat_id=user_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
+
 
 def addalert(bot, update, args=None):
     logging.debug("detectivepikachubot:addalert: %s %s %s" % (bot, update, args))
@@ -55,24 +61,25 @@ def addalert(bot, update, args=None):
     if isBanned(chat_id):
         return
 
-    if user_id!=None and isBanned(user_id):
+    if user_id is not None and isBanned(user_id):
         return
 
     if edit_check_private(chat_id, chat_type, user_username, "addalert", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
 
-    if len(args)<1 or not str(args[0]).isnumeric():
+    if len(args) < 1 or not str(args[0]).isnumeric():
         bot.sendMessage(chat_id=chat_id, text="❌ ¡Tienes que pasarme un identificador numérico como parámetro!", parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     alerts = getAlerts(user_id)
-    if len(alerts)>=25:
+
+    if len(alerts) >= 25:
         bot.sendMessage(chat_id=chat_id, text="❌ ¡Solo se pueden configurar un máximo de 25 alertas!", parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     place = getPlace(args[0])
-    if place == None:
+    if place is None:
         bot.sendMessage(chat_id=chat_id, text="❌ ¡No he reconocido ese gimnasio! ¿Seguro que has puesto bien el identificador?", parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
@@ -83,8 +90,10 @@ def addalert(bot, update, args=None):
 
     if addAlert(user_id, place["id"]):
         bot.sendMessage(chat_id=chat_id, text="👌 Se ha añadido una alerta para el gimnasio *%s*.\n\nA partir de ahora, recibirás un mensaje privado cada vez que alguien cree una incursión en ese gimnasio." % place["desc"], parse_mode=telegram.ParseMode.MARKDOWN)
+
     else:
         bot.sendMessage(chat_id=chat_id, text="❌ No se ha podido añadir una alerta para ese gimnasio.", parse_mode=telegram.ParseMode.MARKDOWN)
+
 
 def delalert(bot, update, args=None):
     logging.debug("detectivepikachubot:delalert: %s %s %s" % (bot, update, args))
@@ -94,10 +103,10 @@ def delalert(bot, update, args=None):
     if isBanned(chat_id):
         return
 
-    if user_id!=None and isBanned(user_id):
+    if user_id is not None and isBanned(user_id):
         return
 
-    if edit_check_private(chat_id, chat_type, user_username, "delalert", bot) == False:
+    if not edit_check_private(chat_id, chat_type, user_username, "delalert", bot):
         delete_message(chat_id, message.message_id, bot)
         return
 
@@ -106,7 +115,7 @@ def delalert(bot, update, args=None):
         return
 
     place = getPlace(args[0])
-    if place == None:
+    if place is None:
         bot.sendMessage(chat_id=chat_id, text="❌ ¡No he reconocido ese gimnasio! ¿Seguro que has puesto bien el identificador?", parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
@@ -123,10 +132,10 @@ def clearalerts(bot, update):
     if isBanned(chat_id):
         return
 
-    if user_id!=None and isBanned(user_id):
+    if user_id is not None and isBanned(user_id):
         return
 
-    if edit_check_private(chat_id, chat_type, user_username, "clearalerts", bot) == False:
+    if not edit_check_private(chat_id, chat_type, user_username, "clearalerts", bot):
         delete_message(chat_id, message.message_id, bot)
         return
 
@@ -143,7 +152,7 @@ def processLocation(bot, update):
     if isBanned(chat_id):
         return
 
-    if user_id!=None and isBanned(user_id):
+    if user_id is not None and isBanned(user_id):
         return
 
     if chat_type == "private":
@@ -173,7 +182,7 @@ def processLocation(bot, update):
                 alert_ids.append(alert["place_id"])
             for place in filtered_places:
                 group = getGroup(place["grupo_id"])
-                if example_id == None:
+                if example_id is None:
                     example_id = place["id"]
                 if place["id"] in alert_ids:
                     icon = "✅"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 #
 # Detective Yellowcopyrightedrat - A Telegram bot to organize Pokémon GO raids
 # Copyright (C) 2017 Jorge Suárez de Lis <hey@gentakojima.me>
@@ -27,6 +27,7 @@ import sys
 import cv2
 import logging
 
+
 logging.basicConfig(filename='/dev/stdout', filemode='w', format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 parser = argparse.ArgumentParser()
@@ -39,7 +40,7 @@ passed_tests = failed_tests = 0
 for root, dirs, filenames in os.walk("testingimgs"):
     for f in filenames:
         m = re.match(r'(Rojo|Amarillo|Azul)_([0-9]{2})_([A-Za-z0-9]{3,15})_([A-Za-z]{3,12})_([A-Za-z0-9]{3,12})\.jpg', f)
-        if m == None:
+        if m is None:
             print("[!] Ignoring file %s..." % f)
         else:
             print("[*] Testing file %s..." % f)
@@ -91,18 +92,18 @@ for root, dirs, filenames in os.walk("testingimgs"):
                 failed_tests = failed_tests + 1
                 failed_test = True
             try:
-                assert chosen_profile != None
+                assert chosen_profile is not None
                 passed_tests = passed_tests + 1
             except AssertionError as e:
                 print(" [!] Incorrect Profile model! No match at all!")
                 failed_tests = failed_tests + 1
                 failed_test = True
 
-            if failed_test == True and args.inspect == True:
+            if failed_test and args.inspect:
                 inspectdir = sys.path[0] + "/inspectimages"
                 for dirname, dirnames, filenames in os.walk(inspectdir):
                     for f in filenames:
-                        if re.match(r'%s' % inspectFilename, f) != None:
+                        if re.match(r'%s' % inspectFilename, f) is not None:
                             i = cv2.imread(inspectdir + "/" + f)
                             cv2.imshow("Inspecting %s" % f, i)
                 cv2.waitKey(0)

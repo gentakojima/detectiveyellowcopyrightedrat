@@ -16,24 +16,24 @@
 
 import json
 import logging
-import types
 import pymysql.cursors
-from pymysql.err import InterfaceError, IntegrityError
+from pymysql.err import IntegrityError
 from datetime import datetime, timedelta
 from pytz import timezone
 from tzlocal import get_localzone
-import time
 import threading
 from config import config
-import math
+
 
 def getDbConnection():
     try:
         globaldb = pymysql.connect(host=config["database"]["host"], user=config["database"]["user"], password=config["database"]["password"], db=config["database"]["schema"], charset="utf8mb4", cursorclass=pymysql.cursors.DictCursor)
         logging.debug("Connected to database from thread %s " % threading.get_ident())
+
     except:
         print("No se puede conectar a la base de datos.\nComprueba el fichero de configuración!")
         logging.debug("Can't connect to database!")
+
     return globaldb
 
 # dbconnections = []
@@ -58,6 +58,7 @@ def getDbConnection():
 #         logging.debug("Can't connect to database!")
 #     return conn
 
+
 def searchTimezone(tz):
     db = getDbConnection()
     logging.debug("storagemethods:searchTimezone: %s" % (tz))
@@ -65,8 +66,10 @@ def searchTimezone(tz):
         sql = "SELECT `Name` as `name` FROM `mysql`.`time_zone_name` WHERE Name NOT LIKE %s AND Name NOT LIKE %s AND Name LIKE %s"
         cursor.execute(sql, ("posix%", "right%", "%"+tz+"%"))
         result = cursor.fetchone()
+
     db.close()
     return result
+
 
 def saveGroup(group):
     db = getDbConnection()
@@ -84,12 +87,14 @@ def saveGroup(group):
             group[k] = 1
     if "plusmax" not in group.keys():
         group["plusmax"] = 5
+
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, alias, spreadsheet) VALUES (%s, %s, %s, %s) \
         ON DUPLICATE KEY UPDATE title = %s, alias = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s, talkgroup = %s, timeformat = %s, icontheme = %s, plusmax = %s, refloatauto = %s, validationrequired = %s;"
         cursor.execute(sql, (group["id"], group["title"], group["alias"], group["spreadsheet"], group["title"], group["alias"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["babysitter"], group["timezone"], group["talkgroup"], group["timeformat"], group["icontheme"], group["plusmax"], group["refloatauto"], group["validationrequired"]))
     db.commit()
     db.close()
+
 
 def getGroup(group_id, reconnect=True):
     db = getDbConnection()
@@ -100,7 +105,7 @@ def getGroup(group_id, reconnect=True):
             cursor.execute(sql, (group_id))
             result = cursor.fetchone()
         except:
-            if reconnect == True:
+            if reconnect:
                 logging.info("storagemethods:getGroup Error interfacing with the database! Trying to reconnect...")
                 result = getGroup(group_id, False)
             else:
@@ -195,7 +200,7 @@ def getGroupTimezoneOffsetFromServer(group_id):
         sql = "SELECT timezone FROM grupos WHERE id = %s"
         cursor.execute(sql, (group_id))
         result = cursor.fetchone()
-        if result == None:
+        if result is None:
             logging.debug("storagemethods:getGroupTimezoneOffsetFromServer: Unknown offset")
             return 0
         else:
@@ -388,7 +393,7 @@ def addAlert(user_id, place_id):
         sql = "SELECT `id` FROM `alertas` WHERE `usuario_id` = %s AND `gimnasio_id` = %s"
         cursor.execute(sql, (user_id, place_id))
         result = cursor.fetchone()
-        if result != None:
+        if result is not None:
             return False
         sql = "INSERT INTO alertas (usuario_id, gimnasio_id) VALUES (%s, %s)"
         cursor.execute(sql, (user_id, place_id))
@@ -403,7 +408,7 @@ def delAlert(user_id, place_id):
         sql = "SELECT `id` FROM `alertas` WHERE `usuario_id` = %s AND `gimnasio_id` = %s"
         cursor.execute(sql, (user_id, place_id))
         result = cursor.fetchone()
-        if result == None:
+        if result is None:
             return False
         sql = "DELETE FROM alertas WHERE `usuario_id`=%s and `gimnasio_id`=%s"
         cursor.execute(sql, (user_id, place_id))
@@ -418,7 +423,7 @@ def clearAlerts(user_id):
         sql = "SELECT `id` FROM `alertas` WHERE `usuario_id` = %s"
         cursor.execute(sql, (user_id))
         result = cursor.fetchone()
-        if result == None:
+        if result is None:
             return False
         sql = "DELETE FROM alertas WHERE `usuario_id`=%s"
         cursor.execute(sql, (user_id))
@@ -438,7 +443,7 @@ def getPlaces(group_id, ordering="name"):
             sql = sql + " ORDER BY id"
         cursor.execute(sql, (group_id))
         for row in cursor:
-            if row["tags"] == None:
+            if row["tags"] is None:
                 row["tags"] = "[]"
             gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"]), "address":row["address"]})
     db.close()
@@ -451,7 +456,7 @@ def getPlace(id):
         sql = "SELECT `id`,`name`,`grupo_id`,`latitude`,`longitude`,`keywords`,`tags`,`address` FROM `gimnasios` WHERE `id`=%s"
         cursor.execute(sql, (id))
         for row in cursor:
-            if row["tags"] == None:
+            if row["tags"] is None:
                 row["tags"] = "[]"
             db.close()
             return {"id":row["id"], "group_id":row["grupo_id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"]), "address":row["address"]}
@@ -511,11 +516,11 @@ def refreshUsername(user_id, username):
     db = getDbConnection()
     logging.debug("storagemethods:refreshUsername: %s %s" % (user_id, username))
     thisuser = getUser(user_id)
-    if thisuser == None:
+    if thisuser is None:
         thisuser = {}
         thisuser["id"] = user_id
         thisuser["validation"] = "none"
-    if username != None and username != "None":
+    if username is not None and username != "None":
         thisuser["username"] = username
     saveUser(thisuser)
     return thisuser
@@ -529,7 +534,7 @@ def getUser(user_id, reconnect=True):
             cursor.execute(sql, (user_id))
             result = cursor.fetchone()
         except:
-            if reconnect == True:
+            if reconnect:
                 logging.info("storagemethods:getUser Error interfacing with the database! Trying to reconnect...")
                 result = getUser(user_id, False)
             else:
@@ -547,7 +552,7 @@ def getUserByTrainername(trainername, reconnect=True):
             cursor.execute(sql, (trainername))
             result = cursor.fetchone()
         except:
-            if reconnect == True:
+            if reconnect:
                 logging.info("storagemethods:getUser Error interfacing with the database! Trying to reconnect...")
                 getDbConnection()
                 result = getUserByTrainername(trainername, False)
@@ -564,7 +569,7 @@ def isBanned(user_id):
         sql = "SELECT `id` FROM `usuarios` WHERE `id`=%s AND banned=1 UNION SELECT `id` FROM `grupos` WHERE `id`=%s AND banned=1"
         cursor.execute(sql, (user_id, user_id))
         result = cursor.fetchone()
-        if result == None:
+        if result is None:
             db.close()
             return False
         else:
@@ -589,7 +594,7 @@ def saveRaid(raid):
             sql = "SELECT id FROM grupos WHERE id=%s"
             cursor.execute(sql, (raid["grupo_id"]))
             result = cursor.fetchone()
-            if result == None:
+            if result is None:
                 sql = "INSERT INTO grupos (`id`) VALUES (%s);"
                 cursor.execute(sql, (raid["grupo_id"]))
             sql = "INSERT INTO incursiones (`grupo_id`, `usuario_id`, `message`, `pokemon`, `egg`,  `gimnasio_id`, `gimnasio_text`, `timeraid`, `timeend`, `status`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
@@ -625,7 +630,7 @@ def getRaidPeople(raid_id):
         ORDER BY `voy`.`addedtime` ASC"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchall()
-        if result[0]["id"] == None:
+        if result[0]["id"] is None:
             db.close()
             return None
         else:
@@ -649,7 +654,7 @@ def getLastRaids(grupo_id, number):
         sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `egg`, `gimnasio_id`, `gimnasio_text`, `edited`, `addedtime`, `timeraid`, `timeend`, `status` FROM `incursiones` WHERE  grupo_id = %s ORDER BY `addedtime` DESC LIMIT 0,%s"
         cursor.execute(sql, (grupo_id, number))
         result = cursor.fetchall()
-        if result[0]["id"] == None:
+        if result[0]["id"] is None:
             db.close()
             return None
         else:
@@ -681,7 +686,7 @@ def raidVoy(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidVoy: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid == None:
+        if raid is None:
             db.close()
             return "not_raid"
         if raid["status"] == "ended" or raid["status"] == "old":
@@ -701,7 +706,7 @@ def raidNovoy(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidNovoy: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid == None:
+        if raid is None:
             db.close()
             return "not_raid"
         if raid["status"] == "ended" or raid["status"] == "old":
@@ -710,7 +715,7 @@ def raidNovoy(grupo_id, message_id, user_id):
         sql = "SELECT * FROM voy WHERE `incursion_id`=%s and usuario_id=%s and addedtime < timestamp(DATE_SUB(NOW(), INTERVAL 5 MINUTE));"
         cursor.execute(sql, (raid["id"], user_id))
         result = cursor.fetchone()
-        if result == None:
+        if result is None:
             sql = "DELETE FROM voy WHERE `incursion_id`=%s and usuario_id=%s;"
             rows_affected = cursor.execute(sql, (raid["id"], user_id))
         else:
@@ -728,7 +733,7 @@ def raidPlus1(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidPlus1: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid == None:
+        if raid is None:
             db.close()
             return "not_raid"
         if raid["status"] == "ended" or raid["status"] == "old":
@@ -738,7 +743,7 @@ def raidPlus1(grupo_id, message_id, user_id):
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
         group = getGroup(grupo_id)
-        if result != None:
+        if result is not None:
             if result["plus"] >= group["plusmax"]:
                 db.close()
                 return "demasiados"
@@ -757,10 +762,10 @@ def raidEstoy(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidEstoy: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid == None:
+        if raid is None:
             db.close()
             return "not_raid"
-        if raid == None or raid["status"] == "ended" or raid["status"] == "old":
+        if raid is None or raid["status"] == "ended" or raid["status"] == "old":
             db.close()
             return "old_raid"
         sql = "INSERT INTO voy (incursion_id, usuario_id, estoy) VALUES (%s, %s, 1) ON DUPLICATE KEY UPDATE estoy=1, tarde=0, novoy=0, lotengo=NULL;"
@@ -777,10 +782,10 @@ def raidLlegotarde(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidLlegotarde: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid == None:
+        if raid is None:
             db.close()
             return "not_raid"
-        if raid == None or raid["status"] == "ended" or raid["status"] == "old":
+        if raid is None or raid["status"] == "ended" or raid["status"] == "old":
             db.close()
             return "old_raid"
         sql = "INSERT INTO voy (incursion_id, usuario_id, tarde) VALUES (%s, %s, 1) ON DUPLICATE KEY UPDATE tarde=1, estoy=0, novoy=0, lotengo=NULL;"
@@ -797,22 +802,22 @@ def raidLotengo(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidLotengo: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid == None:
+        if raid is None:
             db.close()
             return "not_raid"
-        if raid == None or raid["status"] == "waiting" or raid["status"] == "old":
+        if raid is None or raid["status"] == "waiting" or raid["status"] == "old":
             db.close()
             return "old_raid"
         sql = "SELECT `novoy` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s and novoy = 1"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
-        if result != None:
+        if result is not None:
             db.close()
             return "not_going"
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
-        if (result == None and raid["status"] == "started") or result != None:
+        if (result is None and raid["status"] == "started") or result is not None:
             sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 1) ON DUPLICATE KEY UPDATE tarde=0, estoy=1, novoy=0, lotengo=1;"
             rows_affected = cursor.execute(sql, (raid["id"], user_id))
         else:
@@ -830,22 +835,22 @@ def raidEscapou(grupo_id, message_id, user_id):
     logging.debug("storagemethods:raidEscapou: %s %s %s" % (grupo_id, message_id, user_id))
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
-        if raid == None:
+        if raid is None:
             db.close()
             return "not_raid"
-        if raid == None or raid["status"] == "waiting" or raid["status"] == "old":
+        if raid is None or raid["status"] == "waiting" or raid["status"] == "old":
             db.close()
             return "old_raid"
         sql = "SELECT `novoy` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s and novoy = 1"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
-        if result != None:
+        if result is not None:
             db.close()
             return "not_going"
         sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
-        if (result == None and raid["status"] == "started") or result != None:
+        if (result is None and raid["status"] == "started") or result is not None:
             sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 1) ON DUPLICATE KEY UPDATE tarde=0, estoy=1, novoy=0, lotengo=0;"
             rows_affected = cursor.execute(sql, (raid["id"], user_id))
         else:
@@ -882,7 +887,7 @@ def cancelRaid(raid_id, force=False):
         raid = getRaid(raid_id)
         if raid["status"] == "cancelled":
             return "already_cancelled"
-        elif (raid["status"] == "old" or raid["status"] == "ended") and force == False:
+        elif (raid["status"] == "old" or raid["status"] == "ended") and not force:
             return "too_old"
         elif raid["status"] == "deleted":
             return "already_deleted"
