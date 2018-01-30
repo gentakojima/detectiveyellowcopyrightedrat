@@ -1941,9 +1941,9 @@ def raidbutton(bot, update):
       else:
           delete_message(chat_id, message_id, bot)
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired"}
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder"}
 
-  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour"}
+  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids"}
 
   for k in settings:
       if data==k:

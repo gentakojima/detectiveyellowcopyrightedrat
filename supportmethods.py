@@ -188,9 +188,10 @@ def fetch_gym_address(gym):
 def format_message(raid):
     logging.debug("supportmethods:format_message: %s" % (raid))
     creador = getCreadorRaid(raid["id"])
-    gente = getRaidPeople(raid["id"])
     group = getGroup(raid["grupo_id"])
     icons = iconthemes[group["icontheme"]]
+    ordering = "addedtime" if group["listorder"] == 0 else "teamlevel"
+    gente = getRaidPeople(raid["id"], ordering)
 
     if "edited" in raid.keys() and raid["edited"]>0:
         text_edited = " <em>(editada)</em>"
@@ -235,7 +236,7 @@ def format_message(raid):
     else:
         if group["disaggregated"] == 1:
             (numazules, numrojos, numamarillos, numotros, numgente) = count_people_disaggregated(gente)
-            text = text + "%s%s · %s%s · %s%s · ❓%s · 👩‍👩‍👧‍👧%s" % (icons["Azul"], numazules, icons["Rojo"], numrojos, icons["Amarillo"], numamarillos, numotros, numgente)
+            text = text + "%s%s · %s%s · %s%s · ❓%s · 👩‍👩‍👧‍👧%s" % (icons["Amarillo"], numamarillos, icons["Azul"], numazules, icons["Rojo"], numrojos, numotros, numgente)
         else:
             numgente = count_people(gente)
             text = text + "%s entrenadores apuntados:" % numgente
@@ -493,6 +494,10 @@ def get_settings_keyboard(chat_id, keyboard="main"):
         timeformat_text = "✅ Mostrar horas en formato AM/PM"
     else:
         timeformat_text = "▪️ Mostrar horas en formato AM/PM"
+    if group["listorder"] == 1:
+        listorder_text = "✅ Agrupar apuntados por nivel/equipo"
+    else:
+        listorder_text = "▪️ Agrupar apuntados por nivel/equipo"
     if group["plusmax"] == 1:
         plusmax_text = "✅ Botón «+1» (máx. 1 acompañante)"
     elif group["plusmax"] == 2:
@@ -527,7 +532,7 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     elif keyboard == "raidbehaviour":
         settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
     elif keyboard == "raids":
-        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
 
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
