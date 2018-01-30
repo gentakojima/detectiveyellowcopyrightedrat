@@ -66,7 +66,7 @@ def extract_update_info(update):
         message = update.message
     except:
         message = update.channel_post
-    if message == None:
+    if message is None:
         message = update.channel_post
     text = message.text
     try:
@@ -95,12 +95,12 @@ def delete_message(chat_id, message_id, bot):
 
 def count_people(gente):
     count = 0
-    if gente != None:
+    if gente is not None:
         for user in gente:
             if user["novoy"] > 0:
                 continue
             count = count + 1
-            if user["plus"] != None and user["plus"] > 0:
+            if user["plus"] is not None and user["plus"] > 0:
                 count = count + user["plus"]
     return count
 
@@ -110,12 +110,12 @@ def count_people_disaggregated(gente):
     numamarillos = 0
     numotros = 0
     count = 0
-    if gente != None:
+    if gente is not None:
         for user in gente:
             if user["novoy"] > 0:
                 continue
             count = count + 1
-            if user["plus"] != None and user["plus"] > 0:
+            if user["plus"] is not None and user["plus"] > 0:
                 count = count + user["plus"]
                 numotros = numotros + user["plus"]
             if user["team"] == "Rojo":
@@ -139,7 +139,7 @@ def send_alerts(raid, bot):
     if group["alerts"] == 1:
         what_text = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
         what_day = format_text_day(raid["timeraid"], group["timezone"])
-        if group["alias"] != None:
+        if group["alias"] is not None:
             incursion_text = "<a href='https://t.me/%s/%s'>incursión</a>" % (group["alias"], raid["message"])
             group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], html.escape(group["title"]))
         else:
@@ -200,7 +200,7 @@ def format_message(raid):
         text_refloated = " <em>(reflotada)</em>"
     else:
         text_refloated = ""
-    if "timeend" in raid.keys() and raid["timeend"] != None:
+    if "timeend" in raid.keys() and raid["timeend"] is not None:
         t = extract_time(raid["timeend"], group["timeformat"])
         raidend_near = raidend_is_near_raidtime(raid["timeraid"], raid["timeend"], group["timezone"])
         timeend_warn = "⚠️" if raidend_near >= 0 else ""
@@ -209,10 +209,10 @@ def format_message(raid):
         timeend_warn = ""
         text_endtime = ""
     if group["locations"] == 1:
-        if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] != None:
+        if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] is not None:
             gym_emoji="🌎"
             place = getPlace(raid["gimnasio_id"])
-            if place["tags"] != None:
+            if place["tags"] is not None:
                 tags_emojis = format_gym_emojis(place["tags"])
             if len(tags_emojis) > 0:
                 gym_emoji = tags_emojis
@@ -222,8 +222,8 @@ def format_message(raid):
         gym_emoji=""
     what_text = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
     what_day = format_text_day(raid["timeraid"], group["timezone"], "html")
-    if creador["username"] != None:
-        if creador["trainername"] != None:
+    if creador["username"] is not None:
+        if creador["trainername"] is not None:
             created_text = "\nCreada por <a href='https://t.me/%s'>%s</a>%s%s" % (creador["username"], creador["trainername"], text_edited, text_refloated)
         else:
             created_text = "\nCreada por @%s%s%s" % (creador["username"], text_edited, text_refloated)
@@ -239,16 +239,16 @@ def format_message(raid):
         else:
             numgente = count_people(gente)
             text = text + "%s entrenadores apuntados:" % numgente
-    if raid["status"] != "cancelled" and gente != None:
+    if raid["status"] != "cancelled" and gente is not None:
         diff_hours = getGroupTimezoneOffsetFromServer(group["id"])
         for user in gente:
-            if user["plus"] != None and user["plus"]>0:
+            if user["plus"] is not None and user["plus"]>0:
                 plus_text = " +%i" % user["plus"]
             else:
                 plus_text = ""
-            if user["estoy"] != None and user["estoy"]>0:
+            if user["estoy"] is not None and user["estoy"]>0:
                 estoy_text = "✅ "
-            elif user["tarde"] != None and user["tarde"]>0:
+            elif user["tarde"] is not None and user["tarde"]>0:
                 estoy_text = "🕒 "
             elif user["novoy"] >0:
                 estoy_text = "❌ "
@@ -266,15 +266,15 @@ def format_message(raid):
                 lotengo_text = "👍"
             else:
                 lotengo_text = ""
-            if user["level"] != None and user["team"] != None:
-                if user["team"] != None:
+            if user["level"] is not None and user["team"] is not None:
+                if user["team"] is not None:
                     if user["team"]=="Rojo":
                         team_badge = icons["Rojo"]
                     elif user["team"]=="Amarillo":
                         team_badge = icons["Amarillo"]
                     else:
                         team_badge = icons["Azul"]
-                if user["trainername"] != None:
+                if user["trainername"] is not None:
                     text = text + "\n%s%s%s <a href='https://t.me/%s'>%s</a>%s%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["trainername"],lateadded_text,lotengo_text,plus_text)
                 else:
                     text = text + "\n%s%s%s <a href='https://t.me/%s'>@%s</a>%s%s%s" % (estoy_text,team_badge,user["level"],user["username"],user["username"],lateadded_text,lotengo_text,plus_text)
@@ -283,7 +283,7 @@ def format_message(raid):
     return text
 
 def format_text_pokemon(pokemon, egg, format="markdown"):
-    if pokemon != None:
+    if pokemon is not None:
         what_text = "de <b>%s</b>" % pokemon if format == "html" else "de *%s*" % pokemon
     else:
         if egg == "EX":
@@ -353,7 +353,7 @@ def auto_refloat(bot):
         raids = getActiveRaidsforGroup(g["id"])
         for raid in raids:
             timeraid = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
-            if raid["id"] != None and raid["status"] != "ended" and timeraid <= intwohours_datetime and (\
+            if raid["id"] is not None and raid["status"] != "ended" and timeraid <= intwohours_datetime and (\
                 (g["refloatauto"] == 5 and timeraid > tenminsago_datetime) or \
                 (g["refloatauto"] == 10 and timeraid > fifminsago_datetime) or \
                 (g["refloatauto"] == 15 and timeraid > tweminsago_datetime) or \
@@ -395,9 +395,9 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
     group = getGroup(raid["grupo_id"])
     warned = []
     notwarned = []
-    if people == None:
+    if people is None:
         return
-    if group["alias"] != None:
+    if group["alias"] is not None:
         incursion_text = "<a href='https://t.me/%s/%s'>incursión</a>" % (group["alias"], raid["message"])
     else:
         incursion_text = "incursión"
@@ -405,7 +405,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
         if p["username"] == user_username or p["novoy"] > 0:
             continue
         try:
-            user_text = "@%s" % user_username if user_username != None else "Se"
+            user_text = "@%s" % user_username if user_username is not None else "Se"
             if warntype == "cancelar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
                 text = "❌ %s ha <b>cancelado</b> la %s de %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
@@ -543,12 +543,12 @@ def get_keyboard(raid):
         keyboard_row2 = [InlineKeyboardButton("✅ Estoy ahí", callback_data='estoy')]
         if group["latebutton"] == 1:
             keyboard_row2.append(InlineKeyboardButton("🕒 Tardo", callback_data='llegotarde'))
-        if raid["gimnasio_id"] != None:
+        if raid["gimnasio_id"] is not None:
             keyboard_row2.append(InlineKeyboardButton("🌎 Ubicación", callback_data='ubicacion'))
         keyboard = [keyboard_row1, keyboard_row2]
     else:
         keyboard = []
-    if group != None and group["gotitbuttons"] == 1 and (raid["status"] == "started" or raid["status"] == "ended"):
+    if group is not None and group["gotitbuttons"] == 1 and (raid["status"] == "started" or raid["status"] == "ended"):
         keyboard.append([InlineKeyboardButton("👍 ¡Lo tengo!", callback_data='lotengo'), InlineKeyboardButton("👎 ¡Ha escapado!", callback_data='escapou')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
@@ -574,7 +574,7 @@ def update_settings_message(chat_id, bot, keyboard = "main"):
 def edit_check_private(chat_id, chat_type, user_username, command, bot):
     logging.debug("supportmethods:edit_check_private")
     if chat_type != "private":
-        if user_username != None:
+        if user_username is not None:
             text = "@%s el comando `/%s` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(user_username), command)
         else:
             text = "El comando `/%s` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_" % command
@@ -590,7 +590,7 @@ def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username
         expectedargs = 0
     else:
         expectedargs = 1
-    if len(args)>=expectedargs and hasattr(message, 'reply_to_message') and message.reply_to_message != None:
+    if len(args)>=expectedargs and hasattr(message, 'reply_to_message') and message.reply_to_message is not None:
         delete_message(chat_id, message.message_id, bot)
         reply_chat_id = message.reply_to_message.chat.id
         reply_message_id = message.reply_to_message.message_id
@@ -603,7 +603,7 @@ def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username
         raid = getRaid(raid_id)
     else:
         delete_message(chat_id, message.message_id, bot)
-        user_text = "@%s el" % ensure_escaped(user_username) if user_username != None else "El"
+        user_text = "@%s el" % ensure_escaped(user_username) if user_username is not None else "El"
         text = "%s comando `/%s` solo funciona por privado o contestando al mensaje de la incursión.\n\n_(Este mensaje se borrará en unos segundos)_" % (user_text, command)
         sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
@@ -615,18 +615,18 @@ def parse_pokemon(pokestr):
     ret_egg = None
     for pokemon in pokemonlist:
       m = re.match("^%s$" % pokemon, pokestr, flags=re.IGNORECASE)
-      if m != None:
+      if m is not None:
         ret_pok = pokemon
         break
 
-    if ret_pok == None:
+    if ret_pok is None:
         for egg in egglist:
             m = re.match("^%s$" % egg, pokestr, flags=re.IGNORECASE)
-            if m != None:
+            if m is not None:
                 ret_egg = egg
                 break
 
-    if ret_pok == None and ret_egg == None:
+    if ret_pok is None and ret_egg is None:
         for pokemon in pokemonlist:
             if distance(pokestr.lower(), pokemon.lower()) < 3:
                 ret_pok = pokemon
@@ -636,21 +636,21 @@ def parse_pokemon(pokestr):
 
 def parse_time(st, tz, strict=False):
     logging.debug("supportmethods:parse_time %s %s" % (st,tz))
-    if strict == True:
+    if strict:
         m = re.match("([0-9]{1,2}/)?([0-9]{1,2})[:.]([0-9]{1,2})h?", st, flags=re.IGNORECASE)
     else:
         m = re.match("([0-9]{1,2}/)?([0-9]{1,2})[:.]?([0-9]{0,2})h?", st, flags=re.IGNORECASE)
-    if m != None:
+    if m is not None:
         hour = str(m.group(2))
         minute = m.group(3) or "00"
         logging.debug("supportmethods:parse_time parsing time %s %s" % (hour, minute))
-        if m.group(1) != None:
+        if m.group(1) is not None:
             day = m.group(1).replace("/","")
             logging.debug("supportmethods:parse_time parsing day %s" % (day))
         else:
             day = None
         if int(hour)<0 or int(hour)>24 or int(minute)<0 or int(minute)>59 or \
-                                (day != None and (int(day)<0 or int(day)>31)):
+                                (day is not None and (int(day)<0 or int(day)>31)):
             logging.debug("supportmethods::parse_time failed parsing time from %s" % st)
             return None
     else:
@@ -659,12 +659,12 @@ def parse_time(st, tz, strict=False):
 
     localdatetime = datetime.now(timezone(tz))
     localtime = localdatetime.time()
-    if int(hour) <= 12 and day == None:
+    if int(hour) <= 12 and day is None:
         if (int(hour) <= 5) or (int(localtime.hour) >= 15 and int(hour) <= 9 and int(hour)!=0):
                 hour = int(hour) + 12
 
     dt = datetime.now(timezone(tz))
-    if day != None:
+    if day is not None:
         if int(day) >= dt.day:
             dt = dt.replace(day=int(day))
         else:
@@ -682,7 +682,7 @@ def extract_time(formatted_datetime, format=0):
     if not isinstance(formatted_datetime,str):
         formatted_datetime = formatted_datetime.strftime("%Y-%m-%d %H:%M:%S")
     m = re.search("([0-9]{1,2}):([0-9]{0,2}):[0-9]{0,2}", formatted_datetime, flags=re.IGNORECASE)
-    if m != None:
+    if m is not None:
         if format == 0:
             extracted_time = "%02d:%02d" % (int(m.group(1)), int(m.group(2)))
         else:
@@ -739,7 +739,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
         os.makedirs(inspectdir)
 
     # Load possible pokemons
-    if desired_pokemon != None:
+    if desired_pokemon is not None:
         thispoke_models = []
         for j in range(1, 10):
             pokfname = sys.path[0] + "/modelimgs/pokemon/%s%d.png" % (desired_pokemon,j)
@@ -768,7 +768,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
 
     # Raise error for unsupported aspect ratios
     if aspect_ratio <= 1.64 or aspect_ratio >= 2.17:
-        if inspect==True:
+        if inspect:
             cv2.imwrite(inspectdir + "/%s_img.png" % inspectFilename, image)
         raise Exception("Aspect ratio not supported")
 
@@ -779,7 +779,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
         bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
         topbar_img = image[int(0):int(height/12.3),int(0):int(width)] # y1:y2,x1:x2
         topbar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
-        if inspect==True:
+        if inspect:
             cv2.imwrite(inspectdir + "/%s_img_s8_topbar_nml.png" % inspectFilename, topbar_img)
             cv2.imwrite(inspectdir + "/%s_img_s8_bottombar_nml.png" % inspectFilename, bottombar_img)
         if bottombar_gray.mean() < 40 and topbar_gray.mean() < 40:
@@ -787,7 +787,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
             image = image[int(height/17.2):int(height-height/12.3),int(0):int(width)] # y1:y2,x1:x2
             height, width, _ = image.shape
             aspect_ratio = height/width
-            if inspect==True:
+            if inspect:
                 cv2.imwrite(inspectdir + "/%s_img_s8_nml.png" % inspectFilename, image)
         else:
             bottombar_img = image[int(height-height/15):int(height),int(0):int(width)] # y1:y2,x1:x2
@@ -796,7 +796,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
             bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
             topbar_img = image[int(height/60):int(height/15),int(0):int(width)] # y1:y2,x1:x2
             topbar_gray = cv2.cvtColor(topbar_img, cv2.COLOR_BGR2GRAY)
-            if inspect==True:
+            if inspect:
                 cv2.imwrite(inspectdir + "/%s_img_s8_topbar_fs.png" % inspectFilename, topbar_img)
                 cv2.imwrite(inspectdir + "/%s_img_s8_bottombar_fs.png" % inspectFilename, bottombar_img)
             if bottombar_gray.mean() < 40 and topbar_gray.mean() < 40:
@@ -804,7 +804,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
                 image = image[int(height/14):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
                 height, width, _ = image.shape
                 aspect_ratio = height/width
-                if inspect==True:
+                if inspect:
                     cv2.imwrite(inspectdir + "/%s_img_s8_fs.png" % inspectFilename, image)
 
     # Partially crop Oneplus T5S top bar
@@ -817,7 +817,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
             image = image[int(height/18):int(height),int(0):int(width)] # y1:y2,x1:x2
             height, width, _ = image.shape
             aspect_ratio = height/width
-            if inspect==True:
+            if inspect:
                 cv2.imwrite(inspectdir + "/%s_img_oneplus.png" % inspectFilename, image)
 
     # Crop large bars
@@ -827,7 +827,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
         image = image[int(0):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
         height, width, _ = image.shape
         aspect_ratio = height/width
-        if inspect==True:
+        if inspect:
             cv2.imwrite(inspectdir + "/%s_img_largebar.png" % inspectFilename, image)
 
     # Crop small bars
@@ -837,7 +837,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
         image = image[int(0):int(height-height/17),int(0):int(width)] # y1:y2,x1:x2
         height, width, _ = image.shape
         aspect_ratio = height/width
-        if inspect==True:
+        if inspect:
             cv2.imwrite(inspectdir + "/%s_img_smallbar.png" % inspectFilename, image)
 
     logging.debug("supportmethods:parse_profile_image: Ratio: %.2f" % aspect_ratio)
@@ -858,12 +858,12 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     for i in validation_profiles:
         profiles[i]["similarity"] = ssim(profiles[i]["model"], profile_gray)
         logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (i,profiles[i]["similarity"]))
-        if profiles[i]["similarity"] > 0.7 and (chosen_profile == None or chosen_similarity < profiles[i]["similarity"]):
+        if profiles[i]["similarity"] > 0.7 and (chosen_profile is None or chosen_similarity < profiles[i]["similarity"]):
             chosen_profile = i
             chosen_similarity = profiles[i]["similarity"]
             if profiles[i]["similarity"] > 0.9:
                 break
-    if inspect==True:
+    if inspect:
         cv2.imwrite(inspectdir + "/%s_profile.png" % inspectFilename, profile_gray)
     logging.debug("supportmethods:parse_profile_image: Chosen profile: %s" % chosen_profile)
 
@@ -888,9 +888,9 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
         values[color] = output.mean()
         logging.debug("supportmethods:parse_profile_image: Mean value for color %s: %s" %(color,values[color]))
 
-        if chosen_color == None or values[color] > values[chosen_color]:
+        if chosen_color is None or values[color] > values[chosen_color]:
             chosen_color = color
-    if inspect==True:
+    if inspect:
         cv2.imwrite(inspectdir + "/%s_team.png" % inspectFilename, team1_img)
     logging.debug("supportmethods:parse_profile_image: Chosen color: %s" % chosen_color)
 
@@ -925,7 +925,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     # Do the OCR
     cv2.imwrite(tmpfilename, nick1_gray)
     text = pytesseract.image_to_string(Image.open(tmpfilename))
-    if inspect==True:
+    if inspect:
         print("Originally recognized text: %s" % text)
     trainer_name = re.sub(r'\n+.*$','',text)
     trainer_name = trainer_name.replace(" ","").replace("|","l").replace("ﬁ","ri").replace("ﬂ","ri")
@@ -933,7 +933,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     if pokemon_name == "":
         # Alternative pokemon name parsing
         pokemon_name = re.sub(r'^.*\n+(et|&|y|e)[ ]*','',text)
-    if inspect==True:
+    if inspect:
         cv2.imwrite(inspectdir + "/%s_names_img.png" % inspectFilename, nick1_img)
         cv2.imwrite(inspectdir + "/%s_names_gray.png" % inspectFilename, nick1_gray)
     logging.debug("supportmethods:parse_profile_image: Trainer name: %s" % trainer_name)
@@ -964,7 +964,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
             level = None
     except:
         level = None
-    if inspect==True:
+    if inspect:
         cv2.imwrite(inspectdir + "/%s_level_img.png" % inspectFilename, level1_img)
         cv2.imwrite(inspectdir + "/%s_level_gray.png" % inspectFilename, level1_gray)
 
@@ -983,12 +983,12 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     # Test extracted pokemon against possible pokemons
     chosen_pokemon = None
     chosen_similarity = 0.0
-    if desired_pokemon != None:
+    if desired_pokemon is not None:
         for pokemon_model in pokemon["models"]:
             pokemon["similarity"] = ssim(pokemon_model, pokemon_gray)
             logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (desired_pokemon,pokemon["similarity"]))
             if pokemon["similarity"] > 0.7 and \
-               (chosen_pokemon == None or chosen_similarity < pokemon["similarity"]):
+               (chosen_pokemon is None or chosen_similarity < pokemon["similarity"]):
                chosen_pokemon = desired_pokemon
                chosen_similarity = pokemon["similarity"]
                if pokemon["similarity"] > 0.9:
@@ -996,7 +996,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     else:
         chosen_pokemon = None
 
-    if inspect==True:
+    if inspect:
         cv2.imwrite(inspectdir + "/%s_pokemon_img.png" % inspectFilename, pokemon_img)
         cv2.imwrite(inspectdir + "/%s_pokemon_gray.png" % inspectFilename, pokemon_gray)
     logging.debug("supportmethods:parse_profile_image: Chosen Pokemon: %s" % chosen_pokemon)
