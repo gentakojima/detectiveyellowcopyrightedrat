@@ -874,12 +874,13 @@ def stats(bot, update, args = None):
         else:
             lastmonth_start = lastmonth_start - timedelta(days=28) # FIXME leap year
         lastmonth_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().day)
+        logging.debug("Ranking from %s to %s" % (lastmonth_start, lastmonth_end))
         medallas = ["🥇","🥈","🥉"]
         if show_month:
             # Last month stats
             groupstats_lastmonth = getGroupStats(chat_id, lastmonth_start, lastmonth_end)
             months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
-            month_text = "%s" % months[lastmonth_start.month-1 if lastmonth_start.month>1 else 12]
+            month_text = "%s" % months[lastmonth_start.month-1]
             # Prepare output
             output = "TOP 10 de participación en incursiones <b>mes de %s</b>" % month_text
             position = 0
