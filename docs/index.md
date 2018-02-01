@@ -113,9 +113,9 @@ Si necesitas ayuda que no se encuentre en este manual, puedes preguntar en [@det
 
 El bot se puede añadir a grupos y a canales, pero funciona de manera ligeramente distinta en ambos casos, en parte por el propio funcionamiento de Telegram.
 
-En **grupos** el bot ya se puede utilizar tan pronto como saluda al grupo. Conviene configurarlo, no obstante. Ten cuidado porque, si una vez añadas el bot conviertes el grupo a supergrupo, tendrás que volver a configurarlo. Un supergrupo es la mejor opción en la mayoría de los casos.
+En **grupos** el bot ya se puede utilizar tan pronto entra al grupo y envía un saludo. Conviene configurarlo, no obstante. Ten cuidado porque, si una vez añadas el bot conviertes el grupo a supergrupo, tendrás que volver a configurarlo. Un supergrupo es la mejor opción en la mayoría de los casos.
 
-En **canales** el bot necesita configurarse con `/settings` antes de poder utilizarse. También funciona algo más lento y hay algunas diferencias más. En un canal, no mostrará el creador de la incursión porque la incursión siempre la crea el canal, no un usuario. Además, algunas de las opciones no tienen sentido para canales. Usar un canal es una opción sencilla si se quiere integrar con otros bots, ya que un bot no puede leer el mensaje de otro bot en un grupo.
+En **canales** el bot no saluda al entrar y necesita configurarse con `/settings` antes de poder utilizarse. También funciona algo más lento y hay algunas diferencias más. En un canal, no mostrará el creador de la incursión porque la incursión siempre la crea el canal, no un usuario. Además, algunas de las opciones no tienen sentido para canales. Usar un canal es una opción sencilla si se quiere integrar con otros bots, ya que un bot no puede leer el mensaje de otro bot en un grupo.
 
 ### Añadir el bot a un grupo o canal ###
 
@@ -125,9 +125,11 @@ Para **añadir el bot a un grupo** tienes tres alternativas:
 
 2. Pulsa en [este enlace](https://telegram.me/detectivepikachubot?startgroup=true) en un dispositivo donde tengas Telegram instalado.
 
-3. Puedes intentar añadirlo como un contacto más desde el grupo, pero a veces no aparece al buscar.
+3. Puedes intentar añadirlo como un contacto más desde el grupo con su alias `@detectivepikachubot`, pero en versiones recientes de Telegram hay problemas usando este método.
 
-Para **añadir el bot a un canal** las opciones son más limitadas. Tienes que ir a la gestión de administradores y añadirlo directamente como administrador, buscándolo como un contacto más. A veces no aparece en la búsqueda. En ese caso, te aconsejamos que lo intente otra persona desde otro dispositivo.
+Para **añadir el bot a un canal** las opciones son más limitadas. Tienes que ir a la gestión de administradores y **añadirlo directamente como administrador**, buscándolo como un contacto más con su alias `@detectivepikachubot`.
+
+Con versiones recientes de Telegram no se pueden añadir bots de esta forma. Si es tu caso, descarga la beta para Android desde [el canal Beta de Telegram](http://t.me/tgrambeta) buscando el archivo `tgrambeta.apk` más reciente. Telegram Beta se instala como una aplicación aparte y, una vez añadas el bot, puedes desinstalarla.
 
 ### Configuración ###
 
@@ -169,7 +171,7 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 1. **Botón de «Llego tarde»**. Si está activada, aparecerá un nuevo botón en las incursiones para que los entrenadores puedan avisar si van a llegar tarde. Opción desactivada por defecto.
 
-2. **Botones de «¡Lo tengo!»**. Si está activada, aparecerán unos botones que permiten mostrar si has capturado o no el Pokémon de la incursión. Los botones solo aparecen a partir de la hora de inicio de la incursión y durante las siguientes tres horas. Opción desactivada por defecto.
+2. **Botones de «¡Lo tengo!»**. Si está activada, aparecerán unos botones que permiten mostrar si has capturado o no el Pokémon de la incursión. Los botones solo aparecen a partir de la hora de inicio de la incursión y durante las siguientes seis horas. Opción desactivada por defecto.
 
 3. **Botón «+1»**. Si está activada, aparecerá un botón que permite indicar que vas con acompañantes a la incursión. Se puede configurar un máximo de 1, 2, 3, 5 y 10 acompañantes. Opción activada por defecto y configurada con 5 acompañantes como máximo.
 
