@@ -258,7 +258,7 @@ def setspreadsheet(bot, update, args=None):
     group["spreadsheet"] = spreadsheet_id
     group["alias"] = group_alias
     saveGroup(group)
-    bot.sendMessage(chat_id=chat_id, text="👌 Establecido documento con identificador %s.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos." % spreadsheet_id, parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.sendMessage(chat_id=chat_id, text="👌 Establecido hoja de cálculo con identificador `%s`.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos." % ensure_escaped(spreadsheet_id), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def refresh(bot, update, args=None):
@@ -295,11 +295,14 @@ def refresh(bot, update, args=None):
     f = StringIO(response.content.decode('utf-8'))
     csvreader = csv.reader(f, delimiter=',', quotechar='"')
     counter = 0
+    incomplete_rows = []
     for row in csvreader:
       if counter > 3000:
           bot.sendMessage(chat_id=chat_id, text="❌ ¡No se permiten más de 3000 gimnasios por grupo!")
           return
-      if len(row) < 4:
+      if counter == 0 and len(row) == 0:
+          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han encontrado datos! ¿La hoja de cálculo es pública?")
+      elif len(row) < 4:
           rownumber = counter + 1
           bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! La fila %s no tiene las 4 columnas requeridas." % rownumber)
           return
@@ -314,8 +317,10 @@ def refresh(bot, update, args=None):
         return
       for i,r in enumerate(names):
         names[i] = names[i].strip()
-        if len(names[i]) < 3:
+        if len(names[i]) < 2:
           del names[i]
+      if len(names)==0:
+        incomplete_rows.append(counter)
       if len(row) > 4:
           tags = row[4].split(",")
           for i,r in enumerate(tags):
@@ -332,7 +337,10 @@ def refresh(bot, update, args=None):
       removedalerts = getRemovedAlerts(chat_id, places)
       if savePlaces(chat_id, places):
           places = getPlaces(grupo["id"])
-          bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
+          if len(incomplete_rows) > 0:
+              bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!\n⚠️ %i gimnasios no tienen palabras clave. Recuerda que son obligatorias para que puedan ser encontrados." % (len(places), len(incomplete_rows)))
+          else:
+              bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
           # Warn users with removed alerts due to deleted/replaced gyms
           if removedalerts is not None and len(removedalerts)>0:
               for ra in removedalerts:
