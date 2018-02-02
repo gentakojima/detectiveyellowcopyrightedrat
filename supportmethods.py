@@ -166,6 +166,10 @@ def format_gym_emojis(tags):
             tags_emojis = tags_emojis + "🌷"
         if unidecode(t).lower() == "parque":
             tags_emojis = tags_emojis + "🌳"
+        if unidecode(t).lower() == "juegos":
+            tags_emojis = tags_emojis + "⚽️"
+        if unidecode(t).lower() in ["hierba","campo"]:
+            tags_emojis = tags_emojis + "🌱"
         if unidecode(t).lower() == "patrocinado":
             tags_emojis = tags_emojis + "💵"
         if unidecode(t).lower() == "ex":
