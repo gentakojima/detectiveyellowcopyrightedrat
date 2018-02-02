@@ -1817,7 +1817,7 @@ def raidbutton(bot, update):
 
   if data == "voy":
       result = raidVoy(chat_id, message_id, user_id)
-      if result:
+      if result is True:
           if group["plusmax"]>0:
               bot.answerCallbackQuery(text="¡Te has apuntado! Si vas con más gente, pulsa +1", callback_query_id=update.callback_query.id)
           else:
@@ -1847,7 +1847,7 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡No has podido apuntarte con más gente! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   elif data == "novoy":
       result = raidNovoy(chat_id, message_id, user_id)
-      if result:
+      if result is True:
           bot.answerCallbackQuery(text="Te has desapuntado de la incursión", callback_query_id=update.callback_query.id)
           update_text = True
       elif result == "old_raid":
@@ -1860,7 +1860,7 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡No has podido desapuntarte! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   elif data == "estoy":
       result = raidEstoy(chat_id, message_id, user_id)
-      if result:
+      if result is True:
           bot.answerCallbackQuery(text="Has marcardo que has llegado a la incursión", callback_query_id=update.callback_query.id)
           update_text = True
       elif result == "no_changes":
@@ -1873,7 +1873,7 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡No has podido marcar como llegado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   elif data == "llegotarde":
       result = raidLlegotarde(chat_id, message_id, user_id)
-      if result:
+      if result is True:
           bot.answerCallbackQuery(text="Has marcardo que llegarás tarde a la incursión", callback_query_id=update.callback_query.id)
           update_text = True
       elif result == "no_changes":
@@ -1886,7 +1886,7 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡No has podido marcar como que llegas tarde! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   elif data == "lotengo":
       result = raidLotengo(chat_id, message_id, user_id)
-      if result:
+      if result is True:
           bot.answerCallbackQuery(text="Has marcado que lo has capturado, ¡enhorabuena!", callback_query_id=update.callback_query.id)
           update_text = True
       elif result == "no_changes":
@@ -1903,7 +1903,7 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="¡No has podido marcar que lo has capturado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
   elif data == "escapou":
       result = raidEscapou(chat_id, message_id, user_id)
-      if result:
+      if result is True:
           bot.answerCallbackQuery(text="Has marcado que ha escapado, ¡lo siento!", callback_query_id=update.callback_query.id)
           update_text = True
       elif result == "no_changes":
