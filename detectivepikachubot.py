@@ -1963,7 +1963,7 @@ def raidbutton(bot, update):
 
   settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder"}
 
-  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids"}
+  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids"}
 
   for k in settings:
       if data==k:
@@ -2010,6 +2010,24 @@ def raidbutton(bot, update):
               group["plusmax"] = 10
           else:
               group["plusmax"] = 0
+          saveGroup(group)
+          update_settings_message(chat_id, bot, settings_categories[data])
+
+  if data=="settings_snail":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          group = getGroup(chat_id)
+          if group["snail"] == 0:
+              group["snail"] = 1
+          elif group["snail"] == 1:
+              group["snail"] = 3
+          elif group["snail"] == 3:
+              group["snail"] = 5
+          elif group["snail"] == 5:
+              group["snail"] = 10
+          else:
+              group["snail"] = 0
           saveGroup(group)
           update_settings_message(chat_id, bot, settings_categories[data])
 

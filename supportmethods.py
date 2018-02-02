@@ -255,10 +255,13 @@ def format_message(raid):
                 estoy_text = "❌ "
             else:
                 estoy_text = "▪️ "
-            user_addedtime = user["addedtime"].replace(tzinfo=timezone(group["timezone"]))
-            raid_starttime = raid["timeraid"].replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes=diff_hours*60) - timedelta(minutes=1)
-            if user_addedtime > raid_starttime:
-                lateadded_text = "🐌"
+            if group["snail"] > 0:
+                user_addedtime = user["addedtime"].replace(tzinfo=timezone(group["timezone"]))
+                raid_starttime = raid["timeraid"].replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes=diff_hours*60) - timedelta(minutes=group["snail"])
+                if user_addedtime > raid_starttime:
+                    lateadded_text = "🐌"
+                else:
+                    lateadded_text = ""
             else:
                 lateadded_text = ""
             if user["lotengo"] == 0:
@@ -510,6 +513,16 @@ def get_settings_keyboard(chat_id, keyboard="main"):
         plusmax_text = "✅ Botón «+1» (máx. 10 acompañantes)"
     else:
         plusmax_text = "▪️ Botón +1"
+    if group["snail"] == 1:
+        snail_text = "✅ Marcar apuntados tarde (1 minuto)"
+    elif group["snail"] == 3:
+        snail_text = "✅ Marcar apuntados tarde (3 minutos)"
+    elif group["snail"] == 5:
+        snail_text = "✅ Marcar apuntados tarde (5 minutos)"
+    elif group["snail"] == 10:
+        snail_text = "✅ Marcar apuntados tarde (10 minutos)"
+    else:
+        snail_text = "▪️ Marcar apuntados tarde"
     if group["refloatauto"] == 5:
         refloatauto_text = "✅ Reflotar automático (5 minutos)"
     elif group["refloatauto"] == 10:
@@ -532,7 +545,7 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     elif keyboard == "raidbehaviour":
         settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
     elif keyboard == "raids":
-        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
 
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup

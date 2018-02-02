@@ -48,6 +48,7 @@ CREATE TABLE `grupos` (
   `timeformat` TINYINT NOT NULL DEFAULT '0',
   `icontheme` TINYINT NOT NULL DEFAULT '0',
   `listorder` TINYINT NOT NULL DEFAULT '0',
+  `snail` TINYINT NOT NULL DEFAULT '1',
   `validationrequired` TINYINT NOT NULL DEFAULT '0',
   `plusmax` TINYINT NOT NULL DEFAULT '5',
   `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid',
