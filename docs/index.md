@@ -81,7 +81,7 @@ Ten en cuenta que los comandos `/borrar` y `/reflotar` por defecto solo están a
 
 ### Apuntarse a una incursión ###
 
-Una vez creada la incursión, puedes apuntarse pulsando en el botón **Voy**. Si te apuntas en el **último minuto** antes de la hora fijada, o incluso después, aparecerás con un icono de un caracol 🐌 en el listado.
+Una vez creada la incursión, puedes apuntarse pulsando en el botón **Voy**. Si te apuntas unos pocos minutos antes de la hora fijada, o incluso después, podrías aparecer con un icono de un caracol 🐌 en el listado, dependiendo de cómo esté configurado el grupo.
 
 Si vas con acompañantes, puedes pulsar el botón **+1** por cada acompañante adicional. Si te has pasado, pulsa en **Voy** para poner esta cuenta a cero y volver a empezar. Ten en cuenta que los administradores de los grupos pueden limitar el número de acompañantes permitidos o deshabilitar completamente esta opción.
 
@@ -89,7 +89,7 @@ Cuando estés en el lugar de la incursión, puedes pulsar el botón **Estoy ahí
 
 Si te has apuntado pero no vas a ir, pulsa en **No voy**. Si han pasado más de cinco minutos desde que te apuntaste, permanecerás en la lista con una ❌ para que la gente sepa que te has desapuntado.
 
-Una vez llegue la hora de la incursión y hasta tres horas más tarde, puedes informar si has capturado al Pokémon de la incursión pulsando en **Lo tengo** o **Ha escapado**. Ten en cuenta que estos botones no están activados por defecto y los administradores de los grupos pueden decidir no habilitarlos.
+Una vez llegue la hora de la incursión y hasta seis horas más tarde, puedes informar si has capturado al Pokémon de la incursión pulsando en **Lo tengo** o **Ha escapado**. Ten en cuenta que estos botones no están activados por defecto y los administradores de los grupos pueden decidir no habilitarlos.
 
 Para poder apuntarse a una incursión es **necesario tener un alias** definido en Telegram. Además, algunos grupos exigen **estar validado** en el bot. Si no puedes apuntarte por alguno de estos motivos, el bot te informará.
 
@@ -167,6 +167,8 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 4. **Agrupar apuntados por nivel/equipo**. En lugar de mostrar los apuntados por orden temporal, los agrupa por equipo y por nivel. Opción desactivada por defecto.
 
+5. **Marcar apuntados tarde**. Marca en el listado los entrenadores que se hayan apuntado tarde con un 🐌. Se puede configurar para 1, 3, 5 o 10 minutos antes de la hora fijada de la incursión. Opción activada por defecto con 1 minuto.
+
 #### Funcionamiento de incursiones ####
 
 1. **Botón de «Llego tarde»**. Si está activada, aparecerá un nuevo botón en las incursiones para que los entrenadores puedan avisar si van a llegar tarde. Opción desactivada por defecto.
@@ -239,10 +241,14 @@ Si uno de los gimnasios apenas se utiliza porque está muy lejos o no suelen sal
 
 Las etiquetas sirven para marcar los gimnasios con determinados emojis, que sirven para identificarlos mejor como potenciales receptores de una incursión EX. Las etiquetas se ponen en la quinta columna como las palabras clave, separadas por comas. Las soportadas son las siguientes:
 
-* parque - El gimnasio se encuentra dentro de un parque en OpenStreetMap (🌳).
-* jardín (se puede poner con o sin tilde) - El gimnasio se encuentra dentro de un jardín en OpenStreetMap (🌷).
-* patrocinado - Es un gimnasio patrocinado (💵).
-* ex - Ha tenido incursiones EX en el pasado fuera del periodo de pruebas (🌟).
+* `parque` - El gimnasio se encuentra dentro de un parque (🌳).
+* `jardín` (se puede poner con o sin tilde) - El gimnasio se encuentra dentro de un jardín (🌷).
+* `juegos` - El gimnasio se encuentra dentro de un parque de juegos (⚽️).
+* `hierba` o `campo` - El gimnasio se encuentra en un campo o terreno con hierba (🌱).
+* `patrocinado` - Es un gimnasio patrocinado (💵).
+* `ex` - Ha tenido incursiones EX en el pasado fuera del periodo de pruebas (🌟).
+
+Para saber si un gimnasio está realmente considerado como potencial receptor de una incursión EX, puedes utilizar [guías como esta](https://www.reddit.com/r/TheSilphRoad/comments/7pq1cx/how_i_created_a_map_of_potential_exraids_and_how/). Ten en cuenta que el criterio no está completamente definido y puede cambiar con el tiempo.
 
 ### Modo niñero ###
 
