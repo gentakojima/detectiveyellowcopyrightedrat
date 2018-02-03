@@ -1232,7 +1232,7 @@ def cancelar(bot, update, args=None):
     if raid is not None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             response = cancelRaid(raid["id"], force=is_admin(raid["grupo_id"], user_id, bot))
-            if response:
+            if response is True:
                 update_message(raid["grupo_id"], raid["message"], None, bot)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha cancelado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
@@ -1277,7 +1277,7 @@ def descancelar(bot, update, args=None):
     if raid is not None:
         if is_admin(raid["grupo_id"], user_id, bot):
             response = uncancelRaid(raid["id"])
-            if response:
+            if response is True:
                 raid = getRaid(raid["id"])
                 reply_markup = get_keyboard(raid)
                 update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
@@ -1286,7 +1286,7 @@ def descancelar(bot, update, args=None):
                 warn_people("descancelar", raid, user_username, user_id, bot)
             elif response == "not_cancelled":
                 user_id = chat_id if user_id is None else user_id
-                bot.sendMessage(chat_id=user_id, text="❌ No se puede descancelar la incursión `%s` porque ya no sido cancelada previamente." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede descancelar la incursión `%s` porque no ha sido cancelada previamente." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
             elif response == "already_deleted":
                 user_id = chat_id if user_id is None else user_id
                 bot.sendMessage(chat_id=user_id, text="❌ No se puede descancelar la incursión `%s` porque ha sido borrada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
@@ -1318,8 +1318,11 @@ def borrar(bot, update, args=None):
     if raid is not None:
         if chat_type == "channel" or is_admin(raid["grupo_id"], user_id, bot) or (group["candelete"] == 1 and raid["usuario_id"] == user_id):
             response = deleteRaid(raid["id"])
-            if response:
-                bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+            if response is True:
+                try:
+                    bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
+                except:
+                    pass
                 warn_people("borrar", raid, user_username, user_id, bot)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha borrado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
