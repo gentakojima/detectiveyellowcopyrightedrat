@@ -416,27 +416,27 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
             user_text = "@%s" % user_username if user_username is not None else "Se"
             if warntype == "cancelar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "❌ %s ha <b>cancelado</b> la %s de %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+                text = "❌ %s ha <b>cancelado</b> la %s %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "descancelar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha <b>descancelado</b> la %s de %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+                text = "⚠️ %s ha <b>descancelado</b> la %s %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "borrar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "🚫 %s ha <b>borrado</b> la incursión de %s a las %s en %s" % (user_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+                text = "🚫 %s ha <b>borrado</b> la incursión %s a las %s en %s" % (user_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarhora":
                 text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
                 if text_day != "":
                     text_day = " " + text_day
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha cambiado la hora de la %s de %s en %s para las <b>%s</b>%s" % (user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeraid"]), text_day)
+                text = "⚠️ %s ha cambiado la hora de la %s %s en %s para las <b>%s</b>%s" % (user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeraid"]), text_day)
             elif warntype == "cambiarhorafin":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha cambiado la hora a la que se termina la %s de %s en %s a las <b>%s</b> (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
+                text = "⚠️ %s ha cambiado la hora a la que se termina la %s %s en %s a las <b>%s</b> (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
             elif warntype == "borrarhorafin":
-                text = "⚠️ %s ha borrado la hora a la que se termina la %s de %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]))
+                text = "⚠️ %s ha borrado la hora a la que se termina la %s %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]))
             elif warntype == "cambiargimnasio":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha cambiado el gimnasio de la %s de %s para las %s a <b>%s</b>" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+                text = "⚠️ %s ha cambiado el gimnasio de la %s %s para las %s a <b>%s</b>" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarpokemon":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
                 text = "⚠️ %s ha cambiado la %s para las %s en %s a incursión %s" % (user_text, incursion_text, extract_time(raid["timeraid"]), raid["gimnasio_text"], text_pokemon)
