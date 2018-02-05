@@ -983,6 +983,7 @@ def gym(bot, update, args=None):
     else:
         sent_message = bot.sendMessage(chat_id=chat_id, text="Lo siento, pero no he encontrado el gimnasio _%s_.\n\n_(Este mensaje se borrará en unos segundos)_" % gym_text, parse_mode=telegram.ParseMode.MARKDOWN)
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+
 @run_async
 def raid(bot, update, args=None):
   logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
@@ -1806,14 +1807,14 @@ def raidbutton(bot, update):
 
   logging.debug("detectivepikachubot:raidbutton:%s: %s %s" % (data, bot, update))
 
-  if (data == "voy" or data == "plus1" or data == "novoy" or data == "estoy" or data == "lotengo" or data == "escapou" or data == "llegotarde") \
+  if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
     and (thisuser["username"] is None or thisuser["username"] == "None"):
     bot.answerCallbackQuery(text="No puedes unirte a una incursión si no tienes definido un alias.\nEn Telegram, ve a 'Ajustes' y selecciona la opción 'Alias'.", show_alert="true", callback_query_id=update.callback_query.id)
     return
 
   group = getGroup(chat_id)
 
-  if (data == "voy" or data == "plus1" or data == "novoy" or data == "estoy" or data == "lotengo" or data == "escapou" or data == "llegotarde") \
+  if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
     and (group["validationrequired"] == 1 and thisuser["validation"] == "none"):
     bot.answerCallbackQuery(text="No puedes unirte a una incursión en este grupo si no te has validado antes.\nAbre un privado con @detectivepikachubot y escribe '/help' para saber cómo puedes hacerlo.", show_alert="true", callback_query_id=update.callback_query.id)
     return
@@ -1834,8 +1835,9 @@ def raidbutton(bot, update):
           bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
       else:
           bot.answerCallbackQuery(text="¡No has podido apuntarte! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
-  elif data == "plus1":
-      result = raidPlus1(chat_id, message_id, user_id)
+  elif data in ["plus1", "plus1red", "plus1yellow", "plus1blue"]:
+      plus1type = data.replace("plus1","")
+      result = raidPlus1(chat_id, message_id, user_id, plus1type = plus1type)
       if result == "old_raid":
           bot.answerCallbackQuery(text="Ya no te puedes apuntar a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
       elif result == "not_raid":
@@ -1964,9 +1966,9 @@ def raidbutton(bot, update):
       else:
           delete_message(chat_id, message_id, bot)
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder"}
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder", "settings_plusdisaggregated":"plusdisaggregated", "settings_plusdisaggregatedinline":"plusdisaggregatedinline"}
 
-  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids"}
+  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids"}
 
   for k in settings:
       if data==k:
@@ -1976,12 +1978,23 @@ def raidbutton(bot, update):
               group = getGroup(chat_id)
               if group[settings[k]] == 1:
                   group[settings[k]] = 0
-                  if k == "settings_locations":
+                  if k == "settings_locations" and group["alerts"] == 1:
                       group["alerts"] = 0
+                      bot.answerCallbackQuery(text="Al desactivar las ubicaciones, se han desactivado también automáticamente las alertas.", callback_query_id=update.callback_query.id, show_alert="true")
+                  elif k == "settings_plusdisaggregated" and group["plusdisaggregatedinline"] == 1:
+                      group["plusdisaggregatedinline"] = 0
+                      bot.answerCallbackQuery(text="Al desactivar los botones +1 por equipo, se ha desactivado también automáticamente la visualización de +1 disgregados por línea en las opciones de vista.", callback_query_id=update.callback_query.id, show_alert="true")
               else:
                   group[settings[k]] = 1
-                  if k == "settings_alertas":
+                  if k == "settings_alertas" and group["locations"] == 0:
                       group["locations"] = 1
+                      bot.answerCallbackQuery(text="Al activar las alertas, se han activado también automáticamente las ubicaciones.", callback_query_id=update.callback_query.id, show_alert="true")
+                  elif k == "settings_plusdisaggregatedinline" and group["plusdisaggregated"] == 0:
+                      group["plusdisaggregated"] = 1
+                      bot.answerCallbackQuery(text="Al activar la visualización de +1 disagregados en línea, se han activado también automáticamente los botones +1 por equipo.", callback_query_id=update.callback_query.id, show_alert="true")
+                  elif k == "settings_plusdisaggregated" and group["plusmax"] == 0:
+                      group["plusmax"] = 5
+                      bot.answerCallbackQuery(text="Al activar los botones +1 por cada equipo, se ha activado también automáticamente el botón «+1» con un máximo por defecto de 5 acompañantes.", callback_query_id=update.callback_query.id, show_alert="true")
               saveGroup(group)
               update_settings_message(chat_id, bot, settings_categories[k])
 
@@ -2013,6 +2026,10 @@ def raidbutton(bot, update):
               group["plusmax"] = 10
           else:
               group["plusmax"] = 0
+              if group["plusdisaggregatedinline"] == 1 or group["plusdisaggregated"] == 1:
+                  group["plusdisaggregatedinline"] = 0
+                  group["plusdisaggregated"] = 0
+                  bot.answerCallbackQuery(text="Al desactivar el botón +1, se han desactivado también los botones +1 por equipo y la visualización de +1 disgregados por línea automáticamente.", callback_query_id=update.callback_query.id, show_alert="true")
           saveGroup(group)
           update_settings_message(chat_id, bot, settings_categories[data])
 

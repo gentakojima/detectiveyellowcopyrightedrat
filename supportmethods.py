@@ -100,8 +100,11 @@ def count_people(gente):
             if user["novoy"] > 0:
                 continue
             count = count + 1
-            if user["plus"] is not None and user["plus"] > 0:
-                count = count + user["plus"]
+            if (user["plus"] is not None and user["plus"]>0) or\
+               (user["plusb"] is not None and user["plusb"]>0) or\
+               (user["plusy"] is not None and user["plusy"]>0) or\
+               (user["plusr"] is not None and user["plusr"]>0):
+                count = count + user["plus"] + user["plusr"] + user["plusy"] + user["plusb"]
     return count
 
 def count_people_disaggregated(gente):
@@ -118,6 +121,15 @@ def count_people_disaggregated(gente):
             if user["plus"] is not None and user["plus"] > 0:
                 count = count + user["plus"]
                 numotros = numotros + user["plus"]
+            if user["plusr"] is not None and user["plusr"] > 0:
+                count = count + user["plusr"]
+                numrojos = numrojos + user["plusr"]
+            if user["plusb"] is not None and user["plusb"] > 0:
+                count = count + user["plusb"]
+                numazules = numazules + user["plusb"]
+            if user["plusy"] is not None and user["plusy"] > 0:
+                count = count + user["plusy"]
+                numamarillos = numamarillos + user["plusy"]
             if user["team"] == "Rojo":
                 numrojos = numrojos + 1
             elif user["team"] == "Azul":
@@ -191,6 +203,7 @@ def fetch_gym_address(gym):
 
 def format_message(raid):
     logging.debug("supportmethods:format_message: %s" % (raid))
+
     creador = getCreadorRaid(raid["id"])
     group = getGroup(raid["grupo_id"])
     icons = iconthemes[group["icontheme"]]
@@ -240,17 +253,57 @@ def format_message(raid):
     else:
         if group["disaggregated"] == 1:
             (numazules, numrojos, numamarillos, numotros, numgente) = count_people_disaggregated(gente)
-            text = text + "%s%s · %s%s · %s%s · ❓%s · 👩‍👩‍👧‍👧%s" % (icons["Amarillo"], numamarillos, icons["Azul"], numazules, icons["Rojo"], numrojos, numotros, numgente)
+            if numotros > 0:
+                otros_text = "❓%s · " % numotros
+            else:
+                otros_text = ""
+            text = text + "%s%s · %s%s · %s%s · %s👩‍👩‍👧‍👧%s" % (icons["Amarillo"], numamarillos, icons["Azul"], numazules, icons["Rojo"], numrojos, otros_text, numgente)
         else:
             numgente = count_people(gente)
             text = text + "%s entrenadores apuntados:" % numgente
     if raid["status"] != "cancelled" and gente is not None:
         diff_hours = getGroupTimezoneOffsetFromServer(group["id"])
         for user in gente:
-            if user["plus"] is not None and user["plus"]>0:
-                plus_text = " +%i" % user["plus"]
-            else:
+            if group["plusdisaggregatedinline"] == 1:
                 plus_text = ""
+                if user["team"] == "Rojo":
+                    if user["plusr"] > 0:
+                        plus_text = plus_text + " +%i" % user["plusr"]
+                    if user["plusy"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Amarillo"],user["plusy"])
+                    if user["plusb"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Azul"],user["plusb"])
+                elif user["team"] == "Azul":
+                    if user["plusb"] > 0:
+                        plus_text = plus_text + " +%i" % user["plusb"]
+                    if user["plusy"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Amarillo"],user["plusy"])
+                    if user["plusr"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Rojo"],user["plusr"])
+                elif user["team"] == "Amarillo":
+                    if user["plusy"] > 0:
+                        plus_text = plus_text + " +%i" % user["plusy"]
+                    if user["plusb"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Azul"],user["plusb"])
+                    if user["plusr"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Rojo"],user["plusr"])
+                else:
+                    if user["plusy"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Amarillo"],user["plusy"])
+                    if user["plusb"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Azul"],user["plusb"])
+                    if user["plusr"] > 0:
+                        plus_text = plus_text + " %s+%i" % (icons["Rojo"],user["plusr"])
+                if user["plus"] > 0:
+                    plus_text = plus_text + " ❓+%i" % user["plus"]
+            else:
+                if (user["plus"] is not None and user["plus"]>0) or\
+                   (user["plusb"] is not None and user["plusb"]>0) or\
+                   (user["plusy"] is not None and user["plusy"]>0) or\
+                   (user["plusr"] is not None and user["plusr"]>0):
+                    plus_text = " +%i" % (user["plus"]+user["plusr"]+user["plusb"]+user["plusy"])
+                else:
+                    plus_text = ""
             if user["estoy"] is not None and user["estoy"]>0:
                 estoy_text = "✅ "
             elif user["tarde"] is not None and user["tarde"]>0:
@@ -461,10 +514,14 @@ def get_settings_keyboard(chat_id, keyboard="main"):
         disaggregated_text = "✅ Mostrar totales disgregados"
     else:
         disaggregated_text = "▪️ Mostrar totales disgregados"
-    if group["latebutton"] == 1:
-        latebutton_text = "✅ Botón de «Llego tarde»"
+    if group["plusdisaggregatedinline"] == 1:
+        plusdisaggregatedinline_text = "✅ Mostrar «+1» disgregados por línea"
     else:
-        latebutton_text = "▪️ Botón de «Llego tarde»"
+        plusdisaggregatedinline_text = "▪️ Mostrar «+1» disgregados por línea"
+    if group["latebutton"] == 1:
+        latebutton_text = "✅ Botón «Tardo»"
+    else:
+        latebutton_text = "▪️ Botón «Tardo»"
     if group["refloat"] == 1:
         refloat_text = "✅ Reflotar incursiones (comando /reflotar)"
     else:
@@ -474,9 +531,9 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     else:
         candelete_text = "▪️ Borrar incursiones (comando /borrar)"
     if group["gotitbuttons"] == 1:
-        gotitbuttons_text = "✅ Botones de «¡Lo tengo!»"
+        gotitbuttons_text = "✅ Botones «¡Lo tengo!»"
     else:
-        gotitbuttons_text = "▪️ Botones de «¡Lo tengo!»"
+        gotitbuttons_text = "▪️ Botones «¡Lo tengo!»"
     if group["locations"] == 1:
         locations_text = "✅ Ubicaciones"
     else:
@@ -517,6 +574,10 @@ def get_settings_keyboard(chat_id, keyboard="main"):
         plusmax_text = "✅ Botón «+1» (máx. 10 acompañantes)"
     else:
         plusmax_text = "▪️ Botón +1"
+    if group["plusdisaggregated"] == 1:
+        plusdisaggregated_text = "✅ Botón «+1» por cada equipo"
+    else:
+        plusdisaggregated_text = "▪️ Botón «+1» por cada equipo"
     if group["snail"] == 1:
         snail_text = "✅ Marcar apuntados tarde (1 minuto)"
     elif group["snail"] == 3:
@@ -547,31 +608,57 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     elif keyboard == "commands":
         settings_keyboard = [[InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand')], [InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar')], [InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
     elif keyboard == "raidbehaviour":
-        settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton(plusdisaggregated_text, callback_data='settings_plusdisaggregated')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
     elif keyboard == "raids":
-        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(plusdisaggregatedinline_text, callback_data='settings_plusdisaggregatedinline')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
 
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
 def get_keyboard(raid):
     logging.debug("supportmethods:get_keyboard")
+    global iconthemes
     group = getGroup(raid["grupo_id"])
     if raid["status"] == "started" or raid["status"] == "waiting":
-        keyboard_row1 = [InlineKeyboardButton("🙋 Voy", callback_data='voy')]
-        if group["plusmax"]>0:
-            keyboard_row1.append(InlineKeyboardButton("👭 +1", callback_data='plus1'))
-        keyboard_row1.append(InlineKeyboardButton("🙅 No voy", callback_data='novoy'))
-        keyboard_row2 = [InlineKeyboardButton("✅ Estoy ahí", callback_data='estoy')]
-        if group["latebutton"] == 1:
-            keyboard_row2.append(InlineKeyboardButton("🕒 Tardo", callback_data='llegotarde'))
-        if raid["gimnasio_id"] is not None:
-            keyboard_row2.append(InlineKeyboardButton("🌎 Ubicación", callback_data='ubicacion'))
-        keyboard = [keyboard_row1, keyboard_row2]
+        icons = iconthemes[group["icontheme"]]
+        button_voy = InlineKeyboardButton("🙋Voy", callback_data='voy')
+        button_novoy = InlineKeyboardButton("🙅No voy", callback_data='novoy')
+        button_estoy = InlineKeyboardButton("✅Estoy", callback_data='estoy')
+        button_plus = InlineKeyboardButton("👭+1", callback_data='plus1')
+        button_plusy = InlineKeyboardButton("%s+1" % icons["Amarillo"], callback_data='plus1yellow')
+        button_plusb = InlineKeyboardButton("%s+1" % icons["Azul"], callback_data='plus1blue')
+        button_plusr = InlineKeyboardButton("%s+1" % icons["Rojo"], callback_data='plus1red')
+        button_tardo = InlineKeyboardButton("🕒Tardo", callback_data='llegotarde')
+        button_location = InlineKeyboardButton("🌎Ubicación", callback_data='ubicacion')
+        button_loc = InlineKeyboardButton("🌎Ubi", callback_data='ubicacion')
+        if group["plusdisaggregated"] == 0:
+            keyboard_row1 = [button_voy]
+            if group["plusmax"] > 0:
+                keyboard_row1.append(button_plus)
+            keyboard_row1.append(button_novoy)
+            keyboard_row2 = [button_estoy]
+            if group["latebutton"] == 1:
+                keyboard_row2.append(button_tardo)
+            if raid["gimnasio_id"] is not None:
+                keyboard_row2.append(button_location)
+            keyboard = [keyboard_row1, keyboard_row2]
+        else:
+            keyboard_row1 = [button_voy]
+            if group["plusmax"] > 0:
+                keyboard_row1.append(button_plusy)
+                keyboard_row1.append(button_plusb)
+                keyboard_row1.append(button_plusr)
+            keyboard_row2 = [button_estoy]
+            if group["latebutton"] == 1:
+                keyboard_row2.append(button_tardo)
+            keyboard_row2.append(button_novoy)
+            if raid["gimnasio_id"] is not None:
+                keyboard_row2.append(button_loc)
+            keyboard = [keyboard_row1, keyboard_row2]
     else:
         keyboard = []
     if group is not None and group["gotitbuttons"] == 1 and (raid["status"] == "started" or raid["status"] == "ended"):
-        keyboard.append([InlineKeyboardButton("👍 ¡Lo tengo!", callback_data='lotengo'), InlineKeyboardButton("👎 ¡Ha escapado!", callback_data='escapou')])
+        keyboard.append([InlineKeyboardButton("👍¡Lo tengo!", callback_data='lotengo'), InlineKeyboardButton("👎¡Ha escapado!", callback_data='escapou')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 

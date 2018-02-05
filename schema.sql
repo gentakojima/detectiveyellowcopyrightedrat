@@ -51,6 +51,8 @@ CREATE TABLE `grupos` (
   `snail` TINYINT NOT NULL DEFAULT '1',
   `validationrequired` TINYINT NOT NULL DEFAULT '0',
   `plusmax` TINYINT NOT NULL DEFAULT '5',
+  `plusdisaggregated` TINYINT NOT NULL DEFAULT '0',
+  `plusdisaggregatedinline` TINYINT NOT NULL DEFAULT '0',
   `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid',
   `banned` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -107,6 +109,9 @@ CREATE TABLE `voy` (
   `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `novoy` TINYINT NOT NULL DEFAULT '0',
   `plus` int(11) NOT NULL DEFAULT '0',
+  `plusr` int(11) NOT NULL DEFAULT '0',
+  `plusb` int(11) NOT NULL DEFAULT '0',
+  `plusy` int(11) NOT NULL DEFAULT '0',
   `estoy` tinyint(4) NOT NULL DEFAULT '0',
   `tarde` tinyint(4) NOT NULL DEFAULT '0',
   `lotengo` tinyint(4) NULL DEFAULT NULL

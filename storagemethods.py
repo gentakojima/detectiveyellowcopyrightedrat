@@ -79,7 +79,7 @@ def saveGroup(group):
     for k in ["settings_message","spreadsheet","talkgroup","alias"]:
         if k not in group.keys():
             group[k] = None
-    for k in ["disaggregated","latebutton","refloat","gotitbuttons","gymcommand","babysitter","timeformat","listorder","icontheme","refloatauto","validationrequired"]:
+    for k in ["disaggregated","latebutton","refloat","gotitbuttons","gymcommand","babysitter","timeformat","listorder","icontheme","refloatauto","validationrequired","plusdisaggregated","plusdisaggregatedinline"]:
         if k not in group.keys():
             group[k] = 0
     for k in ["alerts","candelete","locations","raidcommand","snail"]:
@@ -90,8 +90,8 @@ def saveGroup(group):
 
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, alias, spreadsheet) VALUES (%s, %s, %s, %s) \
-        ON DUPLICATE KEY UPDATE title = %s, alias = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s, talkgroup = %s, timeformat = %s, listorder = %s, snail = %s, icontheme = %s, plusmax = %s, refloatauto = %s, validationrequired = %s;"
-        cursor.execute(sql, (group["id"], group["title"], group["alias"], group["spreadsheet"], group["title"], group["alias"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["babysitter"], group["timezone"], group["talkgroup"], group["timeformat"], group["listorder"], group["snail"], group["icontheme"], group["plusmax"], group["refloatauto"], group["validationrequired"]))
+        ON DUPLICATE KEY UPDATE title = %s, alias = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s, talkgroup = %s, timeformat = %s, listorder = %s, snail = %s, icontheme = %s, plusmax = %s, plusdisaggregated = %s, plusdisaggregatedinline = %s, refloatauto = %s, validationrequired = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["alias"], group["spreadsheet"], group["title"], group["alias"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["babysitter"], group["timezone"], group["talkgroup"], group["timeformat"], group["listorder"], group["snail"], group["icontheme"], group["plusmax"], group["plusdisaggregated"], group["plusdisaggregatedinline"], group["refloatauto"], group["validationrequired"]))
     db.commit()
     db.close()
 
@@ -100,7 +100,7 @@ def getGroup(group_id, reconnect=True):
     db = getDbConnection()
     logging.debug("storagemethods:getGroup: %s" % (group_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`title`,`alias`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timeformat`, `listorder`, `snail`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `refloatauto`, `validationrequired` FROM `grupos` WHERE `id`=%s"
+        sql = "SELECT `id`,`title`,`alias`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timeformat`, `listorder`, `snail`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `plusdisaggregated`, `plusdisaggregatedinline`, `refloatauto`, `validationrequired` FROM `grupos` WHERE `id`=%s"
         try:
             cursor.execute(sql, (group_id))
             result = cursor.fetchone()
@@ -118,7 +118,7 @@ def getGroupsByUser(user_id):
     db = getDbConnection()
     logging.debug("storagemethods:getGroupsByUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `grupos`.`id` as `id`, `title`, `alias`, `spreadsheet`, `testgroup`, `alerts`, `disaggregated`, `latebutton`, `refloat`, `candelete`, `gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timeformat`, `listorder`, `snail`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `refloatauto`, `validationrequired` FROM `grupos` \
+        sql = "SELECT `grupos`.`id` as `id`, `title`, `alias`, `spreadsheet`, `testgroup`, `alerts`, `disaggregated`, `latebutton`, `refloat`, `candelete`, `gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timeformat`, `listorder`, `snail`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `plusdisaggregated`, `plusdisaggregatedinline`, `refloatauto`, `validationrequired` FROM `grupos` \
         LEFT JOIN incursiones ON incursiones.grupo_id = grupos.id \
         RIGHT JOIN voy ON voy.incursion_id = incursiones.id \
         WHERE voy.usuario_id = %s \
@@ -628,7 +628,7 @@ def getRaidPeople(raid_id, order="addedtime"):
             ordering_text = "`usuarios`.`team` DESC, `voy`.`novoy` ASC, `usuarios`.`level` DESC, `voy`.`addedtime` ASC";
         else:
             ordering_text = "`voy`.`addedtime` ASC";
-        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `estoy`, `tarde`, `level`, `team`, `lotengo`, `novoy`, `voy`.`addedtime` AS `addedtime` FROM `incursiones` \
+        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `plusr`, `plusb`, `plusy`, `estoy`, `tarde`, `level`, `team`, `lotengo`, `novoy`, `voy`.`addedtime` AS `addedtime` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
         LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s \
         ORDER BY " + ordering_text
@@ -696,7 +696,7 @@ def raidVoy(grupo_id, message_id, user_id):
         if raid["status"] == "ended" or raid["status"] == "old":
             db.close()
             return "old_raid"
-        sql = "INSERT INTO voy (incursion_id, usuario_id) VALUES (%s, %s) ON DUPLICATE KEY UPDATE plus = 0, estoy = 0, tarde = 0, novoy = 0, lotengo = NULL"
+        sql = "INSERT INTO voy (incursion_id, usuario_id) VALUES (%s, %s) ON DUPLICATE KEY UPDATE plus = 0, plusr = 0, plusy = 0, plusb = 0, estoy = 0, tarde = 0, novoy = 0, lotengo = NULL"
         rows_affected = cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     db.close()
@@ -732,9 +732,17 @@ def raidNovoy(grupo_id, message_id, user_id):
     else:
         return "no_changes"
 
-def raidPlus1(grupo_id, message_id, user_id):
+def raidPlus1(grupo_id, message_id, user_id, plus1type = None):
     db = getDbConnection()
     logging.debug("storagemethods:raidPlus1: %s %s %s" % (grupo_id, message_id, user_id))
+    if plus1type is None or plus1type == "":
+        plusfield = "plus"
+    elif plus1type == "red":
+        plusfield = "plusr"
+    elif plus1type == "blue":
+        plusfield = "plusb"
+    elif plus1type == "yellow":
+        plusfield = "plusy"
     with db.cursor() as cursor:
         raid = getRaidbyMessage(grupo_id, message_id)
         if raid is None:
@@ -743,7 +751,7 @@ def raidPlus1(grupo_id, message_id, user_id):
         if raid["status"] == "ended" or raid["status"] == "old":
             db.close()
             return "old_raid"
-        sql = "SELECT `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
+        sql = "SELECT `plus` + `plusr` + `plusb` + `plusy` AS `plus` FROM `voy` WHERE `incursion_id`=%s AND `usuario_id`=%s"
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
         group = getGroup(grupo_id)
@@ -751,11 +759,11 @@ def raidPlus1(grupo_id, message_id, user_id):
             if result["plus"] >= group["plusmax"]:
                 db.close()
                 return "demasiados"
-            sql = "UPDATE voy SET plus=plus+1, novoy = 0 WHERE `incursion_id`=%s and usuario_id=%s;"
+            sql = "UPDATE voy SET " + plusfield + "=" + plusfield + "+1, novoy = 0 WHERE `incursion_id`=%s and usuario_id=%s;"
             cursor.execute(sql, (raid["id"], user_id))
         else:
             result = {"plus":0}
-            sql = "INSERT IGNORE INTO voy (incursion_id, usuario_id, plus) VALUES (%s, %s, 1)"
+            sql = "INSERT IGNORE INTO voy (incursion_id, usuario_id, " + plusfield + ") VALUES (%s, %s, 1)"
             cursor.execute(sql, (raid["id"], user_id))
     db.commit()
     db.close()
