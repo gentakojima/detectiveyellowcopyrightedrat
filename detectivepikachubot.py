@@ -1504,19 +1504,19 @@ def cambiargimnasio(bot, update, args=None):
         if chat_type == "channel" or raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["status"] == "old":
                 user_id = chat_id if user_id is None else user_id
-                bot.sendMessage(chat_id=chat_id, text="❌ No se puede editar la incursión `%s` porque ya ha terminado." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede editar la incursión `%s` porque ya ha terminado." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             if raid["status"] == "cancelled":
                 user_id = chat_id if user_id is None else user_id
-                bot.sendMessage(chat_id=chat_id, text="❌ No se puede editar la incursión `%s` porque ha sido cancelada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede editar la incursión `%s` porque ha sido cancelada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             if raid["status"] == "deleted":
                 user_id = chat_id if user_id is None else user_id
-                bot.sendMessage(chat_id=chat_id, text="❌ No se puede editar la incursión `%s` porque ha sido borrada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede editar la incursión `%s` porque ha sido borrada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             if new_gymtext == raid["gimnasio_text"]:
                 user_id = chat_id if user_id is None else user_id
-                bot.sendMessage(chat_id=chat_id, text="❌ La incursión `%s` ya está puesta en ese mismo gimnasio." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="❌ La incursión `%s` ya está puesta en ese mismo gimnasio." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
             else:
                 chosengym = None
                 if group["locations"] == 1:
@@ -1575,7 +1575,9 @@ def reflotartodas(bot, update, args=None):
         return
 
     raids = getActiveRaidsforGroup(chat_id)
+    logging.debug("detectivepikachubot:reflotartodas: Active raids: %s" % (raids))
     for raid in raids:
+        logging.debug("detectivepikachubot:reflotartodas: Reflotating raid %s" % (raid["id"]))
         if raid["id"] is not None and raid["status"] != "ended":
             try:
                 bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
