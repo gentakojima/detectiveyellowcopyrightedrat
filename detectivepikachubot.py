@@ -576,6 +576,8 @@ def channelCommands(bot, update):
 
     try:
         args = re.sub(r"^/[a-zA-Z0-9_]+", "", text).strip().split(" ")
+        if len(args) == 1 and args[0] == "":
+            args = []
     except:
         args = None
     m = re.match("/([a-zA-Z0-9_]+)", text)
@@ -1033,10 +1035,13 @@ def raid(bot, update, args=None):
 
   currgyms = getCurrentGyms(chat_id)
   allgyms = getPlaces(chat_id)
-  if len(args) == 0 and (len(currgyms) >= 6 or len(currgyms) == len(allgyms))\
+  if (len(args) == 0 or args == None) and (len(currgyms) >= 6 or len(currgyms) == len(allgyms))\
   and group["locations"] == 1:
       keyboard = get_pokemons_keyboard()
-      creating_text = format_text_creating(thisuser)
+      if chat_type != "channel":
+          creating_text = format_text_creating(thisuser)
+      else:
+          creating_text = format_text_creating(None)
       sent_message = bot.sendMessage(chat_id=chat_id, text="🤔 %s\n\nElige el <b>Pokémon</b> o el huevo del que quieres realizar la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y créala manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % creating_text, reply_markup=keyboard, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
       current_raid = {}
@@ -1947,7 +1952,7 @@ def raidbutton(bot, update):
   if re.match("^iraid_.+", data) != None:
     raid = getRaidbyMessage(chat_id, message_id)
 
-    if user_id != raid["usuario_id"]:
+    if (chat_type == "channel" and not is_admin(chat_id, user_id, bot)) or (chat_type != "channel" and user_id != raid["usuario_id"]):
         bot.answerCallbackQuery(text="Solo puede seleccionar las opciones de la incursión el usuario que la está creando.", callback_query_id=update.callback_query.id, show_alert="true")
         return
 

@@ -77,7 +77,7 @@ CREATE TABLE `incursiones` (
   `addedtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `timeraid` timestamp NULL DEFAULT NULL,
   `timeend` datetime DEFAULT NULL,
-  `status` enum('waiting','started','ended','cancelled','deleted','old') NOT NULL DEFAULT 'waiting'
+  `status` enum('creating','waiting','started','ended','cancelled','deleted','old') NOT NULL DEFAULT 'waiting'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

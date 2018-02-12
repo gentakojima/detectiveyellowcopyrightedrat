@@ -371,7 +371,7 @@ def format_text_day(timeraid, tzone, format="markdown"):
 
 def format_text_creating(creator):
     logging.debug("supportmethods:format_text_creating");
-    if creator["username"] is not None:
+    if creator is not None and creator["username"] is not None:
         if creator["trainername"] is not None:
             creating_text = "<a href='https://t.me/%s'>%s</a> está creando una incursión..." % (creator["username"], creator["trainername"])
         else:
