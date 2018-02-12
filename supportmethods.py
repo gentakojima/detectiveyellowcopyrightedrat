@@ -807,6 +807,10 @@ def get_keyboard(raid):
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
+def update_settings_message_timed(chat_id, sleep_time, bot):
+    time.sleep(sleep_time)
+    update_settings_message(chat_id, bot)
+
 def update_settings_message(chat_id, bot, keyboard = "main"):
     logging.debug("supportmethods:update_settings_message: %s %s" % (chat_id, keyboard))
     group = getGroup(chat_id)

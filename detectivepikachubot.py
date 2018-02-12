@@ -663,7 +663,7 @@ def settings(bot, update):
     message = bot.sendMessage(chat_id=chat_id, text="Cargando preferencias del grupo. Un momento...")
     group["settings_message"] = message.message_id
     saveGroup(group)
-    update_settings_message(chat_id, bot)
+    Thread(target=update_settings_message_timed, args=(chat_id, 1, bot)).start()
 
 @run_async
 def list(bot, update):
