@@ -674,7 +674,7 @@ def get_pokemons_keyboard():
     logging.debug("supportmethods:get_pokemons_keyboard")
     keyboard = []
     current_pokemons = getCurrentPokemons()
-    for i in range(0,12,3):
+    for i in range(0,min(12,len(current_pokemons)-2),3):
         keyboard.append([InlineKeyboardButton(current_pokemons[i]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i]["pokemon"]), InlineKeyboardButton(current_pokemons[i+1]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+1]["pokemon"]), InlineKeyboardButton(current_pokemons[i+2]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+2]["pokemon"])])
     keyboard.append([InlineKeyboardButton("Nivel 5", callback_data="iraid_pokemon_N5"), InlineKeyboardButton("Nivel 4", callback_data="iraid_pokemon_N4"), InlineKeyboardButton("EX", callback_data="iraid_pokemon_EX")])
     keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
