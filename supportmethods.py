@@ -33,9 +33,10 @@ from PIL import Image, ImageOps
 from skimage.measure import compare_ssim as ssim
 from unidecode import unidecode
 import googlemaps
+import math
 
 from config import config
-from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace, getGroupTimezoneOffsetFromServer
+from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace, getGroupTimezoneOffsetFromServer, getCurrentPokemons, getCurrentGyms, removeIncompleteRaids
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
@@ -368,6 +369,17 @@ def format_text_day(timeraid, tzone, format="markdown"):
         what_day = ""
     return what_day
 
+def format_text_creating(creator):
+    logging.debug("supportmethods:format_text_creating");
+    if creator["username"] is not None:
+        if creator["trainername"] is not None:
+            creating_text = "<a href='https://t.me/%s'>%s</a> está creando una incursión..." % (creator["username"], creator["trainername"])
+        else:
+            creating_text = "@%s está creando una incursión..." % (creator["username"])
+    else:
+        creating_text = "Se está creando una incursión..."
+    return creating_text
+
 def ensure_escaped(username):
     if username.find("_") != -1 and username.find("\\_") == -1:
         username = username.replace("_","\\_")
@@ -398,6 +410,20 @@ def update_validations_status(bot):
             bot.sendMessage(chat_id=v["usuario_id"], text="⚠ El proceso de validación pendiente ha caducado porque han pasado 6 horas desde que empezó. Si quieres validarte, debes volver a empezar el proceso.", parse_mode=telegram.ParseMode.MARKDOWN)
         except Exception as e:
             logging.debug("supportmethods:update_validations_status error: %s" % str(e))
+        time.sleep(0.01)
+
+def remove_incomplete_raids(bot):
+    logging.debug("supportmethods:remove_incomplete_raids")
+    raids = removeIncompleteRaids()
+    for raid in raids:
+        logging.debug(raid)
+        r = getRaid(raid["id"])
+        logging.debug("Removing message for raid ID %s" % (raid["id"]))
+        try:
+            reply_markup = get_keyboard(r)
+            updated = bot.deleteMessage(chat_id = r["grupo_id"], message_id = r["message"])
+        except Exception as e:
+            logging.debug("supportmethods:remove_incomplete_raids error: %s" % str(e))
         time.sleep(0.01)
 
 def auto_refloat(bot):
@@ -449,6 +475,35 @@ def error_callback(bot, update, error):
         logging.debug("TELEGRAM ERROR: Other error - %s" % error)
     except:
         logging.debug("TELEGRAM ERROR: Unknown - %s" % error)
+
+def send_edit_instructions(group, raid, user_id, bot):
+    what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
+    what_day = format_text_day(raid["timeraid"], group["timezone"])
+    day = extract_day(raid["timeraid"], group["timezone"])
+    if group["refloat"] == 1 or is_admin(raid["grupo_id"], user_id, bot):
+        text_refloat="\n🎈 *Reflotar incursión*: `/reflotar`"
+    else:
+        text_refloat=""
+    if group["candelete"] == 1 or is_admin(raid["grupo_id"], user_id, bot):
+        text_delete="\n❌ *Borrar incursión*: `/borrar`"
+    else:
+        text_delete=""
+    if raid["timeend"] is not None:
+        text_endtime = extract_time(raid["timeend"])
+    else:
+        text_endtime = extract_time(raid["timeraid"])
+    if day is None:
+        daystr = ""
+    else:
+        daystr = "%s/" % day
+    if raid["pokemon"] is None:
+        pokemon = raid["egg"]
+    else:
+        pokemon = raid["pokemon"]
+    try:
+        bot.send_message(chat_id=user_id, text="Puedes editar la incursión %s %sa las *%s* en *%s* (identificador `%s`) contestando al mensaje de la incursión con los siguientes comandos:\n\n🕒 *Día/hora*: `/hora %s%s`\n🕒 *Hora a la que desaparece*: `/horafin %s`\n🌎 *Gimnasio*: `/gimnasio %s`\n👿 *Pokémon/nivel*: `/pokemon %s`\n\n🚫 *Cancelar incursión*: `/cancelar`%s%s" % (what_text, what_day, extract_time(raid["timeraid"]), raid["gimnasio_text"], raid["id"], daystr, extract_time(raid["timeraid"]), text_endtime, raid["gimnasio_text"], pokemon, text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+    except:
+        logging.debug("Error sending instructions in private. Maybe conversation not started?")
 
 def warn_people(warntype, raid, user_username, chat_id, bot):
     logging.debug("supportmethods:warn_people")
@@ -614,6 +669,96 @@ def get_settings_keyboard(chat_id, keyboard="main"):
 
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
+
+def get_pokemons_keyboard():
+    logging.debug("supportmethods:get_pokemons_keyboard")
+    keyboard = []
+    current_pokemons = getCurrentPokemons()
+    for i in range(0,12,3):
+        keyboard.append([InlineKeyboardButton(current_pokemons[i]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i]["pokemon"]), InlineKeyboardButton(current_pokemons[i+1]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+1]["pokemon"]), InlineKeyboardButton(current_pokemons[i+2]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+2]["pokemon"])])
+    keyboard.append([InlineKeyboardButton("Nivel 5", callback_data="iraid_pokemon_N5"), InlineKeyboardButton("Nivel 4", callback_data="iraid_pokemon_N4"), InlineKeyboardButton("EX", callback_data="iraid_pokemon_EX")])
+    keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+
+def get_gyms_keyboard(group_id, page=0):
+    logging.debug("supportmethods:get_gyms_keyboard")
+    keyboard = []
+    current_gyms = getCurrentGyms(group_id)
+    if page == 0:
+        maxgyms = min(13, len(current_gyms)-1)
+    else:
+        maxgyms = min(27, len(current_gyms)-1)
+    for i in range(page*14, maxgyms,2):
+        keyboard.append([InlineKeyboardButton(current_gyms[i]["name"], callback_data="iraid_gym_%s" % current_gyms[i]["id"]), InlineKeyboardButton(current_gyms[i+1]["name"], callback_data="iraid_gym_%s" % current_gyms[i+1]["id"])])
+    if len(current_gyms)>14:
+        if page == 0:
+            keyboard.append([InlineKeyboardButton("Más Gimnasios >", callback_data="iraid_gyms_page2"), InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+        else:
+            keyboard.append([InlineKeyboardButton("< Más Gimnasios", callback_data="iraid_gyms_page1"), InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    else:
+        keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+
+def get_days_keyboard(tz):
+    logging.debug("supportmethods:get_days_keyboard")
+    keyboard = []
+
+    basedt = datetime.now(timezone(tz))
+    minute = math.floor(basedt.minute/10)*10
+    basedt = basedt.replace(minute=0,hour=0)
+
+    dts = []
+    for x in range(1,13):
+        dts.append(basedt + timedelta(days=x))
+
+    for i in range(0,10,3):
+        h1 = dts[i].strftime('Día %d')
+        h1k = dts[i].strftime('%d/00:00')
+        h2 = dts[i+1].strftime('Día %d')
+        h2k = dts[i+1].strftime('%d/00:00')
+        h3 = dts[i+2].strftime('Día %d')
+        h3k = dts[i+2].strftime('%d/00:00')
+        keyboard.append([InlineKeyboardButton(h1, callback_data="iraid_date_%s" % h1k), InlineKeyboardButton(h2, callback_data="iraid_date_%s" % h2k), InlineKeyboardButton(h3, callback_data="iraid_date_%s" % h3k)])
+    keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+    pass
+
+def get_times_keyboard(tz, date=None):
+    logging.debug("supportmethods:get_times_keyboard")
+    keyboard = []
+    dts = []
+
+    if date == None:
+        basedt = datetime.now(timezone(tz))
+        minute = math.floor(basedt.minute/10)*10
+        basedt = basedt.replace(minute=int(minute))
+        for x in range(20,160,10):
+            dts.append(basedt + timedelta(minutes=x))
+    else:
+        try:
+            date = datetime.strptime(date,"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(tz))
+        except:
+            date = date.replace(tzinfo=timezone(tz))
+        basedt = date.replace(hour=9,minute=0)
+        for x in range(30,600,30):
+            dts.append(basedt + timedelta(minutes=x))
+
+    for i in range(0,len(dts)-3,3):
+        h1 = dts[i].strftime('%H:%M')
+        h1k = dts[i].strftime('%d/%H:%M')
+        h2 = dts[i+1].strftime('%H:%M')
+        h2k = dts[i+1].strftime('%d/%H:%M')
+        h3 = dts[i+2].strftime('%H:%M')
+        h3k = dts[i+2].strftime('%d/%H:%M')
+        keyboard.append([InlineKeyboardButton(h1, callback_data="iraid_time_%s" % h1k), InlineKeyboardButton(h2, callback_data="iraid_time_%s" % h2k), InlineKeyboardButton(h3, callback_data="iraid_time_%s" % h3k)])
+
+    keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+    pass
 
 def get_keyboard(raid):
     logging.debug("supportmethods:get_keyboard")

@@ -52,8 +52,8 @@ from Levenshtein import distance
 import html
 
 from config import config
-from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats, getRemovedAlerts
-from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address
+from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats, getRemovedAlerts, getCurrentGyms
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, update_settings_message_timed, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address, get_pokemons_keyboard, get_gyms_keyboard, get_times_keyboard, get_days_keyboard, format_text_creating, remove_incomplete_raids, send_edit_instructions
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
 def cleanup(signum, frame):
@@ -1031,6 +1031,22 @@ def raid(bot, update, args=None):
       Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
       return
 
+  currgyms = getCurrentGyms(chat_id)
+  allgyms = getPlaces(chat_id)
+  if len(args) == 0 and (len(currgyms) >= 6 or len(currgyms) == len(allgyms))\
+  and group["locations"] == 1:
+      keyboard = get_pokemons_keyboard()
+      creating_text = format_text_creating(thisuser)
+      sent_message = bot.sendMessage(chat_id=chat_id, text="🤔 %s\n\nElige el <b>Pokémon</b> o el huevo del que quieres realizar la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y créala manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % creating_text, reply_markup=keyboard, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+      current_raid = {}
+      current_raid["grupo_id"] = chat_id
+      current_raid["usuario_id"] = user_id
+      current_raid["message"] = sent_message.message_id
+      current_raid["status"] = "creating"
+      current_raid["id"] = saveRaid(current_raid)
+      return
+
   if args is None or len(args)<3:
     if chat_type != "channel":
         sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text), parse_mode=telegram.ParseMode.MARKDOWN)
@@ -1156,35 +1172,8 @@ def raid(bot, update, args=None):
   current_raid["message"] = sent_message.message_id
   saveRaid(current_raid)
 
-  if current_raid["timeend"] is not None:
-      show_endtime = extract_time(current_raid["timeend"])
-  else:
-      show_endtime = extract_time(current_raid["timeraid"])
-  if group["refloat"] == 1 or is_admin(current_raid["grupo_id"], user_id, bot):
-      text_refloat="\n🎈 *Reflotar incursión*: `/reflotar`"
-  else:
-      text_refloat=""
-  if group["candelete"] == 1 or is_admin(current_raid["grupo_id"], user_id, bot):
-      text_delete="\n❌ *Borrar incursión*: `/borrar`"
-  else:
-      text_delete=""
-
   if chat_type != "channel":
-      what_text = format_text_pokemon(current_raid["pokemon"], current_raid["egg"])
-      what_day = format_text_day(current_raid["timeraid"], group["timezone"])
-      day = extract_day(current_raid["timeraid"], group["timezone"])
-      if day is None:
-          daystr = ""
-      else:
-          daystr = "%s/" % day
-      if current_raid["pokemon"] is None:
-          pokemon = current_raid["egg"]
-      else:
-          pokemon = current_raid["pokemon"]
-      try:
-          bot.send_message(chat_id=user_id, text="Puedes editar la incursión %s %sa las *%s* en *%s* (identificador `%s`) contestando al mensaje de la incursión con los siguientes comandos:\n\n🕒 *Día/hora*: `/hora %s%s`\n🕒 *Hora a la que desaparece*: `/horafin %s`\n🌎 *Gimnasio*: `/gimnasio %s`\n👿 *Pokémon/nivel*: `/pokemon %s`\n\n🚫 *Cancelar incursión*: `/cancelar`%s%s" % (what_text, what_day, extract_time(current_raid["timeraid"]), current_raid["gimnasio_text"], current_raid["id"], daystr, extract_time(current_raid["timeraid"]), show_endtime, current_raid["gimnasio_text"], pokemon, text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
-      except:
-          logging.debug("Error sending instructions in private. Maybe conversation not started?")
+      send_edit_instructions(group, current_raid, user_id, bot)
 
   if group["locations"] == 1:
       if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] is not None:
@@ -1797,6 +1786,7 @@ def raidbutton(bot, update):
   user_username = query.from_user.username
   chat_id = query.message.chat.id
   message_id = query.message.message_id
+  chat_type = query.message.chat.type
 
   if isBanned(user_id) or isBanned(chat_id):
     return
@@ -1951,6 +1941,89 @@ def raidbutton(bot, update):
     else:
       bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id, show_alert="true")
 
+  # Create raid interactively
+  if re.match("^iraid_.+", data) != None:
+    raid = getRaidbyMessage(chat_id, message_id)
+
+    if user_id != raid["usuario_id"]:
+        bot.answerCallbackQuery(text="Solo puede seleccionar las opciones de la incursión el usuario que la está creando.", callback_query_id=update.callback_query.id, show_alert="true")
+        return
+
+    if re.match("^iraid_pokemon_.+", data) != None:
+        m = re.match("^iraid_pokemon_(.+)", data)
+        if m.group(1) in pokemonlist:
+            raid["pokemon"] = m.group(1)
+        elif m.group(1) in egglist:
+            raid["egg"] = m.group(1)
+        else:
+            return
+        saveRaid(raid)
+        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+        creating_text = format_text_creating(thisuser)
+        if raid["egg"] != "EX":
+            reply_markup = get_times_keyboard(group["timezone"])
+            bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s. Ahora selecciona la hora a la que quieres crear la incursión. Si no está en la lista, escoge la más próxima o pulsa <i>Cancelar</i>.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        else:
+            reply_markup = get_days_keyboard(group["timezone"])
+            bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s. Ahora selecciona el día en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i>.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+    if re.match("^iraid_date_[0-9]{1,2}/00:00$", data) != None:
+        m = re.match("^iraid_date_([0-9]{1,2}/00:00)$", data)
+        raid["timeraid"] = parse_time(m.group(1), group["timezone"])
+        saveRaid(raid)
+        reply_markup = get_times_keyboard(group["timezone"], date=raid["timeraid"])
+        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+        creating_text = format_text_creating(thisuser)
+        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+        if text_day != "":
+            text_day = " " + text_day
+        text_time = extract_time(raid["timeraid"])
+        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s. Ahora selecciona la hora a la que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon, text_day), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+    if re.match("^iraid_time_[0-9]{1,2}/[0-9]{2}:[0-9]{2}$", data) != None:
+        m = re.match("^iraid_time_([0-9]{1,2}/[0-9]{2}:[0-9]{2})$", data)
+        raid["timeraid"] = parse_time(m.group(1), group["timezone"])
+        saveRaid(raid)
+        reply_markup = get_gyms_keyboard(group["id"])
+        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+        creating_text = format_text_creating(thisuser)
+        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+        if text_day != "":
+            text_day = " " + text_day
+        text_time = extract_time(raid["timeraid"])
+        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+    if re.match("^iraid_gyms_page[12]$", data) != None:
+        m = re.match("^iraid_gyms_page([12])$", data)
+        reply_markup = get_gyms_keyboard(group["id"], page=int(m.group(1))-1)
+        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+        creating_text = format_text_creating(thisuser)
+        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+        if text_day != "":
+            text_day = " " + text_day
+        text_time = extract_time(raid["timeraid"])
+        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+    if re.match("^iraid_gym_[0-9]+$", data) != None:
+        m = re.match("^iraid_gym_([0-9]+)$", data)
+        gym = getPlace(m.group(1))
+        raid["gimnasio_id"] = gym["id"]
+        raid["gimnasio_text"] = gym["desc"]
+        raid["status"] = "waiting"
+        saveRaid(raid)
+        reply_markup = get_keyboard(raid)
+        updated = update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
+        if chat_type != "channel":
+            send_edit_instructions(group, raid, user_id, bot)
+        if raid["gimnasio_id"] is not None:
+            Thread(target=send_alerts_delayed, args=(raid, bot)).start()
+
+    if data == "iraid_cancel":
+        raid["status"] = "deleted"
+        saveRaid(raid)
+        bot.deleteMessage(chat_id=chat_id, message_id=message_id)
+
+  # Settings and admin stuff
   settings_goto = {"settings_goto_main":"main", "settings_goto_raids":"raids", "settings_goto_commands":"commands", "settings_goto_behaviour": "behaviour", "settings_goto_raidbehaviour": "raidbehaviour"}
 
   for k in settings_goto:
@@ -2116,12 +2189,15 @@ dispatcher.add_handler(MessageHandler(Filters.status_update, joinedChat))
 j = updater.job_queue
 def callback_update_raids_status(bot, job):
     Thread(target=update_raids_status, args=(bot,)).start()
-job = j.run_repeating(callback_update_raids_status, interval=60, first=8)
+job = j.run_repeating(callback_update_raids_status, interval=60, first=12)
 def callback_update_validations_status(bot, job):
     Thread(target=update_validations_status, args=(bot,)).start()
-job2 = j.run_repeating(callback_update_validations_status, interval=60, first=16)
+job2 = j.run_repeating(callback_update_validations_status, interval=60, first=18)
 def callback_auto_refloat(bot, job):
     Thread(target=auto_refloat, args=(bot,)).start()
-job2 = j.run_repeating(callback_auto_refloat, interval=60, first=26)
+job3 = j.run_repeating(callback_auto_refloat, interval=60, first=26)
+def callback_remove_incomplete_raids(bot, job):
+    Thread(target=remove_incomplete_raids, args=(bot,)).start()
+job4 = j.run_repeating(callback_remove_incomplete_raids, interval=30, first=42)
 
 updater.start_polling()

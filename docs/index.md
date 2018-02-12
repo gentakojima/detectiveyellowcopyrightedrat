@@ -179,7 +179,7 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 3. **Botón «+1»**. Si está activada, aparecerá un botón que permite indicar que vas con acompañantes a la incursión. Se puede configurar un máximo de 1, 2, 3, 5 y 10 acompañantes. Opción activada por defecto y configurada con 5 acompañantes como máximo.
 
-4. **Botón «+1» por cada equipo**. Requiere la opción *Botón «+1»* (se marca automáticamente si es necesario). Si está activada, muestra tres botones «+1», uno por equipo, en vez de un único botón. Esta opción solo tiene sentido si tienes activada la opción de vista de incursión *Mostrar totales disgregados* o *Mostrar «+1» disgregados por línea*.
+4. **Botón «+1» por cada equipo**. Requiere la opción *Botón «+1»* (se marca automáticamente si es necesario). Si está activada, muestra tres botones «+1», uno por equipo, en vez de un único botón. Esta opción solo tiene sentido si tienes activada la opción de vista de incursión *Mostrar totales disgregados* o *Mostrar «+1» disgregados por línea*. Opción desactivada por defecto.
 
 ### Ubicaciones ###
 

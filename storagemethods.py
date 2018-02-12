@@ -586,7 +586,7 @@ def saveRaid(raid):
         raid["edited"] = 0
     if "refloated" not in raid.keys():
         raid["refloated"] = 0
-    for k in ["egg","pokemon","timeend","timeraid","message","gimnasio_id"]:
+    for k in ["egg","pokemon","timeend","timeraid","message","gimnasio_id","gimnasio_text"]:
         if k not in raid.keys():
             raid[k] = None
     if "id" not in raid.keys():
@@ -617,6 +617,42 @@ def getRaid(raid_id):
         sql = "SELECT `id`,`grupo_id`, `usuario_id`, `message`, `pokemon`, `egg`, `gimnasio_id`, `gimnasio_text`, `edited`, `refloated`, `addedtime`, `timeraid`, `timeend`, `status` FROM `incursiones` WHERE `id`=%s"
         cursor.execute(sql, (raid_id))
         result = cursor.fetchone()
+    db.close()
+    return result
+
+def getCurrentPokemons():
+    db = getDbConnection()
+    logging.debug("storagemethods:getCurrentPokemons")
+    with db.cursor() as cursor:
+        sql = "SELECT count(pokemon) as count, pokemon \
+            FROM detectivepikachu.incursiones \
+            LEFT JOIN grupos ON grupos.id = incursiones.grupo_id \
+            WHERE incursiones.addedtime > NOW() - INTERVAL 5 DAY  \
+            AND grupos.testgroup = 0 \
+            AND pokemon != 'Pikachu' AND pokemon != 'Mewtwo' AND pokemon != 'Pidgey' \
+            GROUP BY pokemon \
+            ORDER BY count DESC \
+            LIMIT 0,12;"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    db.close()
+    return result
+
+def getCurrentGyms(group_id):
+    db = getDbConnection()
+    logging.debug("storagemethods:getCurrentPokemons")
+    with db.cursor() as cursor:
+        sql = "SELECT count(DISTINCT incursiones.id) AS count, name, gimnasios.id AS id \
+            FROM gimnasios \
+            LEFT JOIN incursiones ON incursiones.gimnasio_id = gimnasios.id \
+            LEFT JOIN grupos ON grupos.id = incursiones.grupo_id \
+            WHERE incursiones.addedtime > NOW() - INTERVAL 60 DAY \
+            AND grupos.id = %s \
+            GROUP BY gimnasios.id \
+            ORDER BY count DESC \
+            LIMIT 0,28;"
+        cursor.execute(sql, (group_id))
+        result = cursor.fetchall()
     db.close()
     return result
 
@@ -985,6 +1021,26 @@ def updateRaidsStatus():
     db.commit()
     db.close()
     return raidstoupdate
+
+def removeIncompleteRaids():
+    db = getDbConnection()
+    logging.debug("storagemethods:removeIncompleteRaids")
+    raidstoremove = []
+    try:
+        # Set raids as old
+        with db.cursor() as cursor:
+            sql = "SELECT `incursiones`.`id` AS `id`, `timeraid`, `timezone` FROM `incursiones` LEFT JOIN grupos ON `incursiones`.`grupo_id` = `grupos`.`id` WHERE status = 'creating' and addedtime < NOW() - INTERVAL 1 MINUTE LIMIT 0,2000"
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            for r in results:
+                sql = "UPDATE incursiones SET `status`='deleted' WHERE id=%s;"
+                cursor.execute(sql, (r["id"]))
+                raidstoremove.append(r)
+    except Exception as e:
+        logging.debug("supportmethods:removeIncompleteRaids error: %s" % str(e))
+    db.commit()
+    db.close()
+    return raidstoremove
 
 def updateValidationsStatus():
     db = getDbConnection()
