@@ -1034,9 +1034,7 @@ def raid(bot, update, args=None):
       return
 
   currgyms = getCurrentGyms(chat_id)
-  allgyms = getPlaces(chat_id)
-  if (len(args) == 0 or args == None) and (len(currgyms) >= 6 or len(currgyms) == len(allgyms))\
-  and group["locations"] == 1:
+  if (len(args) == 0 or args == None) and len(currgyms) >= 2 and group["locations"] == 1:
       keyboard = get_pokemons_keyboard()
       if chat_type != "channel":
           creating_text = format_text_creating(thisuser)

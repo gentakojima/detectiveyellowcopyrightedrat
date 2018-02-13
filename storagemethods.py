@@ -646,8 +646,8 @@ def getCurrentGyms(group_id):
             FROM gimnasios \
             LEFT JOIN incursiones ON incursiones.gimnasio_id = gimnasios.id \
             LEFT JOIN grupos ON grupos.id = incursiones.grupo_id \
-            WHERE incursiones.addedtime > NOW() - INTERVAL 60 DAY \
-            AND grupos.id = %s \
+            WHERE (incursiones.addedtime > NOW() - INTERVAL 60 DAY OR incursiones.addedtime IS NULL) \
+            AND gimnasios.grupo_id = %s \
             GROUP BY gimnasios.id \
             ORDER BY count DESC \
             LIMIT 0,28;"

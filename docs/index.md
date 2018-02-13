@@ -34,7 +34,11 @@ Para registrarte tienes dos opciones:
 
 ### Crear una incursión ###
 
-La sintaxis para crear una incursión nueva es muy sencilla:
+Se puede crear una sintaxis de forma interactiva con el comando:
+
+    /raid
+
+También se pueden especificar los parámetros directamente, algo que es necesario si alguno de los parámetros no aparece en el menú de creación interactivo. La sintaxis para crear una incursión nueva de esta forma es sencilla:
 
     /raid pokemon hora gimnasio
 
@@ -78,6 +82,8 @@ Una incursión también se puede cancelar contestando con el comando `/cancelar`
 Los participantes recibirán **avisos por privado** cuando se edite, cancele o borre una incursión.
 
 Ten en cuenta que los comandos `/borrar` y `/reflotar` por defecto solo están activados para los administradores de los grupos y solo algunos grupos permiten que los usen los propios creadores de las incursiones.
+
+Al editar una hora hay las mismas restricciones que al crear la incursión. Con `/hora` es **necesario especificar el día** si no es el día actual. Con `/horafin`, sin embargo, no es necesario, ya que por defecto se toma el mismo día en que se realiza la incursión.
 
 ### Apuntarse a una incursión ###
 
