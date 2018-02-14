@@ -398,7 +398,7 @@ def update_raids_status(bot):
             logging.debug(updated)
         except Exception as e:
             logging.debug("supportmethods:update_raids_status error: %s" % str(e))
-        time.sleep(0.01)
+        time.sleep(0.015)
 
 def update_validations_status(bot):
     logging.debug("supportmethods:update_validations_status")
@@ -410,7 +410,7 @@ def update_validations_status(bot):
             bot.sendMessage(chat_id=v["usuario_id"], text="⚠ El proceso de validación pendiente ha caducado porque han pasado 6 horas desde que empezó. Si quieres validarte, debes volver a empezar el proceso.", parse_mode=telegram.ParseMode.MARKDOWN)
         except Exception as e:
             logging.debug("supportmethods:update_validations_status error: %s" % str(e))
-        time.sleep(0.01)
+        time.sleep(0.015)
 
 def remove_incomplete_raids(bot):
     logging.debug("supportmethods:remove_incomplete_raids")
@@ -424,7 +424,7 @@ def remove_incomplete_raids(bot):
             updated = bot.deleteMessage(chat_id = r["grupo_id"], message_id = r["message"])
         except Exception as e:
             logging.debug("supportmethods:remove_incomplete_raids error: %s" % str(e))
-        time.sleep(0.01)
+        time.sleep(0.015)
 
 def auto_refloat(bot):
     logging.debug("supportmethods:auto_refloat")
@@ -456,7 +456,7 @@ def auto_refloat(bot):
                 raid["message"] = sent_message.message_id
                 saveRaid(raid)
                 logging.debug("supportmethods:auto_refloat: auto reflotada incursión %s mensaje %s" % (raid["id"], raid["message"]))
-                time.sleep(0.01)
+                time.sleep(0.015)
 
 def error_callback(bot, update, error):
     try:

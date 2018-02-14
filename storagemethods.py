@@ -1005,7 +1005,6 @@ def updateRaidsStatus():
             cursor.execute(sql)
             results = cursor.fetchall()
             for r in results:
-                logging.debug(r)
                 try:
                     now_datetime = datetime.now(timezone(r["timezone"])).replace(tzinfo=timezone(r["timezone"]))
                     raid_datetime = r["timeraid"].replace(tzinfo=timezone(r["timezone"]))
