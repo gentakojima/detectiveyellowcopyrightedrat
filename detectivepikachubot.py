@@ -412,7 +412,7 @@ def joinedChat(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     try:
         new_chat_member = message.new_chat_member
-        if new_chat_member.username == 'detectivepikachubot' and chat_type != "private":
+        if new_chat_member.username == config["telegram"]["botalias"] and chat_type != "private":
             chat_title = message.chat.title
             chat_id = message.chat.id
             group = getGroup(chat_id)
@@ -1029,7 +1029,7 @@ def raid(bot, update, args=None):
       return
 
   if chat_type != "channel" and thisuser["validation"] == "none" and group["validationrequired"] == 1:
-      sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero en este grupo es obligatorio validarse antes de poder crear incursiones o participar en ellas!\nAbre un privado con @detectivepikachubot y escribe `/help` para saber cómo puedes validarte.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
+      sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero en este grupo es obligatorio validarse antes de poder crear incursiones o participar en ellas!\nAbre un privado con @%s y escribe `/help` para saber cómo puedes validarte.\n\n_(Este mensaje se borrará en unos segundos)_" % config["telegram"]["botalias"], parse_mode=telegram.ParseMode.MARKDOWN)
       Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
       return
 
@@ -1811,7 +1811,7 @@ def raidbutton(bot, update):
 
   if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
     and (group["validationrequired"] == 1 and thisuser["validation"] == "none"):
-    bot.answerCallbackQuery(text="No puedes unirte a una incursión en este grupo si no te has validado antes.\nAbre un privado con @detectivepikachubot y escribe '/help' para saber cómo puedes hacerlo.", show_alert="true", callback_query_id=update.callback_query.id)
+    bot.answerCallbackQuery(text="No puedes unirte a una incursión en este grupo si no te has validado antes.\nAbre un privado con @%s y escribe '/help' para saber cómo puedes hacerlo." % config["telegram"]["botalias"], show_alert="true", callback_query_id=update.callback_query.id)
     return
 
   if data == "voy":
