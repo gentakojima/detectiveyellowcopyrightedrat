@@ -625,7 +625,7 @@ def getCurrentPokemons():
     logging.debug("storagemethods:getCurrentPokemons")
     with db.cursor() as cursor:
         sql = "SELECT count(pokemon) as count, pokemon \
-            FROM detectivepikachu.incursiones \
+            FROM incursiones \
             LEFT JOIN grupos ON grupos.id = incursiones.grupo_id \
             WHERE incursiones.addedtime > NOW() - INTERVAL 5 DAY  \
             AND grupos.testgroup = 0 \
