@@ -34,7 +34,7 @@ Para registrarte tienes dos opciones:
 
 ### Crear una incursión ###
 
-Se puede crear una sintaxis de forma interactiva con el comando:
+Se puede crear una incursión de forma interactiva con el comando:
 
     /raid
 

@@ -1040,7 +1040,7 @@ def raid(bot, update, args=None):
           creating_text = format_text_creating(thisuser)
       else:
           creating_text = format_text_creating(None)
-      sent_message = bot.sendMessage(chat_id=chat_id, text="🤔 %s\n\nElige el <b>Pokémon</b> o el huevo del que quieres realizar la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y créala manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % creating_text, reply_markup=keyboard, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+      sent_message = bot.sendMessage(chat_id=chat_id, text="🤔 %s\n\nElige el <b>Pokémon</b> o el huevo del que quieres realizar la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y créala manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % creating_text, reply_markup=keyboard, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
       current_raid = {}
       current_raid["grupo_id"] = chat_id
@@ -1967,10 +1967,10 @@ def raidbutton(bot, update):
         creating_text = format_text_creating(thisuser)
         if raid["egg"] != "EX":
             reply_markup = get_times_keyboard(group["timezone"])
-            bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s. Ahora selecciona la hora a la que quieres crear la incursión. Si no está en la lista, escoge la más próxima o pulsa <i>Cancelar</i>.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s. Ahora selecciona la hora a la que quieres crear la incursión. Si no está en la lista, escoge la más próxima o pulsa <i>Cancelar</i>.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
         else:
             reply_markup = get_days_keyboard(group["timezone"])
-            bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s. Ahora selecciona el día en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i>.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s. Ahora selecciona el día en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i>.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
     if re.match("^iraid_date_[0-9]{1,2}/00:00$", data) != None:
         m = re.match("^iraid_date_([0-9]{1,2}/00:00)$", data)
@@ -1983,7 +1983,7 @@ def raidbutton(bot, update):
         if text_day != "":
             text_day = " " + text_day
         text_time = extract_time(raid["timeraid"])
-        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s. Ahora selecciona la hora a la que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon, text_day), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s. Ahora selecciona la hora a la que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
     if re.match("^iraid_time_[0-9]{1,2}/[0-9]{2}:[0-9]{2}$", data) != None:
         m = re.match("^iraid_time_([0-9]{1,2}/[0-9]{2}:[0-9]{2})$", data)
@@ -1996,7 +1996,7 @@ def raidbutton(bot, update):
         if text_day != "":
             text_day = " " + text_day
         text_time = extract_time(raid["timeraid"])
-        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
     if re.match("^iraid_gyms_page[12]$", data) != None:
         m = re.match("^iraid_gyms_page([12])$", data)
@@ -2007,7 +2007,7 @@ def raidbutton(bot, update):
         if text_day != "":
             text_day = " " + text_day
         text_time = extract_time(raid["timeraid"])
-        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>Si no completas el proceso de creación de la incursión en menos de un minuto, este mensaje se borrará y deberás volver a empezar.</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        bot.edit_message_text(text="🤔 %s\n\nHas escogido una raid %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crear la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
     if re.match("^iraid_gym_[0-9]+$", data) != None:
         m = re.match("^iraid_gym_([0-9]+)$", data)
