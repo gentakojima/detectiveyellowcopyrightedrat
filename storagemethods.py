@@ -629,7 +629,8 @@ def getCurrentPokemons():
             LEFT JOIN grupos ON grupos.id = incursiones.grupo_id \
             WHERE incursiones.addedtime > NOW() - INTERVAL 5 DAY  \
             AND grupos.testgroup = 0 \
-            AND pokemon != 'Pikachu' AND pokemon != 'Mewtwo' AND pokemon != 'Pidgey' \
+            AND pokemon != 'Pikachu' AND pokemon != 'Mewtwo' \
+            AND pokemon != 'Pidgey' AND pokemon != 'Mew' AND pokemon != 'Celebi' \
             GROUP BY pokemon \
             ORDER BY count DESC \
             LIMIT 0,12;"
@@ -649,8 +650,8 @@ def getCurrentGyms(group_id):
             WHERE (incursiones.addedtime > NOW() - INTERVAL 60 DAY OR incursiones.addedtime IS NULL) \
             AND gimnasios.grupo_id = %s \
             GROUP BY gimnasios.id \
-            ORDER BY count DESC \
-            LIMIT 0,28;"
+            ORDER BY count DESC, gimnasios.name ASC \
+            LIMIT 0,56;"
         cursor.execute(sql, (group_id))
         result = cursor.fetchall()
     db.close()
