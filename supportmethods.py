@@ -948,8 +948,9 @@ def parse_time(st, tz, strict=False):
     localdatetime = datetime.now(timezone(tz))
     localtime = localdatetime.time()
     if int(hour) <= 12 and day is None:
-        if (int(hour) <= 5) or (int(localtime.hour) >= 15 and int(hour) <= 9 and int(hour)!=0):
-                hour = int(hour) + 12
+        if (int(hour) <= 5 and int(localtime.hour) > 5) or \
+            (int(localtime.hour) >= 15 and int(hour) <= 9 and int(hour)!=0):
+            hour = int(hour) + 12
 
     dt = datetime.now(timezone(tz))
     if day is not None:
