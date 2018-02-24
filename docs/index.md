@@ -32,6 +32,20 @@ Para registrarte tienes dos opciones:
 
 2. Si estás registrado y validado con [@profesoroak_bot](https://t.me/profesoroak_bot), puedes sencillamente preguntarle `quién soy?` y reenviar la respuesta a [@detectivepikachubot](https://t.me/detectivepikachubot).
 
+#### Subida de nivel ####
+
+Para indicar una subida de nivel, basta con enviar una captura de pantalla del perfil donde se vea el nuevo nivel, una vez se esté validado. Si el bot no contesta nada, es debido a que el estado de validación no es correcto.
+
+Alternativamente, puedes subir nivel en [@profesoroak_bot](https://t.me/profesoroak_bot) y luego reenviar de nuevo la respuesta de `quién soy?` a [@detectivepikachubot](https://t.me/detectivepikachubot) para actualizar los datos.
+
+#### Cambio de nombre de entrenador ####
+
+Si has cambiado tu nombre de entrenador en el juego, debes volver a hacer el proceso de registro. No hay ninguna restricción, aunque ya estuvieras validado anteriormente con otra cuenta.
+
+#### Cambio de cuenta de Telegram ####
+
+Si has cambiado de número de teléfono y prefieres utilizar el bot con la cuenta de Telegram correspondiente al nuevo número, solicita un reseteo de tu cuenta anterior, para que puedas validarte con la nueva, en el correo electrónico [validations@detectivepik.ac](mailto:validations@detectivepik.ac)
+
 ### Crear una incursión ###
 
 Se puede crear una incursión de forma interactiva con el comando:
@@ -191,13 +205,14 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 Las ubicaciones de los gimnasios tienen que configurarse en cada grupo de forma independiente. Un grupo no conoce las ubicaciones de los demás grupos.
 
-Para comenzar, debes crear una [hoja de cálculo de Google](https://docs.google.com/spreadsheets/u/0/) con 4 columnas:
+Para comenzar, debes crear una [hoja de cálculo de Google](https://docs.google.com/spreadsheets/u/0/) con 4 columnas (y 2 opcionales que puedes cubrir más tarde):
 
 1. Nombre del gimnasio
 2. Latitud en formato numérico (por ejemplo 42.211345)
 3. Longitud también en formato numérico
 4. Palabras clave separadas por comas (pueden tener espacios)
 5. Etiquetas (opcional)
+6. Zonas (opcional)
 
 Esta lista se puede generar a partir de los gimnasios de Gymhuntr [siguiendo esta guía](http://telegra.ph/Lista-de-gimnasios-para-Detective-Pikachu-10-06). Ahorra muchísimo tiempo, así que es recomendable hacerlo así.
 
@@ -207,7 +222,9 @@ Por defecto, Google intenta formatear los números y los estropea. Antes de empe
 
 La cuarta columna es **muy importante**, ya que es la que permite encontrar los gimnasios. Revisa la sección sobre [mejorar la búsqueda de ubicaciones](#mejorar-la-búsqueda-de-ubicaciones) con calma.
 
-La quinta columna es opcional y siempre puedes cubrirla más tarde. Revisa la sección sobre [etiquetas](#etiquetas) donde se explica un poco más en detalle.
+La quinta columna es opcional y siempre puedes cubrirla más tarde. Revisa la sección sobre [etiquetas](#etiquetas) donde se explica más en detalle.
+
+La sexta columna también es opcional. Revisa la sección sobre [zonas](#zonas) donde se explica más en detalle.
 
 Una vez tengas lista la hoja de cálculo, debes pulsar en el botón **Compartir** para obtener un enlace público a la hoja de cálculo y establecerlo con el comando `/setspreadsheet` en el grupo. Por ejemplo:
 
@@ -249,7 +266,9 @@ Si uno de los gimnasios apenas se utiliza porque está muy lejos o no suelen sal
 
 #### Etiquetas ####
 
-Las etiquetas sirven para marcar los gimnasios con determinados emojis, que sirven para identificarlos mejor como potenciales receptores de una incursión EX. Las etiquetas se ponen en la quinta columna como las palabras clave, separadas por comas. Las soportadas son las siguientes:
+Las etiquetas sirven para marcar los gimnasios con determinados emojis, que sirven para identificarlos mejor como potenciales receptores de una incursión EX.
+
+Las etiquetas se ponen en la quinta columna como las palabras clave, separadas por comas. Las soportadas son las siguientes:
 
 * `parque` - El gimnasio se encuentra dentro de un parque (🌳).
 * `jardín` (se puede poner con o sin tilde) - El gimnasio se encuentra dentro de un jardín (🌷).
@@ -259,6 +278,16 @@ Las etiquetas sirven para marcar los gimnasios con determinados emojis, que sirv
 * `ex` - Ha tenido incursiones EX en el pasado fuera del periodo de pruebas (🌟).
 
 Para saber si un gimnasio está realmente considerado como potencial receptor de una incursión EX, puedes utilizar [guías como esta](https://www.reddit.com/r/TheSilphRoad/comments/7pq1cx/how_i_created_a_map_of_potential_exraids_and_how/). Ten en cuenta que el criterio no está completamente definido y puede cambiar con el tiempo.
+
+#### Zonas ####
+
+Las zonas tan sólo se utilizan con el modo de creación interactivo de incursiones, con el objetivo de facilitar encontrar los gimnasios.
+
+Las zonas se establecen en la sexta columna. Pueden configurarse varias zonas para el mismo gimnasio separadas por comas. Por ejemplo:
+
+    Polígono Industrial, Zona Norte
+
+Ten en cuenta que, si añades estos datos en algún gimnasio, los gimnasios que no tengan este dato cubierto no aparecerán como opción al crear una incursión de forma interactiva, pero podrán seguir seleccionándose por palabras clave.
 
 ### Modo niñero ###
 

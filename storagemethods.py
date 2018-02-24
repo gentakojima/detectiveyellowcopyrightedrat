@@ -348,12 +348,13 @@ def savePlaces(group_id, places):
         sql = "DELETE alertas, gimnasios FROM gimnasios LEFT JOIN alertas ON alertas.gimnasio_id = gimnasios.id WHERE gimnasios.grupo_id=%s AND gimnasios.name NOT IN ("+(",".join(params_vars))+")"
         cursor.execute(sql, params_replacements)
         for place in places:
-            if "tags" not in place.keys():
-                place["tags"] = {}
+            for field in ["tags","zones"]:
+                if field not in place.keys():
+                    place[field] = {}
             try:
-                sql = "INSERT INTO gimnasios (grupo_id,name,latitude,longitude,keywords,tags) \
-                VALUES (%s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE latitude=%s, longitude=%s, keywords=%s, tags=%s;"
-                cursor.execute(sql, (group_id, place["desc"], place["latitude"], place["longitude"], json.dumps(place["names"]), json.dumps(place["tags"]), place["latitude"], place["longitude"], json.dumps(place["names"]), json.dumps(place["tags"])))
+                sql = "INSERT INTO gimnasios (grupo_id, name, latitude, longitude, keywords, tags, zones) \
+                VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE latitude=%s, longitude=%s, keywords=%s, tags=%s, zones=%s;"
+                cursor.execute(sql, (group_id, place["desc"], place["latitude"], place["longitude"], json.dumps(place["names"]), json.dumps(place["tags"]), json.dumps(place["zones"]), place["latitude"], place["longitude"], json.dumps(place["names"]), json.dumps(place["tags"]), json.dumps(place["zones"])))
             except IntegrityError:
                 db.rollback()
                 db.close()
@@ -436,16 +437,17 @@ def getPlaces(group_id, ordering="name"):
     logging.debug("storagemethods:getPlaces: %s" % (group_id))
     gyms = []
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords`,`tags`,`address` FROM `gimnasios` WHERE `grupo_id`=%s"
+        sql = "SELECT `id`,`name`,`latitude`,`longitude`,`keywords`,`tags`,`zones`,`address` FROM `gimnasios` WHERE `grupo_id`=%s"
         if ordering == "name":
             sql = sql + " ORDER BY name"
         elif ordering == "id":
             sql = sql + " ORDER BY id"
         cursor.execute(sql, (group_id))
         for row in cursor:
-            if row["tags"] is None:
-                row["tags"] = "[]"
-            gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"]), "address":row["address"]})
+            for field in ["tags","zones"]:
+                if row[field] is None:
+                    row[field] = "[]"
+            gyms.append({"id":row["id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"]), "zones":json.loads(row["zones"]), "address":row["address"]})
     db.close()
     return gyms
 
@@ -453,13 +455,14 @@ def getPlace(id):
     db = getDbConnection()
     logging.debug("storagemethods:getPlace: %s" % (id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`name`,`grupo_id`,`latitude`,`longitude`,`keywords`,`tags`,`address` FROM `gimnasios` WHERE `id`=%s"
+        sql = "SELECT `id`,`name`,`grupo_id`,`latitude`,`longitude`,`keywords`,`tags`,`zones`,`address` FROM `gimnasios` WHERE `id`=%s"
         cursor.execute(sql, (id))
         for row in cursor:
-            if row["tags"] is None:
-                row["tags"] = "[]"
+            for field in ["tags","zones"]:
+                if row[field] is None:
+                    row[field] = "[]"
             db.close()
-            return {"id":row["id"], "group_id":row["grupo_id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"]), "address":row["address"]}
+            return {"id":row["id"], "group_id":row["grupo_id"], "desc":row["name"], "latitude":row["latitude"], "longitude":row["longitude"], "names":json.loads(row["keywords"]), "tags":json.loads(row["tags"]), "zones":json.loads(row["zones"]), "address":row["address"]}
         db.close()
         return None
 
@@ -639,11 +642,12 @@ def getCurrentPokemons():
     db.close()
     return result
 
-def getCurrentGyms(group_id):
+def getCurrentGyms(group_id, zone=None):
     db = getDbConnection()
     logging.debug("storagemethods:getCurrentPokemons")
     with db.cursor() as cursor:
-        sql = "SELECT count(DISTINCT incursiones.id) AS count, name, gimnasios.id AS id \
+        limit = "56" if zone is None else "256"
+        sql = "SELECT count(DISTINCT incursiones.id) AS count, name, zones, gimnasios.id AS id \
             FROM gimnasios \
             LEFT JOIN incursiones ON incursiones.gimnasio_id = gimnasios.id \
             LEFT JOIN grupos ON grupos.id = incursiones.grupo_id \
@@ -651,11 +655,46 @@ def getCurrentGyms(group_id):
             AND gimnasios.grupo_id = %s \
             GROUP BY gimnasios.id \
             ORDER BY count DESC, gimnasios.name ASC \
-            LIMIT 0,56;"
+            LIMIT 0," + limit + ";"
         cursor.execute(sql, (group_id))
         result = cursor.fetchall()
+        if zone is not None:
+            filtered_result = []
+            for r in result:
+                if r["zones"] != None:
+                    zs = json.loads(r["zones"])
+                    for z in zs:
+                        if z.strip().lower() == zone:
+                            filtered_result.append(r)
+                            break
+            result = filtered_result
     db.close()
     return result
+
+def getZones(group_id):
+    db = getDbConnection()
+    logging.debug("storagemethods:getZones")
+    zones = []
+    with db.cursor() as cursor:
+        sql = "SELECT count(DISTINCT incursiones.id) AS count, name, zones, gimnasios.id AS id \
+            FROM gimnasios \
+            LEFT JOIN incursiones ON incursiones.gimnasio_id = gimnasios.id \
+            LEFT JOIN grupos ON grupos.id = incursiones.grupo_id \
+            WHERE (incursiones.addedtime > NOW() - INTERVAL 60 DAY OR incursiones.addedtime IS NULL) \
+            AND gimnasios.grupo_id = %s \
+            GROUP BY gimnasios.id \
+            ORDER BY count DESC, gimnasios.name ASC \
+            LIMIT 0,256;"
+        cursor.execute(sql, (group_id))
+        results = cursor.fetchall()
+        for r in results:
+            if r["zones"] != None:
+                zs = json.loads(r["zones"])
+                for z in zs:
+                    if z.strip().lower() not in map(str.lower, zones):
+                        zones.append(z.strip())
+    db.close()
+    return zones
 
 def getRaidPeople(raid_id, order="addedtime"):
     db = getDbConnection()
