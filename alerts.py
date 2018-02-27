@@ -16,7 +16,7 @@
 
 import telegram
 import logging
-from supportmethods import delete_message, edit_check_private, extract_update_info
+from supportmethods import delete_message, edit_check_private, extract_update_info, ensure_escaped
 from storagemethods import getAlerts, getPlace, getGroup, isBanned, delAlert, addAlert, clearAlerts, getPlacesByLocation, getGroupsByUser
 
 
@@ -46,7 +46,7 @@ def alerts(bot, update, args=None):
         for alert in alerts:
             place = getPlace(alert["place_id"])
             group = getGroup(place["group_id"])
-            text_message = text_message + "\n✅ `%s` %s - Grupo %s" % (place["id"], place["desc"], group["title"])
+            text_message = text_message + "\n✅ `%s` %s - Grupo %s" % (place["id"], ensure_escaped(place["desc"]), ensure_escaped(group["title"]))
 
         text_message = text_message + "\n\nPara borrar una alerta, envíame `/delalert` seguido del identificador numérico, o `/clearalerts` para borrarlas todas."
     text_message = text_message + "\n\nPara añadir alertas de incursión nuevas, *envíame una ubicación* con gimnasios cercanos (_usando la función de Telegram de enviar ubicaciones_) y te explico."
@@ -89,7 +89,7 @@ def addalert(bot, update, args=None):
             return
 
     if addAlert(user_id, place["id"]):
-        bot.sendMessage(chat_id=chat_id, text="👌 Se ha añadido una alerta para el gimnasio *%s*.\n\nA partir de ahora, recibirás un mensaje privado cada vez que alguien cree una incursión en ese gimnasio." % place["desc"], parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text="👌 Se ha añadido una alerta para el gimnasio *%s*.\n\nA partir de ahora, recibirás un mensaje privado cada vez que alguien cree una incursión en ese gimnasio." % ensure_escaped(place["desc"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
     else:
         bot.sendMessage(chat_id=chat_id, text="❌ No se ha podido añadir una alerta para ese gimnasio.", parse_mode=telegram.ParseMode.MARKDOWN)
@@ -120,7 +120,7 @@ def delalert(bot, update, args=None):
         return
 
     if delAlert(user_id, place["id"]):
-        bot.sendMessage(chat_id=chat_id, text="👌 Se ha eliminado la alerta del gimnasio *%s*.\n\nA partir de ahora, ya no recibirás mensajes privados cada vez que alguien cree una incursión allí." % place["desc"], parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text="👌 Se ha eliminado la alerta del gimnasio *%s*.\n\nA partir de ahora, ya no recibirás mensajes privados cada vez que alguien cree una incursión allí." % ensure_escaped(place["desc"]), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         bot.sendMessage(chat_id=chat_id, text="❌ No se ha podido eliminar la alerta para ese gimnasio.", parse_mode=telegram.ParseMode.MARKDOWN)
 
@@ -188,6 +188,6 @@ def processLocation(bot, update):
                     icon = "✅"
                 else:
                     icon = "▪️"
-                text_message = text_message + "\n%s `%s` %s - Grupo %s" % (icon, place["id"], place["name"], group["title"])
+                text_message = text_message + "\n%s `%s` %s - Grupo %s" % (icon, place["id"], ensure_escaped(place["name"]), ensure_escaped(group["title"]))
             text_message = text_message + "\n\nPara añadir una alerta para alguno de estos gimnasios, envíame el comando `/addalert` seguido del identificador numérico.\n\nPor ejemplo:\n`/addalert %s`" % example_id
             bot.sendMessage(chat_id=chat_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
