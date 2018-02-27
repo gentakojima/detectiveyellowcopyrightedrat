@@ -327,7 +327,7 @@ def refresh(bot, update, args=None):
               tags[i] = tags[i].strip()
       else:
           tags = []
-      if len(row) > 5:
+      if len(row) > 5 and row[5].strip()!="":
           zones = row[5].split(",")
           for i,r in enumerate(zones):
               zones[i] = zones[i].strip()

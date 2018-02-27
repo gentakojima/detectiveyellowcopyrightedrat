@@ -281,13 +281,21 @@ Para saber si un gimnasio está realmente considerado como potencial receptor de
 
 #### Zonas ####
 
-Las zonas tan sólo se utilizan con el modo de creación interactivo de incursiones, con el objetivo de facilitar encontrar los gimnasios.
+Las zonas tan sólo se utilizan con el modo de creación interactivo de incursiones, con el objetivo de facilitar encontrar los gimnasios. Se pueden asociar, por ejemplo, a barrios, o a divisiones de una ciudad (Zona Norte, Zona Sur...).
 
-Las zonas se establecen en la sexta columna. Pueden configurarse varias zonas para el mismo gimnasio separadas por comas. Por ejemplo:
+Las zonas se establecen en la sexta columna. Pueden configurarse varias para el mismo gimnasio separadas por comas. Por ejemplo:
 
     Polígono Industrial, Zona Norte
 
 Ten en cuenta que, si añades estos datos en algún gimnasio, los gimnasios que no tengan este dato cubierto no aparecerán como opción al crear una incursión de forma interactiva, pero podrán seguir seleccionándose por palabras clave.
+
+#### Límites en número de zonas y ubicaciones de gimnasios ####
+
+El número máximo de gimnasios que se cargarán de la hoja de cálculo es **3000**. A partir de ese número, se ignorarán.
+
+En la creación de incursiones con el comando `/raid`, sin embargo, solo se mostrará un **máximo de 56 gimnasios**, ordenados de mayor a menor uso en los últimos 60 días. Si se quiere mostrar más gimnasios, se recomienda crear zonas. Se mostrará un **máximo de 12 zonas**, así que si el número de zonas es mayor, las zonas con menor uso no aparecerán.
+
+Combinando el número de zonas con el número máximo de gimnasios por zona, usando el comando `/raid` pueden mostrarse hasta un total de 56*12=**672 gimnasios**.
 
 ### Modo niñero ###
 

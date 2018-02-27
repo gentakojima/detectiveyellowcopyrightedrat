@@ -688,6 +688,8 @@ def getZones(group_id):
         cursor.execute(sql, (group_id))
         results = cursor.fetchall()
         for r in results:
+            if len(zones) > 12:
+                break
             if r["zones"] != None:
                 zs = json.loads(r["zones"])
                 for z in zs:
