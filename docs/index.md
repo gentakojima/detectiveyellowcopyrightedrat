@@ -297,9 +297,11 @@ Ten en cuenta que, si añades estos datos en algún gimnasio, los gimnasios que 
 
 El número máximo de gimnasios que se cargarán de la hoja de cálculo es **3000**. A partir de ese número, se ignorarán.
 
-En la creación de incursiones con el comando `/raid`, sin embargo, solo se mostrará un **máximo de 56 gimnasios**, ordenados de mayor a menor uso en los últimos 60 días. Si se quiere mostrar más gimnasios, se recomienda crear zonas. Se mostrará un **máximo de 12 zonas**, así que si el número de zonas es mayor, las zonas con menor uso no aparecerán. Combinando el número de zonas con el número máximo de gimnasios por zona, usando el comando `/raid` pueden mostrarse hasta un total de 56*12=**672 gimnasios**.
+En la creación de incursiones con el comando `/raid` se mostrará un **máximo de 56 gimnasios**, ordenados de mayor a menor uso en los últimos 60 días. Si se quiere mostrar más gimnasios, se recomienda crear zonas. Se mostrará un **máximo de 12 zonas**, así que si el número de zonas es mayor, las zonas con menor uso no aparecerán.
 
-Esto no quiere decir que sea obligatorio crear zonas si se quieren utilizar más de 56 gimnasios. Lo único que ocurre, es que solo se podrán seleccionar los 56 más concurridos usando el comando `/raid` sin argumentos.
+Combinando el número máximo de zonas con el número máximo de gimnasios por zona, pueden mostrarse hasta un total de 56*12=**672 gimnasios**.
+
+Esto no quiere decir que sea obligatorio crear zonas si se quiere mostrar más de 56 gimnasios. Lo ocurre es que solo se podrán seleccionar los 56 más concurridos usando el comando `/raid` sin argumentos, pero siempre se podrán seleccionar los menos concurridos usando las palabras clave.
 
 ### Modo niñero ###
 
