@@ -14,7 +14,11 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    1. [Grupos y canales](#grupos-y-canales)
    2. [Añadir el bot a un grupo o canal](#añadir-el-bot-a-un-grupo-o-canal)
    3. [Configuración](#configuración)
-   4. [Ubicaciones](#ubicaciones)
+   4. [Ubicaciones de gimnasios](#ubicaciones-de-gimnasios)
+      1. [Mejorar palabras clave](#mejorar-palabras-clave)
+      2. [Etiquetas](#etiquetas)
+      3. [Zonas](#zonas)
+      4. [Límites en número de zonas y ubicaciones de gimnasios](#límites-en-número-de-zonas-y-ubicaciones-de-gimnasios)
    5. [Modo niñero](#modo-niñero)
    6. [Zona horaria](#zona-horaria)
    7. [Rankings](#rankings)
@@ -157,7 +161,7 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 #### Funcionamiento del grupo/canal ####
 
-1. **Ubicaciones**. Activa o desactiva la integración de las ubicaciones. Para poder utilizar esta opción, debes [configurar las ubicaciones](#ubicaciones). Si no vas a hacerlo, es mejor que la desactives. Opción activada por defecto.
+1. **Ubicaciones**. Activa o desactiva la integración de las ubicaciones. Para poder utilizar esta opción, debes [configurar las ubicaciones](#ubicaciones-de-gimnasios). Si no vas a hacerlo, es mejor que la desactives. Opción activada por defecto.
 
 2. **Permitir configurar alertas**. Requiere la opción *Ubicaciones* (se marca automáticamente si es necesario). Permite o no que los usuarios encuentren los gimnasios configurados en este grupo/canal a la hora de configurarse alertas por privado. Opción activada por defecto.
 
@@ -201,7 +205,7 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 4. **Botón «+1» por cada equipo**. Requiere la opción *Botón «+1»* (se marca automáticamente si es necesario). Si está activada, muestra tres botones «+1», uno por equipo, en vez de un único botón. Esta opción solo tiene sentido si tienes activada la opción de vista de incursión *Mostrar totales disgregados* o *Mostrar «+1» disgregados por línea*. Opción desactivada por defecto.
 
-### Ubicaciones ###
+### Ubicaciones de gimnasios ###
 
 Las ubicaciones de los gimnasios tienen que configurarse en cada grupo de forma independiente. Un grupo no conoce las ubicaciones de los demás grupos.
 
@@ -220,7 +224,7 @@ Por defecto, Google intenta formatear los números y los estropea. Antes de empe
 
 ![Esto nos pasa por utilizar las hojas de cálculo como tablas](gsp.gif)
 
-La cuarta columna es **muy importante**, ya que es la que permite encontrar los gimnasios. Revisa la sección sobre [mejorar la búsqueda de ubicaciones](#mejorar-la-búsqueda-de-ubicaciones) con calma.
+La cuarta columna es **muy importante**, ya que es la que permite encontrar los gimnasios. Revisa la sección sobre [mejorar palabras clave](#mejorar-palabras-clave) con calma.
 
 La quinta columna es opcional y siempre puedes cubrirla más tarde. Revisa la sección sobre [etiquetas](#etiquetas) donde se explica más en detalle.
 
@@ -240,7 +244,7 @@ Para listar todos los gimnasios conocidos puedes usar el comando `/list`. Este c
 
 **¡Importante!** Si les cambias el nombre (primera columna), los gimnasios se borran y se vuelven a crear, y todas las alertas que los usuarios tuvieran creadas se pierden. También puede afectar a incursiones en curso.
 
-#### Mejorar la búsqueda de ubicaciones ####
+#### Mejorar palabras clave ####
 
 Cuando crees las palabras clave ten en cuenta que las tildes y mayúsculas se ignoran. Además, los caracteres como «ç» y «ñ» se transforman a «c» y «n». Es decir, la palabra clave *Peñíscola* a efectos de búsqueda es la misma que *peniscola*. Puede haber varias palabras clave separadas por comas y se ignoran los espacios entre las comas y las palabras.
 
@@ -293,9 +297,9 @@ Ten en cuenta que, si añades estos datos en algún gimnasio, los gimnasios que 
 
 El número máximo de gimnasios que se cargarán de la hoja de cálculo es **3000**. A partir de ese número, se ignorarán.
 
-En la creación de incursiones con el comando `/raid`, sin embargo, solo se mostrará un **máximo de 56 gimnasios**, ordenados de mayor a menor uso en los últimos 60 días. Si se quiere mostrar más gimnasios, se recomienda crear zonas. Se mostrará un **máximo de 12 zonas**, así que si el número de zonas es mayor, las zonas con menor uso no aparecerán.
+En la creación de incursiones con el comando `/raid`, sin embargo, solo se mostrará un **máximo de 56 gimnasios**, ordenados de mayor a menor uso en los últimos 60 días. Si se quiere mostrar más gimnasios, se recomienda crear zonas. Se mostrará un **máximo de 12 zonas**, así que si el número de zonas es mayor, las zonas con menor uso no aparecerán. Combinando el número de zonas con el número máximo de gimnasios por zona, usando el comando `/raid` pueden mostrarse hasta un total de 56*12=**672 gimnasios**.
 
-Combinando el número de zonas con el número máximo de gimnasios por zona, usando el comando `/raid` pueden mostrarse hasta un total de 56*12=**672 gimnasios**.
+Esto no quiere decir que sea obligatorio crear zonas si se quieren utilizar más de 56 gimnasios. Lo único que ocurre, es que solo se podrán seleccionar los 56 más concurridos usando el comando `/raid` sin argumentos.
 
 ### Modo niñero ###
 
