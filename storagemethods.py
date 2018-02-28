@@ -941,7 +941,7 @@ def raidEscapou(grupo_id, message_id, user_id):
         cursor.execute(sql, (raid["id"],user_id))
         result = cursor.fetchone()
         if (result is None and raid["status"] == "started") or result is not None:
-            sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 1) ON DUPLICATE KEY UPDATE tarde=0, estoy=1, novoy=0, lotengo=0;"
+            sql = "INSERT INTO voy (incursion_id, usuario_id, estoy, lotengo) VALUES (%s, %s, 1, 0) ON DUPLICATE KEY UPDATE tarde=0, estoy=1, novoy=0, lotengo=0;"
             rows_affected = cursor.execute(sql, (raid["id"], user_id))
         else:
             return "not_now"
