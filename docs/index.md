@@ -94,8 +94,13 @@ Para editar o añadir cualquiera de estos detalles, el creador de la incursión 
     /pokemon Wartortle
     /gimnasio Plaza de Abastos
     /horafin 12:30
+    /horafin -
 
-Una incursión también se puede cancelar contestando con el comando `/cancelar`, ser borrada con el comando `/borrar` y ser reflotada con el comando `/reflotar`.
+En el caso de pasar una barra horizontal - como argumento a `/horafin`, se borrará la hora de fin.
+
+Una incursión también puede ser **cancelada** contestando con el comando `/cancelar`, ser **borrada** con el comando `/borrar` y ser **reflotada** con el comando `/reflotar`.
+
+Las incursiones se finalizan automáticamente pasada media hora desde la hora de creación, pero se puede **forzar la finalización** con el comando `/cerrar`. Este comando solo se puede utilizar pasada la hora de inicio de la incursión.
 
 Los participantes recibirán **avisos por privado** cuando se edite, cancele o borre una incursión.
 
@@ -193,7 +198,9 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 5. **Agrupar apuntados por nivel/equipo**. En lugar de mostrar los apuntados por orden temporal, los agrupa por equipo y por nivel. Opción desactivada por defecto.
 
-6. **Marcar apuntados tarde**. Marca en el listado los entrenadores que se hayan apuntado tarde con un 🐌. Se puede configurar para 1, 3, 5 o 10 minutos antes de la hora fijada de la incursión. Opción activada por defecto con 1 minuto.
+6. **Ordenar zonas/gimnasios por actividad**. Al crear incursiones de forma interactiva, mostrar las zonas y los gimnasios ordenados de mayor a menor actividad, en lugar de usar únicamente el orden alfabético. Opción activada por defecto.
+
+7. **Marcar apuntados tarde**. Marca en el listado los entrenadores que se hayan apuntado tarde con un 🐌. Se puede configurar para 1, 3, 5 o 10 minutos antes de la hora fijada de la incursión. Opción activada por defecto con 1 minuto.
 
 #### Funcionamiento de incursiones ####
 
