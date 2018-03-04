@@ -446,16 +446,20 @@ def auto_refloat(bot):
                 (g["refloatauto"] == 15 and timeraid > tweminsago_datetime) or \
                  g["refloatauto"] == 30):
                 try:
-                    bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
-                except Exception as e:
-                    logging.debug("supportmethods:auto_refloat: error borrando post antiguo %s" % raid["message"])
-                raid["refloated"] = 1
-                text = format_message(raid)
-                reply_markup = get_keyboard(raid)
-                sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-                raid["message"] = sent_message.message_id
-                saveRaid(raid)
-                logging.debug("supportmethods:auto_refloat: auto reflotada incursión %s mensaje %s" % (raid["id"], raid["message"]))
+                    raid["refloated"] = 1
+                    text = format_message(raid)
+                    reply_markup = get_keyboard(raid)
+                    sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+                    delete_message_id = raid["message"]
+                    raid["message"] = sent_message.message_id
+                    saveRaid(raid)
+                    logging.debug("supportmethods:auto_refloat: auto reflotada incursión %s mensaje %s" % (raid["id"], raid["message"]))
+                    try:
+                        bot.deleteMessage(chat_id=raid["grupo_id"],message_id=delete_message_id)
+                    except Exception as e:
+                        logging.debug("supportmethods:auto_refloat: error borrando post antiguo %s" % raid["message"])
+                except:
+                    logging.debug("supportmethods:auto_refloat: error reflotando incursión %s mensaje %s" % (raid["id"], raid["message"]))
                 time.sleep(0.015)
 
 def error_callback(bot, update, error):
