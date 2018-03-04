@@ -991,6 +991,24 @@ def cancelRaid(raid_id, force=False):
     db.close()
     return True
 
+def closeRaid(raid_id):
+    db = getDbConnection()
+    logging.debug("storagemethods:closeRaid: %s" % (raid_id))
+    with db.cursor() as cursor:
+        raid = getRaid(raid_id)
+        if raid["status"] == "cancelled":
+            return "already_cancelled"
+        elif raid["status"] in ["old", "ended", "waiting"]:
+            return "too_old_or_too_young"
+        elif raid["status"] == "deleted":
+            return "already_deleted"
+        else:
+            sql = "UPDATE incursiones SET `status`='ended' WHERE id=%s;"
+            cursor.execute(sql, (raid_id))
+            db.commit()
+    db.close()
+    return True
+
 def uncancelRaid(raid_id):
     db = getDbConnection()
     logging.debug("storagemethods:uncancelRaid: %s" % (raid_id))

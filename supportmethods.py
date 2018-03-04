@@ -905,7 +905,7 @@ def edit_check_private(chat_id, chat_type, user_username, command, bot):
 
 def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, command, bot):
     logging.debug("supportmethods:edit_check_private_or_reply")
-    if command == "borrar" or command == "cancelar" or command == "reflotar" or command == "descancelar":
+    if command in ["borrar", "cancelar", "reflotar", "descancelar", "cerrar"]:
         expectedargs = 0
     else:
         expectedargs = 1

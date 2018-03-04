@@ -52,7 +52,7 @@ from Levenshtein import distance
 import html
 
 from config import config
-from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats, getRemovedAlerts, getCurrentGyms
+from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, closeRaid, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats, getRemovedAlerts, getCurrentGyms
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, update_settings_message_timed, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address, get_pokemons_keyboard, get_gyms_keyboard, get_zones_keyboard, get_times_keyboard, get_days_keyboard, format_text_creating, remove_incomplete_raids, send_edit_instructions
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
@@ -1209,6 +1209,48 @@ def raid(bot, update, args=None):
         logging.debug("Error sending warning in private. Maybe conversation not started?")
 
 @run_async
+def cerrar(bot, update, args=None):
+    logging.debug("detectivepikachubot:cerrar: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+
+    if isBanned(chat_id):
+        return
+
+    if chat_type != "channel":
+        user_username = message.from_user.username
+        thisuser = refreshUsername(user_id, user_username)
+        if isBanned(user_id):
+            return
+    else:
+        user_username = None
+        thisuser = None
+
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cerrar", bot)
+    if raid is None:
+        return
+
+    if raid is not None:
+        if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
+            response = closeRaid(raid["id"])
+            if response is True:
+                raid["status"] = "ended"
+                reply_markup = get_keyboard(raid)
+                update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
+                if user_id is not None:
+                    bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha cerrado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+            elif response == "already_deleted":
+                user_id = chat_id if user_id is None else user_id
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede cerrar la incursión `%s` porque ha sido borrada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+            elif response == "already_cancelled":
+                user_id = chat_id if user_id is None else user_id
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede cerrar la incursión `%s` porque ha sido cancelada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+            elif response == "too_old_or_too_young":
+                user_id = chat_id if user_id is None else user_id
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede cerrar la incursión `%s`. Solo se pueden cerrar incursiones comenzadas y que no han finalizado ya." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para cerrar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+
+@run_async
 def cancelar(bot, update, args=None):
     logging.debug("detectivepikachubot:cancelar: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -2195,6 +2237,7 @@ dispatcher.add_handler(CommandHandler('settings', settings))
 # Commands related to raids
 dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cancelar','cancel'], cancelar, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cerrar','close'], cerrar, pass_args=True))
 dispatcher.add_handler(CommandHandler(['descancelar','uncancel'], descancelar, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cambiarhora','hora'], cambiarhora, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cambiarhorafin','horafin'], cambiarhorafin, pass_args=True))
