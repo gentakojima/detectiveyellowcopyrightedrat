@@ -996,9 +996,15 @@ def closeRaid(raid_id):
     logging.debug("storagemethods:closeRaid: %s" % (raid_id))
     with db.cursor() as cursor:
         raid = getRaid(raid_id)
+        group = getGroup(raid["grupo_id"])
+        tzone = timezone(group["timezone"])
+        raid_timeraid = tzone.localize(raid["timeraid"])
+        now_datetime = datetime.now(tzone)
+        difftime = raid_timeraid - now_datetime
         if raid["status"] == "cancelled":
             return "already_cancelled"
-        elif raid["status"] in ["old", "ended", "waiting"]:
+        elif (raid["status"] == "waiting" and difftime.total_seconds() > 120) or \
+             (raid["status"] in ["old", "ended"]):
             return "too_old_or_too_young"
         elif raid["status"] == "deleted":
             return "already_deleted"

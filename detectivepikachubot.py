@@ -1246,7 +1246,7 @@ def cerrar(bot, update, args=None):
                 bot.sendMessage(chat_id=user_id, text="❌ No se puede cerrar la incursión `%s` porque ha sido cancelada." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
             elif response == "too_old_or_too_young":
                 user_id = chat_id if user_id is None else user_id
-                bot.sendMessage(chat_id=user_id, text="❌ No se puede cerrar la incursión `%s`. Solo se pueden cerrar incursiones comenzadas y que no han finalizado ya." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=user_id, text="❌ No se puede cerrar la incursión `%s`. Solo se pueden cerrar incursiones comenzadas (o que estén a punto de comenzar) y que no han finalizado ya." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             bot.sendMessage(chat_id=user_id, text="❌ No tienes permiso para cerrar la incursión `%s`." % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
 
