@@ -82,7 +82,7 @@ def saveGroup(group):
     for k in ["disaggregated","latebutton","refloat","gotitbuttons","gymcommand","babysitter","timeformat","listorder","icontheme","refloatauto","validationrequired","plusdisaggregated","plusdisaggregatedinline"]:
         if k not in group.keys():
             group[k] = 0
-    for k in ["alerts","candelete","locations","raidcommand","snail"]:
+    for k in ["alerts","candelete","locations","raidcommand","raidcommandorder","snail"]:
         if k not in group.keys():
             group[k] = 1
     if "plusmax" not in group.keys():
@@ -90,8 +90,8 @@ def saveGroup(group):
 
     with db.cursor() as cursor:
         sql = "INSERT INTO grupos (id, title, alias, spreadsheet) VALUES (%s, %s, %s, %s) \
-        ON DUPLICATE KEY UPDATE title = %s, alias = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, babysitter = %s, timezone = %s, talkgroup = %s, timeformat = %s, listorder = %s, snail = %s, icontheme = %s, plusmax = %s, plusdisaggregated = %s, plusdisaggregatedinline = %s, refloatauto = %s, validationrequired = %s;"
-        cursor.execute(sql, (group["id"], group["title"], group["alias"], group["spreadsheet"], group["title"], group["alias"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["babysitter"], group["timezone"], group["talkgroup"], group["timeformat"], group["listorder"], group["snail"], group["icontheme"], group["plusmax"], group["plusdisaggregated"], group["plusdisaggregatedinline"], group["refloatauto"], group["validationrequired"]))
+        ON DUPLICATE KEY UPDATE title = %s, alias = %s, spreadsheet = %s, settings_message = %s, alerts = %s, disaggregated = %s, latebutton = %s, refloat = %s, candelete = %s, gotitbuttons = %s, locations = %s, gymcommand = %s, raidcommand = %s, raidcommandorder = %s, babysitter = %s, timezone = %s, talkgroup = %s, timeformat = %s, listorder = %s, snail = %s, icontheme = %s, plusmax = %s, plusdisaggregated = %s, plusdisaggregatedinline = %s, refloatauto = %s, validationrequired = %s;"
+        cursor.execute(sql, (group["id"], group["title"], group["alias"], group["spreadsheet"], group["title"], group["alias"], group["spreadsheet"], group["settings_message"], group["alerts"], group["disaggregated"], group["latebutton"], group["refloat"], group["candelete"], group["gotitbuttons"], group["locations"], group["gymcommand"], group["raidcommand"], group["raidcommandorder"], group["babysitter"], group["timezone"], group["talkgroup"], group["timeformat"], group["listorder"], group["snail"], group["icontheme"], group["plusmax"], group["plusdisaggregated"], group["plusdisaggregatedinline"], group["refloatauto"], group["validationrequired"]))
     db.commit()
     db.close()
 
@@ -100,7 +100,7 @@ def getGroup(group_id, reconnect=True):
     db = getDbConnection()
     logging.debug("storagemethods:getGroup: %s" % (group_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`,`title`,`alias`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timeformat`, `listorder`, `snail`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `plusdisaggregated`, `plusdisaggregatedinline`, `refloatauto`, `validationrequired` FROM `grupos` WHERE `id`=%s"
+        sql = "SELECT `id`,`title`,`alias`,`spreadsheet`,`testgroup`,`alerts`,`disaggregated`,`settings_message`,`latebutton`,`refloat`,`candelete`,`gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `raidcommandorder`, `babysitter`, `timeformat`, `listorder`, `snail`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `plusdisaggregated`, `plusdisaggregatedinline`, `refloatauto`, `validationrequired` FROM `grupos` WHERE `id`=%s"
         try:
             cursor.execute(sql, (group_id))
             result = cursor.fetchone()
@@ -118,7 +118,7 @@ def getGroupsByUser(user_id):
     db = getDbConnection()
     logging.debug("storagemethods:getGroupsByUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `grupos`.`id` as `id`, `title`, `alias`, `spreadsheet`, `testgroup`, `alerts`, `disaggregated`, `latebutton`, `refloat`, `candelete`, `gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `babysitter`, `timeformat`, `listorder`, `snail`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `plusdisaggregated`, `plusdisaggregatedinline`, `refloatauto`, `validationrequired` FROM `grupos` \
+        sql = "SELECT `grupos`.`id` as `id`, `title`, `alias`, `spreadsheet`, `testgroup`, `alerts`, `disaggregated`, `latebutton`, `refloat`, `candelete`, `gotitbuttons`, `locations`, `gymcommand`, `raidcommand`, `raidcommandorder`, `babysitter`, `timeformat`, `listorder`, `snail`, `talkgroup`, `icontheme`, `timezone`, `plusmax`, `plusdisaggregated`, `plusdisaggregatedinline`, `refloatauto`, `validationrequired` FROM `grupos` \
         LEFT JOIN incursiones ON incursiones.grupo_id = grupos.id \
         RIGHT JOIN voy ON voy.incursion_id = incursiones.id \
         WHERE voy.usuario_id = %s \
@@ -642,11 +642,12 @@ def getCurrentPokemons():
     db.close()
     return result
 
-def getCurrentGyms(group_id, zone=None):
+def getCurrentGyms(group_id, zone=None, order="activity"):
     db = getDbConnection()
     logging.debug("storagemethods:getCurrentPokemons")
     with db.cursor() as cursor:
         limit = "56" if zone is None else "256"
+        sql_order = "ORDER BY count DESC, gimnasios.name ASC" if order == "activity" else "ORDER BY gimnasios.name ASC"
         sql = "SELECT count(DISTINCT incursiones.id) AS count, name, zones, gimnasios.id AS id \
             FROM gimnasios \
             LEFT JOIN incursiones ON incursiones.gimnasio_id = gimnasios.id \
@@ -654,7 +655,7 @@ def getCurrentGyms(group_id, zone=None):
             WHERE (incursiones.addedtime > NOW() - INTERVAL 60 DAY OR incursiones.addedtime IS NULL) \
             AND gimnasios.grupo_id = %s \
             GROUP BY gimnasios.id \
-            ORDER BY count DESC, gimnasios.name ASC \
+            " + sql_order + " \
             LIMIT 0," + limit + ";"
         cursor.execute(sql, (group_id))
         result = cursor.fetchall()
@@ -671,7 +672,7 @@ def getCurrentGyms(group_id, zone=None):
     db.close()
     return result
 
-def getZones(group_id):
+def getZones(group_id, order="activity"):
     db = getDbConnection()
     logging.debug("storagemethods:getZones")
     zones = []
@@ -695,6 +696,8 @@ def getZones(group_id):
                 for z in zs:
                     if z.strip().lower() not in map(str.lower, zones):
                         zones.append(z.strip())
+        if order == "alphabetical":
+            zones.sort()
     db.close()
     return zones
 

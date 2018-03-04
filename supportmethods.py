@@ -605,6 +605,10 @@ def get_settings_keyboard(chat_id, keyboard="main"):
         raidcommand_text = "✅ Crear incursiones (comando /raid)"
     else:
         raidcommand_text = "▪️ Crear incursiones (comando /raid)"
+    if group["raidcommandorder"] == 1:
+        raidcommandorder_text = "✅ Ordenar zonas/gimnasios por actividad"
+    else:
+        raidcommandorder_text = "▪️ Ordenar zonas/gimnasios por actividad"
     if group["babysitter"] == 1:
         babysitter_text = "✅ Modo niñero (borra mensajes)"
     else:
@@ -665,7 +669,7 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     elif keyboard == "raidbehaviour":
         settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton(plusdisaggregated_text, callback_data='settings_plusdisaggregated')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
     elif keyboard == "raids":
-        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(plusdisaggregatedinline_text, callback_data='settings_plusdisaggregatedinline')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(plusdisaggregatedinline_text, callback_data='settings_plusdisaggregatedinline')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(raidcommandorder_text, callback_data='settings_raidcommandorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
 
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
@@ -681,10 +685,10 @@ def get_pokemons_keyboard():
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
-def get_gyms_keyboard(group_id, page=0, zone=None):
+def get_gyms_keyboard(group_id, page=0, zone=None, order="activity"):
     logging.debug("supportmethods:get_gyms_keyboard %s %s" % (group_id, page))
     keyboard = []
-    current_gyms = getCurrentGyms(group_id, zone)
+    current_gyms = getCurrentGyms(group_id, zone, order=order)
     maxgyms = min(14*page+13, len(current_gyms))
 
     for i in range(page*14, maxgyms,2):
@@ -705,10 +709,10 @@ def get_gyms_keyboard(group_id, page=0, zone=None):
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
-def get_zones_keyboard(group_id):
+def get_zones_keyboard(group_id, order="activity"):
     logging.debug("supportmethods:get_zones_keyboard %s" % (group_id))
     keyboard = []
-    zones = getZones(group_id)
+    zones = getZones(group_id, order=order)
 
     if len(zones) == 0:
         return False

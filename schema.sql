@@ -44,6 +44,7 @@ CREATE TABLE `grupos` (
   `locations` TINYINT NOT NULL DEFAULT '1',
   `gymcommand` TINYINT NOT NULL DEFAULT '0',
   `raidcommand` TINYINT NOT NULL DEFAULT '1',
+  `raidcommandorder` TINYINT NOT NULL DEFAULT '1',
   `talkgroup` VARCHAR(60) NULL DEFAULT NULL,
   `babysitter` TINYINT NOT NULL DEFAULT '0',
   `timeformat` TINYINT NOT NULL DEFAULT '0',

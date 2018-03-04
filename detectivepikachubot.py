@@ -2005,9 +2005,10 @@ def raidbutton(bot, update):
         if text_day != "":
             text_day = " " + text_day
         text_time = extract_time(raid["timeraid"])
-        reply_markup = get_zones_keyboard(group["id"])
+        gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
+        reply_markup = get_zones_keyboard(group["id"], gyms_ordering)
         if reply_markup is False:
-            reply_markup = get_gyms_keyboard(group["id"])
+            reply_markup = get_gyms_keyboard(group["id"], order=gyms_ordering)
             bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crearla. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
         else:
             bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona la zona del gimnasio en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
@@ -2016,7 +2017,8 @@ def raidbutton(bot, update):
         m = re.match("^iraid_zone_(.+)$", data)
         raid["gimnasio_text"] = m.group(1)
         saveRaid(raid)
-        reply_markup = get_gyms_keyboard(group["id"], 0, m.group(1))
+        gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
+        reply_markup = get_gyms_keyboard(group["id"], 0, m.group(1), order=gyms_ordering)
         text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
         creating_text = format_text_creating(thisuser)
         text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
@@ -2027,7 +2029,8 @@ def raidbutton(bot, update):
 
     if re.match("^iraid_gyms_page[1-9]$", data) != None:
         m = re.match("^iraid_gyms_page([1-9])$", data)
-        reply_markup = get_gyms_keyboard(group["id"], page=int(m.group(1))-1, zone=raid["gimnasio_text"])
+        gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
+        reply_markup = get_gyms_keyboard(group["id"], page=int(m.group(1))-1, zone=raid["gimnasio_text"], order=gyms_ordering)
         text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
         creating_text = format_text_creating(thisuser)
         text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
@@ -2071,9 +2074,9 @@ def raidbutton(bot, update):
       else:
           delete_message(chat_id, message_id, bot)
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder", "settings_plusdisaggregated":"plusdisaggregated", "settings_plusdisaggregatedinline":"plusdisaggregatedinline"}
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder", "settings_plusdisaggregated":"plusdisaggregated", "settings_plusdisaggregatedinline":"plusdisaggregatedinline", "settings_raidcommandorder":"raidcommandorder"}
 
-  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids"}
+  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids", "settings_raidcommandorder":"raids"}
 
   for k in settings:
       if data==k:
