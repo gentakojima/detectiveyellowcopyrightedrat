@@ -1157,19 +1157,20 @@ def raid(bot, update, args=None):
       current_raid["gimnasio_text"] = current_raid["gimnasio_text"] + "%s " % args[i]
   current_raid["gimnasio_text"] = current_raid["gimnasio_text"].strip()
 
-  chosengym = None
-  gyms = getPlaces(chat_id, ordering="id")
-  for p in gyms:
-    for n in p["names"]:
-      if re.search(re.escape(unidecode(n)),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) is not None:
-        logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(current_raid["gimnasio_text"])))
-        chosengym = p
-        break
-    if chosengym is not None:
-      break
-  if chosengym is not None:
-    current_raid["gimnasio_text"] = chosengym["desc"]
-    current_raid["gimnasio_id"] = chosengym["id"]
+  if group["locations"] == 1:
+      chosengym = None
+      gyms = getPlaces(chat_id, ordering="id")
+      for p in gyms:
+        for n in p["names"]:
+          if re.search(re.escape(unidecode(n)),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) is not None:
+            logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(current_raid["gimnasio_text"])))
+            chosengym = p
+            break
+        if chosengym is not None:
+          break
+      if chosengym is not None:
+        current_raid["gimnasio_text"] = chosengym["desc"]
+        current_raid["gimnasio_id"] = chosengym["id"]
 
   current_raid["grupo_id"] = chat_id
   current_raid["usuario_id"] = user_id
