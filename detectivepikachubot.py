@@ -878,6 +878,7 @@ def stats(bot, update, args = None):
                 show_week = True
         # Get group info
         group = getGroup(chat_id)
+        icons = iconthemes[group["icontheme"]]
         now = datetime.now(timezone(group["timezone"]))
         # Arrange time periods
         lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
@@ -893,12 +894,14 @@ def stats(bot, update, args = None):
         logging.debug("Ranking from %s to %s" % (lastmonth_start, lastmonth_end))
         medallas = ["🥇","🥈","🥉"]
         if show_month:
+            if group["rankingmonth"] == 0:
+                return
             # Last month stats
             groupstats_lastmonth = getGroupStats(chat_id, lastmonth_start, lastmonth_end)
             months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
             month_text = "%s" % months[lastmonth_start.month-1]
             # Prepare output
-            output = "TOP 10 de participación en incursiones <b>mes de %s</b>" % month_text
+            output = "TOP %s de participación en incursiones <b>mes de %s</b>" % (group["rankingmonth"],month_text)
             position = 0
             counter = 0
             lastraidno = 0
@@ -906,20 +909,22 @@ def stats(bot, update, args = None):
                 counter = counter + 1
                 if gs["incursiones"] != lastraidno:
                     position = counter
-                    if position > 10:
+                    if position > group["rankingmonth"]:
                         break
                 lastraidno = gs["incursiones"]
                 trainername = gs["trainername"] if gs["trainername"] is not None else "@%s" % gs["username"]
                 user_text = "<a href='https://t.me/%s'>%s</a>" % (gs["username"], trainername)
                 medalla_text = "" if position > 3 else " %s" % medallas[position-1]
-                output = output + "\n %s. %s (%s)%s" % (position, user_text, gs["incursiones"], medalla_text)
+                output = output + "\n %s. %s %s (%s)%s" % (position, icons[gs["team"]], user_text, gs["incursiones"], medalla_text)
             bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
         if show_week:
+            if group["rankingweek"] == 0:
+                return
             # Last week stats
             groupstats_lastweek = getGroupStats(chat_id, lastweek_start, lastweek_end)
             daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
             # Prepare output
-            output = "TOP 10 de participación en incursiones <b>semana del %s</b>" % daymonth_text
+            output = "TOP %s de participación en incursiones <b>semana del %s</b>" % (group["rankingweek"],daymonth_text)
             position = 0
             counter = 0
             lastraidno = 0
@@ -927,13 +932,13 @@ def stats(bot, update, args = None):
                 counter = counter + 1
                 if gs["incursiones"] != lastraidno:
                     position = counter
-                    if position > 10:
+                    if position > group["rankingweek"]:
                         break
                 lastraidno = gs["incursiones"]
                 trainername = gs["trainername"] if gs["trainername"] is not None else "@%s" % gs["username"]
                 user_text = "<a href='https://t.me/%s'>%s</a>" % (gs["username"], trainername)
                 medalla_text = "" if position > 3 else " %s" % medallas[position-1]
-                output = output + "\n %s. %s (%s)%s" % (position, user_text, gs["incursiones"], medalla_text)
+                output = output + "\n %s. %s %s (%s)%s" % (position, icons[gs["team"]], user_text, gs["incursiones"], medalla_text)
             bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 @run_async
@@ -2101,7 +2106,7 @@ def raidbutton(bot, update):
         bot.deleteMessage(chat_id=chat_id, message_id=message_id)
 
   # Settings and admin stuff
-  settings_goto = {"settings_goto_main":"main", "settings_goto_raids":"raids", "settings_goto_commands":"commands", "settings_goto_behaviour": "behaviour", "settings_goto_raidbehaviour": "raidbehaviour"}
+  settings_goto = {"settings_goto_main":"main", "settings_goto_raids":"raids", "settings_goto_commands":"commands", "settings_goto_behaviour": "behaviour", "settings_goto_raidbehaviour": "raidbehaviour", "settings_goto_ranking":"ranking"}
 
   for k in settings_goto:
       if data==k:
@@ -2118,7 +2123,7 @@ def raidbutton(bot, update):
 
   settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder", "settings_plusdisaggregated":"plusdisaggregated", "settings_plusdisaggregatedinline":"plusdisaggregatedinline", "settings_raidcommandorder":"raidcommandorder"}
 
-  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids", "settings_raidcommandorder":"raids"}
+  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids", "settings_raidcommandorder":"raids", "settings_rankingweek":"ranking", "settings_rankingmonth":"ranking"}
 
   for k in settings:
       if data==k:
@@ -2200,6 +2205,44 @@ def raidbutton(bot, update):
               group["snail"] = 0
           saveGroup(group)
           update_settings_message(chat_id, bot, settings_categories[data])
+
+  if data=="settings_rankingmonth":
+      if not is_admin(chat_id, user_id, bot):
+          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+      else:
+          group = getGroup(chat_id)
+          if group["rankingmonth"] == 0:
+              group["rankingmonth"] = 15
+          elif group["rankingmonth"] == 15:
+              group["rankingmonth"] = 25
+          elif group["rankingmonth"] == 25:
+              group["rankingmonth"] = 35
+          elif group["rankingmonth"] == 35:
+              group["rankingmonth"] = 50
+          else:
+              group["rankingmonth"] = 0
+          saveGroup(group)
+          update_settings_message(chat_id, bot, settings_categories[data])
+
+  if data=="settings_rankingweek":
+        if not is_admin(chat_id, user_id, bot):
+            bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            group = getGroup(chat_id)
+            if group["rankingweek"] == 0:
+                group["rankingweek"] = 5
+            elif group["rankingweek"] == 5:
+                group["rankingweek"] = 10
+            elif group["rankingweek"] == 10:
+                group["rankingweek"] = 15
+            elif group["rankingweek"] == 15:
+                group["rankingweek"] = 20
+            elif group["rankingweek"] == 20:
+                group["rankingweek"] = 25
+            else:
+                group["rankingweek"] = 0
+            saveGroup(group)
+            update_settings_message(chat_id, bot, settings_categories[data])
 
   if data=="settings_refloatauto":
     if not is_admin(chat_id, user_id, bot):

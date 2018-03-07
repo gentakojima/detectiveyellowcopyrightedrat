@@ -212,6 +212,12 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 4. **Botón «+1» por cada equipo**. Requiere la opción *Botón «+1»* (se marca automáticamente si es necesario). Si está activada, muestra tres botones «+1», uno por equipo, en vez de un único botón. Esta opción solo tiene sentido si tienes activada la opción de vista de incursión *Mostrar totales disgregados* o *Mostrar «+1» disgregados por línea*. Opción desactivada por defecto.
 
+#### Funcionamiento de rankings ####
+
+1. **Ranking Semanal**. Si está ativado, permite a los administradores de un grupo mostrar un TOP 5, 10, 15, 20 o 25 semanal de participación en incursiones (según la opción seleccionada, por defecto 10) utilizando el comando `/ranking week` (o simplemente `/ranking`).
+
+1. **Ranking Mensual**. Si está ativado, permite a los administradores de un grupo mostrar un TOP 15, 25, 35 o 50 mensual de participación en incursiones (según la opción seleccionada, por defecto 15) utilizando el comando `/ranking month`.
+
 ### Ubicaciones de gimnasios ###
 
 Las ubicaciones de los gimnasios tienen que configurarse en cada grupo de forma independiente. Un grupo no conoce las ubicaciones de los demás grupos.
@@ -319,6 +325,10 @@ El comando `/settalkgroup` permite definir un grupo para hablar. Si está el mod
     /settalkgroup @PGSDC
     /settalkgroup https://t.me/joinchat/XXs3XkzYsXXxnvbtxxe11x
 
+Para eliminar el grupo para hablar se puede pasar una barra horizontal como argumento, es decir:
+
+    /settalkgroup -
+
 ### Zona horaria ###
 
 El bot reconoce la hora que escriben los usuarios y hace operaciones con ellas, por lo que es importante que la hora que utilice el bot se corresponda con la hora real de tu grupo.
@@ -332,7 +342,9 @@ Para establecer la zona horaria correcta se debe utilizar el comando `/settimezo
 
 El bot puede mostrar los rankings de la **semana pasada** (contando de lunes a domingo) y del **mes pasado**, con los comandos `/ranking week` (o simplemente `/ranking`) y `/ranking month`.
 
-En estos rankings aparecen solo los 10 usuarios con mayor participación en incursiones. En caso de empate en número de incursiones, se muestran en la misma posición. Solo se tienen en cuenta los usuarios que se han apuntado a la incursión **antes de la hora de inicio** y que han pulsado el botón de **Estoy**.
+En estos rankings aparecen ordenados por participación en incursiones el número de usuarios [configurado en el grupo o canal](#funcionamiento-de-rankings). Por defecto, un TOP 10 semanal y un TOP 15 mensual.
+
+En caso de empate en número de incursiones, se muestran en la misma posición. Solo se tienen en cuenta los usuarios que se han apuntado a la incursión **antes de la hora de inicio** y que han pulsado el botón de **Estoy**.
 
 ### Otros comandos exclusivos para administradores ###
 

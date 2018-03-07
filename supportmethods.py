@@ -628,45 +628,37 @@ def get_settings_keyboard(chat_id, keyboard="main"):
         listorder_text = "▪️ Agrupar apuntados por nivel/equipo"
     if group["plusmax"] == 1:
         plusmax_text = "✅ Botón «+1» (máx. 1 acompañante)"
-    elif group["plusmax"] == 2:
-        plusmax_text = "✅ Botón «+1» (máx. 2 acompañantes)"
-    elif group["plusmax"] == 3:
-        plusmax_text = "✅ Botón «+1» (máx. 3 acompañantes)"
-    elif group["plusmax"] == 5:
-        plusmax_text = "✅ Botón «+1» (máx. 5 acompañantes)"
-    elif group["plusmax"] == 10:
-        plusmax_text = "✅ Botón «+1» (máx. 10 acompañantes)"
+    elif group["plusmax"] in [2,3,5,10]:
+        plusmax_text = "✅ Botón «+1» (máx. %s acompañantes)" % group["plusmax"]
     else:
-        plusmax_text = "▪️ Botón +1"
+        plusmax_text = "▪️ Botón «+1»"
     if group["plusdisaggregated"] == 1:
         plusdisaggregated_text = "✅ Botón «+1» por cada equipo"
     else:
         plusdisaggregated_text = "▪️ Botón «+1» por cada equipo"
     if group["snail"] == 1:
         snail_text = "✅ Marcar apuntados tarde (1 minuto)"
-    elif group["snail"] == 3:
-        snail_text = "✅ Marcar apuntados tarde (3 minutos)"
-    elif group["snail"] == 5:
-        snail_text = "✅ Marcar apuntados tarde (5 minutos)"
-    elif group["snail"] == 10:
-        snail_text = "✅ Marcar apuntados tarde (10 minutos)"
+    elif group["snail"] in [3,5,10]:
+        snail_text = "✅ Marcar apuntados tarde (%s minutos)" % group["snail"]
     else:
         snail_text = "▪️ Marcar apuntados tarde"
-    if group["refloatauto"] == 5:
-        refloatauto_text = "✅ Reflotar automático (5 minutos)"
-    elif group["refloatauto"] == 10:
-        refloatauto_text = "✅ Reflotar automático (10 minutos)"
-    elif group["refloatauto"] == 15:
-        refloatauto_text = "✅ Reflotar automático (15 minutos)"
-    elif group["refloatauto"] == 30:
-        refloatauto_text = "✅ Reflotar automático (30 minutos)"
+    if group["refloatauto"] in [5,10,15,30]:
+        refloatauto_text = "✅ Reflotar automático (%s minutos)" % group["refloatauto"]
     else:
         refloatauto_text = "▪️ Reflotar automático"
+    if group["rankingweek"] in [5,10,15,20,25]:
+        rankingweek_text = "✅ Ranking semanal (TOP %s)" % group["rankingweek"]
+    else:
+        rankingweek_text = "▪️ Ranking semanal"
+    if group["rankingmonth"] in [15,25,35,50]:
+        rankingmonth_text = "✅ Ranking mensual (TOP %s)" % group["rankingmonth"]
+    else:
+        rankingmonth_text = "▪️ Ranking mensual"
     icons = iconthemes[group["icontheme"]]
     icontheme_text = "%s%s%s Tema de iconos" % (icons["Rojo"],icons["Azul"],icons["Amarillo"])
 
     if keyboard == "main":
-        settings_keyboard = [[InlineKeyboardButton("Funcionamiento del grupo/canal »", callback_data='settings_goto_behaviour')], [InlineKeyboardButton("Comandos disponibles para usuarios »", callback_data='settings_goto_commands')], [InlineKeyboardButton("Opciones de vista de incursiones »", callback_data='settings_goto_raids')], [InlineKeyboardButton("Funcionamiento de incursiones »", callback_data='settings_goto_raidbehaviour')], [InlineKeyboardButton("Terminado", callback_data='settings_done')]]
+        settings_keyboard = [[InlineKeyboardButton("Funcionamiento del grupo/canal »", callback_data='settings_goto_behaviour')], [InlineKeyboardButton("Comandos disponibles para usuarios »", callback_data='settings_goto_commands')], [InlineKeyboardButton("Opciones de vista de incursiones »", callback_data='settings_goto_raids')], [InlineKeyboardButton("Funcionamiento de incursiones »", callback_data='settings_goto_raidbehaviour')], [InlineKeyboardButton("Funcionamiento de rankings »", callback_data='settings_goto_ranking')], [InlineKeyboardButton("Terminado", callback_data='settings_done')]]
     elif keyboard == "behaviour":
         settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations')], [InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')], [InlineKeyboardButton(validationrequired_text, callback_data='settings_validationrequired')], [InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
     elif keyboard == "commands":
@@ -675,6 +667,8 @@ def get_settings_keyboard(chat_id, keyboard="main"):
         settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton(plusdisaggregated_text, callback_data='settings_plusdisaggregated')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
     elif keyboard == "raids":
         settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(plusdisaggregatedinline_text, callback_data='settings_plusdisaggregatedinline')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(raidcommandorder_text, callback_data='settings_raidcommandorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+    elif keyboard == "ranking":
+        settings_keyboard = [[InlineKeyboardButton(rankingweek_text, callback_data='settings_rankingweek')], [InlineKeyboardButton(rankingmonth_text, callback_data='settings_rankingmonth')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
 
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
@@ -887,6 +881,8 @@ def update_settings_message(chat_id, bot, keyboard = "main"):
         text = "Estas opciones permiten configurar características opcionales de las incursiones."
     elif keyboard == "behaviour":
         text = "Estas opciones son muy importantes porque definen el funcionamiento general del bot en el grupo/canal. Revisa la ayuda en caso de duda."
+    elif keyboard == "ranking":
+        text = "Estas opciones definen el comportamiento de los rankings del bot en el grupo/canal."
 
     return bot.edit_message_text(text=text, chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 

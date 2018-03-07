@@ -56,6 +56,8 @@ CREATE TABLE `grupos` (
   `plusdisaggregated` TINYINT NOT NULL DEFAULT '0',
   `plusdisaggregatedinline` TINYINT NOT NULL DEFAULT '0',
   `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid',
+  `rankingweek` TINYINT NOT NULL DEFAULT '10',
+  `rankingmonth` TINYINT NOT NULL DEFAULT '15',
   `banned` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
