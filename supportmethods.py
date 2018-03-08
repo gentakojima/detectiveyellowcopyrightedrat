@@ -51,7 +51,7 @@ iconthemes = [
 ]
 
 validation_pokemons = ["chikorita", "machop", "growlithe", "diglett", "spinarak", "ditto", "teddiursa", "cubone", "sentret", "voltorb"]
-validation_profiles = ["model1", "model2", "model3", "model4", "model5"]
+validation_profiles = ["model1", "model2", "model3", "model4", "model5", "model6"]
 validation_names = ["Calabaza", "Puerro", "Cebolleta", "Remolacha", "Aceituna", "Pimiento", "Zanahoria", "Tomate", "Guisante", "Coliflor", "Pepino", "Berenjena", "Perejil", "Batata", "Aguacate", "Alcaparra", "Escarola", "Lechuga", "Hinojo"]
 
 def is_admin(chat_id, user_id, bot):
@@ -1187,7 +1187,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     team1_img = image[int(height/2):int(height/2+height/10),0:int(width/60)] # y1:y2,x1:x2
     boundaries = {
         "Rojo": ([0, 0, 140], [100, 70, 255]),
-        "Azul": ([180, 50, 0], [255, 140, 60]),
+        "Azul": ([90, 50, 0], [255, 140, 70]),
         "Amarillo": ([0, 180, 200], [100, 225, 255])
     }
     chosen_color = None
@@ -1212,7 +1212,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
 
     # Prepare color boundaries to extract level, trainer and pokémon name
     boundaries = {
-        "Rojo": ([35, 10, 105], [110, 100, 190]),
+        "Rojo": ([35, 10, 90], [110, 100, 190]),
         "Azul": ([90, 75, 0], [190, 145, 80]),
         "Amarillo": ([0, 105, 180], [110, 198, 255])
     }
@@ -1269,7 +1269,7 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     level1_gray = 255 - level1_gray
     # Do the OCR
     cv2.imwrite(tmpfilename, level1_gray)
-    level = pytesseract.image_to_string(Image.open(tmpfilename), config="-psm 6")
+    level = pytesseract.image_to_string(Image.open(tmpfilename), config="-psm 6 outputbase nobatch digits")
     level = re.sub('O','0',level)
     numbers = re.findall(r'\d+', level)
     if len(numbers)>0:
