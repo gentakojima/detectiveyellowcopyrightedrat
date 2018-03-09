@@ -1243,11 +1243,11 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
         cv2.rectangle(nick1_gray, (x, y), (x+w, y+h), (255, 255, 255), -1)
     # Do the OCR
     cv2.imwrite(tmpfilename, nick1_gray)
-    text = pytesseract.image_to_string(Image.open(tmpfilename))
+    text = pytesseract.image_to_string(Image.open(tmpfilename), config="-c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&")
     if inspect:
         print("Originally recognized text: %s" % text)
     trainer_name = re.sub(r'\n+.*$','',text)
-    trainer_name = trainer_name.replace(" ","").replace("|","l").replace("ﬁ","ri").replace("ﬂ","ri")
+    trainer_name = trainer_name.replace(" ","")
     pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text).replace(" ","")
     if pokemon_name == "":
         # Alternative pokemon name parsing
