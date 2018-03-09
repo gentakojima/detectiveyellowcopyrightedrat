@@ -880,6 +880,13 @@ def stats(bot, update, args = None):
         group = getGroup(chat_id)
         icons = iconthemes[group["icontheme"]]
         now = datetime.now(timezone(group["timezone"]))
+        if group["alias"] is not None:
+            group_text = "<a href='https://t.me/%s'>%s</a>" % (group["alias"],html.escape(group["title"]))
+        else:
+            try:
+                group_text = "<i>%s</i>" % (html.escape(group["title"]))
+            except:
+                group_text = "<i>(Grupo sin nombre guardado)</i>"
         # Arrange time periods
         lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
         lastweek_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday())
@@ -901,7 +908,7 @@ def stats(bot, update, args = None):
             months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
             month_text = "%s" % months[lastmonth_start.month-1]
             # Prepare output
-            output = "TOP %s de participación en incursiones <b>mes de %s</b>" % (group["rankingmonth"],month_text)
+            output = "TOP %s de participación en incursiones del <b>mes de %s</b> en %s" % (group["rankingmonth"],month_text,group_text)
             position = 0
             counter = 0
             lastraidno = 0
@@ -917,14 +924,14 @@ def stats(bot, update, args = None):
                 medalla_text = "" if position > 3 else " %s" % medallas[position-1]
                 output = output + "\n %s. %s %s (%s)%s" % (position, icons[gs["team"]], user_text, gs["incursiones"], medalla_text)
             bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-        if show_week:
+        elif show_week:
             if group["rankingweek"] == 0:
                 return
             # Last week stats
             groupstats_lastweek = getGroupStats(chat_id, lastweek_start, lastweek_end)
             daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
             # Prepare output
-            output = "TOP %s de participación en incursiones <b>semana del %s</b>" % (group["rankingweek"],daymonth_text)
+            output = "TOP %s de participación en incursiones de la <b>semana del %s</b> en %s" % (group["rankingweek"],daymonth_text,group_text)
             position = 0
             counter = 0
             lastraidno = 0
