@@ -1136,25 +1136,25 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
             if inspect:
                 cv2.imwrite(inspectdir + "/%s_img_oneplus.png" % inspectFilename, image)
 
-    # Crop large bars
-    bottombar_img = image[int(height-height/14):int(height),int(0):int(width)] # y1:y2,x1:x2
-    bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
-    if bottombar_gray.mean() < 40:
-        image = image[int(0):int(height-height/14),int(0):int(width)] # y1:y2,x1:x2
-        height, width, _ = image.shape
-        aspect_ratio = height/width
-        if inspect:
-            cv2.imwrite(inspectdir + "/%s_img_largebar.png" % inspectFilename, image)
+    # Crop large, medium or small bars
+    for cropbarheight in [int(height/14),int(height/17),int(height/20)]:
+        logging.debug("supportmethods:parse_profile_image: Testing for bottom bar %ipx..." % cropbarheight)
+        bottombar_img = image[int(height-cropbarheight):int(height),int(0):int(width)] # y1:y2,x1:x2
+        bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
 
-    # Crop small bars
-    bottombar_img = image[int(height-height/17):int(height),int(0):int(width)] # y1:y2,x1:x2
-    bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
-    if bottombar_gray.mean() < 40:
-        image = image[int(0):int(height-height/17),int(0):int(width)] # y1:y2,x1:x2
-        height, width, _ = image.shape
-        aspect_ratio = height/width
-        if inspect:
-            cv2.imwrite(inspectdir + "/%s_img_smallbar.png" % inspectFilename, image)
+        if bottombar_gray.mean() < 30 or bottombar_gray.std() < 10:
+            logging.debug("supportmethods:parse_profile_image: Positive for bottom bar! Mean %s Std %s" % (bottombar_gray.mean(),bottombar_gray.std()))
+            newimage = image[int(0):int(height-cropbarheight),int(0):int(width)] # y1:y2,x1:x2
+            if inspect:
+                cv2.imwrite(inspectdir + "/%s_img_%icropped.png" % (inspectFilename,cropbarheight), newimage)
+                croppedbar = image[int(height-cropbarheight):int(height),int(0):int(width)] # y1:y2,x1:x2
+                cv2.imwrite(inspectdir + "/%s_img_%ibar.png" % (inspectFilename,cropbarheight), croppedbar)
+            image = newimage
+            height, width, _ = image.shape
+            aspect_ratio = height/width
+            break
+        else:
+            logging.debug("supportmethods:parse_profile_image: Negative for bottom bar! Mean %s Std %s" % (bottombar_gray.mean(),bottombar_gray.std()))
 
     logging.debug("supportmethods:parse_profile_image: Ratio: %.2f" % aspect_ratio)
     logging.debug("supportmethods:parse_profile_image: Extracting image info...")
@@ -1221,11 +1221,14 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     upper = np.array(boundaries[chosen_color][1], dtype = "uint8")
 
     # Extract and OCR trainer and Pokémon name
-    if aspect_ratio < 1.88:
+    if aspect_ratio < 1.89:
+        logging.debug("supportmethods:parse_profile_image: Extracting name with ratio <1.89")
         nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
     elif aspect_ratio < 2.15:
+        logging.debug("supportmethods:parse_profile_image: Extracting name with ratio <2.15")
         nick1_img = image[int(height/10+height/80):int(height/10*2-height/40),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
     else:
+        logging.debug("supportmethods:parse_profile_image: Extracting name with ratio else")
         nick1_img = image[int(height/11+height/80):int(height/11*2-height/60),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
     # find colors within the specified boundaries
     nick1_gray = cv2.inRange(nick1_img, lower, upper)
@@ -1257,12 +1260,16 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
 
     # Extract and OCR level
     if aspect_ratio < 1.81:
+        logging.debug("supportmethods:parse_profile_image: Extracting level with ratio <1.81")
         level1_img = image[int(height/2+2*height/13):int(height-height/4-height/22),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
-    elif aspect_ratio < 1.88:
+    elif aspect_ratio < 1.89:
+        logging.debug("supportmethods:parse_profile_image: Extracting level with ratio <1.89")
         level1_img = image[int(height/2+height/8):int(height-height/4-height/16),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
     elif aspect_ratio < 2.15:
+        logging.debug("supportmethods:parse_profile_image: Extracting level with ratio <2.15")
         level1_img = image[int(height/2+height/16):int(height-height/3-height/18),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
     else:
+        logging.debug("supportmethods:parse_profile_image: Extracting level with ratio else")
         level1_img = image[int(height/2+height/32):int(height-height/3-height/12),int(width/2):int(width/2+width/7)] # y1:y2,x1:x2
     # find colors within the specified boundaries
     level1_gray = cv2.inRange(level1_img, lower, upper)
@@ -1286,12 +1293,16 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
 
     # Extract Pokemon
     if aspect_ratio < 1.81:
+        logging.debug("supportmethods:parse_profile_image: Extracting pokemon with ratio <1.81")
         pokemon_img = image[int(height/3):int(height-height/3),int(width/8):int(width/2)] # y1:y2,x1:x2
-    elif aspect_ratio < 1.88:
+    elif aspect_ratio < 1.89:
+        logging.debug("supportmethods:parse_profile_image: Extracting pokemon with ratio <1.89")
         pokemon_img = image[int(height/3-height/42):int(height-height/3-height/42),int(width/8):int(width/2)] # y1:y2,x1:x2
     elif aspect_ratio < 2.15:
+        logging.debug("supportmethods:parse_profile_image: Extracting pokemon with ratio <2.15")
         pokemon_img = image[int(height/3-height/20):int(height-height/3-height/12),int(width/8):int(width/2)] # y1:y2,x1:x2
     else:
+        logging.debug("supportmethods:parse_profile_image: Extracting pokemon with ratio else")
         pokemon_img = image[int(height/3-height/20):int(height-height/3-height/8),int(width/8):int(width/2)] # y1:y2,x1:x2
     pokemon_gray = cv2.cvtColor(pokemon_img, cv2.COLOR_BGR2GRAY)
     pokemon_gray = cv2.resize(pokemon_gray, (60,60))
