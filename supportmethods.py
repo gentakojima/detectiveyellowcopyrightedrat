@@ -1223,13 +1223,13 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     # Extract and OCR trainer and Pokémon name
     if aspect_ratio < 1.89:
         logging.debug("supportmethods:parse_profile_image: Extracting name with ratio <1.89")
-        nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
+        nick1_img = image[int(height/9):int(height/9*2),int(width/15):int(width/18+5*width/10)] # y1:y2,x1:x2
     elif aspect_ratio < 2.15:
         logging.debug("supportmethods:parse_profile_image: Extracting name with ratio <2.15")
-        nick1_img = image[int(height/10+height/80):int(height/10*2-height/40),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
+        nick1_img = image[int(height/10+height/80):int(height/10*2-height/40),int(width/15):int(width/18+5*width/10)] # y1:y2,x1:x2
     else:
         logging.debug("supportmethods:parse_profile_image: Extracting name with ratio else")
-        nick1_img = image[int(height/11+height/80):int(height/11*2-height/60),int(width/15):int(width/15+5*width/10)] # y1:y2,x1:x2
+        nick1_img = image[int(height/11+height/80):int(height/11*2-height/60),int(width/15):int(width/18+5*width/10)] # y1:y2,x1:x2
     # find colors within the specified boundaries
     nick1_gray = cv2.inRange(nick1_img, lower, upper)
     nick1_gray = 255 - nick1_gray
@@ -1241,6 +1241,14 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
             continue
         # draw a white rectangle to mask the unwanted artifact
         cv2.rectangle(nick1_gray, (x, y), (x+w, y+h), (255, 255, 255), -1)
+    # Try to clean artifacts at the right of the image
+    nick_height, nick_width = nick1_gray.shape
+    for rectanglestart in [7*nick_width/10,8*nick_width/10,9*nick_width/10]:
+        nick1_gray_rect = nick1_gray[0:int(nick_height),int(rectanglestart):int(rectanglestart+nick_width/10)]
+        if nick1_gray_rect.mean() == 255:
+            logging.debug("supportmethods:parse_profile_image: Drawing white rectangle in the right to avoid artifacts")
+            cv2.rectangle(nick1_gray, (int(rectanglestart), 0), (int(nick_width), int(nick_height)), (255, 255, 255), -1)
+            break
     # Do the OCR
     cv2.imwrite(tmpfilename, nick1_gray)
     text = pytesseract.image_to_string(Image.open(tmpfilename), config="-c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&")
