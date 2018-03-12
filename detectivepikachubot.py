@@ -378,7 +378,7 @@ def registerOak(bot, update):
     if isBanned(user_id):
         return
 
-    m = re.search("@([a-zA-Z0-9]+), eres (Rojo|Azul|Amarillo) L([0-9]{1,2})[ .]",text, flags=re.IGNORECASE)
+    m = re.search("@?([a-zA-Z0-9]+), eres (Rojo|Azul|Amarillo) L([0-9]{1,2})[ .]",text, flags=re.IGNORECASE)
     if m is not None:
         if forward_id == 201760961:
             if (this_date - forward_date).total_seconds() < 120:
