@@ -417,15 +417,16 @@ def joinedChat(bot, update):
     logging.debug("detectivepikachubot:joinedChat: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     try:
-        new_chat_member = message.new_chat_members[0]
-        if new_chat_member.username == config["telegram"]["botalias"] and chat_type != "private":
-            chat_title = message.chat.title
-            logging.debug("detectivepikachubot:joinedChat: Oh, I'm new at %s" % chat_title);
-            group = getGroup(chat_id)
-            if group is None:
-                saveGroup({"id":chat_id, "title":message.chat.title})
-            message_text = "¡Hola a todos los miembros de *%s*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir." % ensure_escaped(chat_title)
-            Thread(target=send_message_timed, args=(chat_id, message_text, 3, bot)).start()
+        if len(message.new_chat_members)>0:
+            new_chat_member = message.new_chat_members[0]
+            if new_chat_member.username == config["telegram"]["botalias"] and chat_type != "private":
+                chat_title = message.chat.title
+                logging.debug("detectivepikachubot:joinedChat: Oh, I'm new at %s" % chat_title);
+                group = getGroup(chat_id)
+                if group is None:
+                    saveGroup({"id":chat_id, "title":message.chat.title})
+                message_text = "¡Hola a todos los miembros de *%s*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir." % ensure_escaped(chat_title)
+                Thread(target=send_message_timed, args=(chat_id, message_text, 3, bot)).start()
     except Exception as e:
         logging.debug("detectivepikachubot:joinedChat: Exception entering in %s: %s" % (chat_title,str(e)));
         pass
