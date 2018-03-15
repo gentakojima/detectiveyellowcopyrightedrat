@@ -1101,7 +1101,7 @@ def removeIncompleteRaids():
     try:
         # Set raids as old
         with db.cursor() as cursor:
-            sql = "SELECT `incursiones`.`id` AS `id`, `timeraid`, `timezone` FROM `incursiones` LEFT JOIN grupos ON `incursiones`.`grupo_id` = `grupos`.`id` WHERE status = 'creating' and addedtime < NOW() - INTERVAL 1 MINUTE LIMIT 0,2000"
+            sql = "SELECT `incursiones`.`id` AS `id`, `timeraid`, `timezone` FROM `incursiones` LEFT JOIN grupos ON `incursiones`.`grupo_id` = `grupos`.`id` WHERE status = 'creating' and addedtime < NOW() - INTERVAL 80 SECOND LIMIT 0,2000"
             cursor.execute(sql)
             results = cursor.fetchall()
             for r in results:

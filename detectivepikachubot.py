@@ -53,7 +53,7 @@ import html
 
 from config import config
 from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, closeRaid, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats, getRemovedAlerts, getCurrentGyms
-from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, update_settings_message_timed, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address, get_pokemons_keyboard, get_gyms_keyboard, get_zones_keyboard, get_times_keyboard, get_days_keyboard, format_text_creating, remove_incomplete_raids, send_edit_instructions
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, update_settings_message_timed, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address, get_pokemons_keyboard, get_gyms_keyboard, get_zones_keyboard, get_times_keyboard, get_endtimes_keyboard, get_days_keyboard, format_text_creating, remove_incomplete_raids, send_edit_instructions
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
 def cleanup(signum, frame):
@@ -2095,11 +2095,26 @@ def raidbutton(bot, update):
         text_time = extract_time(raid["timeraid"])
         bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crearla. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
-    if re.match("^iraid_gym_[0-9]+$", data) != None:
+    if re.match("^iraid_gym_[0-9]+$", data) != None: # NEWCODE
         m = re.match("^iraid_gym_([0-9]+)$", data)
         gym = getPlace(m.group(1))
         raid["gimnasio_id"] = gym["id"]
         raid["gimnasio_text"] = gym["desc"]
+        saveRaid(raid)
+        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+        creating_text = format_text_creating(thisuser)
+        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+        if text_day != "":
+            text_day = " " + text_day
+        text_time = extract_time(raid["timeraid"])
+        text_gym = gym["desc"]
+        reply_markup = get_endtimes_keyboard(raid["timeraid"])
+        bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b> en <b>%s</b>. Ahora selecciona la hora a la que desaparece el Pokémon.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time, text_gym), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+    if re.match("^iraid_endtime_.+$", data) != None: # OLDCODE
+        m = re.match("^iraid_endtime_(.+)$", data)
+        if m.group(1) != "unknown":
+            raid["timeend"] = parse_time(m.group(1), group["timezone"])
         raid["status"] = "waiting"
         saveRaid(raid)
         reply_markup = get_keyboard(raid)
@@ -2328,6 +2343,6 @@ def callback_auto_refloat(bot, job):
 job3 = j.run_repeating(callback_auto_refloat, interval=60, first=26)
 def callback_remove_incomplete_raids(bot, job):
     Thread(target=remove_incomplete_raids, args=(bot,)).start()
-job4 = j.run_repeating(callback_remove_incomplete_raids, interval=30, first=42)
+job4 = j.run_repeating(callback_remove_incomplete_raids, interval=15, first=42)
 
 updater.start_polling()

@@ -813,7 +813,38 @@ def get_times_keyboard(tz, date=None, offset=False):
         keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
-    pass
+
+def get_endtimes_keyboard(timeraid, offset=False):
+    logging.debug("supportmethods:get_endtimes_keyboard")
+    keyboard = []
+    dts = []
+
+    basedt = timeraid
+    minute = math.floor(basedt.minute/10)*10
+    if offset is True:
+        basedt = basedt.replace(minute=int(minute)+5)
+    else:
+        basedt = basedt.replace(minute=int(minute))
+    for x in range(10,70,5):
+        dts.append(basedt + timedelta(minutes=x))
+    if offset == False:
+        newoffset = 5
+    else:
+        newoffset = -5
+
+    for i in range(0,len(dts)-3,3):
+        h1 = dts[i].strftime('%H:%M')
+        h1k = dts[i].strftime('%d/%H:%M')
+        h2 = dts[i+1].strftime('%H:%M')
+        h2k = dts[i+1].strftime('%d/%H:%M')
+        h3 = dts[i+2].strftime('%H:%M')
+        h3k = dts[i+2].strftime('%d/%H:%M')
+        keyboard.append([InlineKeyboardButton(h1, callback_data="iraid_endtime_%s" % h1k), InlineKeyboardButton(h2, callback_data="iraid_endtime_%s" % h2k), InlineKeyboardButton(h3, callback_data="iraid_endtime_%s" % h3k)])
+
+    keyboard.append([InlineKeyboardButton("No sé / no ponerla", callback_data="iraid_endtime_unknown"), InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
 
 def get_keyboard(raid):
     logging.debug("supportmethods:get_keyboard")
