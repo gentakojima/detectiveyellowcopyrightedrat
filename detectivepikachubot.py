@@ -2059,7 +2059,7 @@ def raidbutton(bot, update):
         text_time = extract_time(raid["timeraid"])
         text_gym = gym["desc"]
         reply_markup = get_endtimes_keyboard(raid["timeraid"])
-        bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b> en <b>%s</b>. Ahora selecciona la hora a la que desaparece el Pokémon.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time, text_gym), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b> en <b>%s</b>. Ahora selecciona la hora <b>a la que desaparece</b> el Pokémon.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time, text_gym), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
     if re.match("^iraid_endtime_.+$", data) != None: # OLDCODE
         m = re.match("^iraid_endtime_(.+)$", data)
