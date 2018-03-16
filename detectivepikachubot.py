@@ -1626,79 +1626,20 @@ def cambiargimnasio(bot, update, args=None):
 @run_async
 def reflotartodas(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotartodas: %s %s %s" % (bot, update, args))
-    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-
-    if isBanned(chat_id):
-        return
-
-    if chat_type == "private":
-      bot.sendMessage(chat_id=chat_id, text="Este comando solo funciona en canales y grupos.")
-      return
-
-    delete_message(chat_id, message.message_id, bot)
-
-    if chat_type != "channel" and not is_admin(chat_id, user_id, bot):
-        return
-
-    raids = getActiveRaidsforGroup(chat_id)
-    logging.debug("detectivepikachubot:reflotartodas: Active raids: %s" % (raids))
-    for raid in raids:
-        logging.debug("detectivepikachubot:reflotartodas: Reflotating raid %s" % (raid["id"]))
-        if raid["id"] is not None and raid["status"] != "ended":
-            try:
-                bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
-            except Exception as e:
-                logging.debug("detectivepikachubot:reflotar: error borrando post antiguo %s" % raid["message"])
-            raid["refloated"] = 1
-            text = format_message(raid)
-            reply_markup = get_keyboard(raid)
-            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-            raid["message"] = sent_message.message_id
-            saveRaid(raid)
-            if user_id is not None:
-                bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
+    mass_refloat(bot, update, args, "all")
 
 @run_async
 def reflotarhoy(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotarhoy: %s %s %s" % (bot, update, args))
-    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-
-    if isBanned(chat_id):
-        return
-
-    if chat_type == "private":
-      bot.sendMessage(chat_id=chat_id, text="Este comando solo funciona en canales y grupos.")
-      return
-
-    delete_message(chat_id, message.message_id, bot)
-
-    if chat_type != "channel" and not is_admin(chat_id, user_id, bot):
-        return
-
-    group = getGroup(chat_id)
-    tonight_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"]),hour=23,minute=59)
-    raids = getActiveRaidsforGroup(chat_id)
-
-    for raid in raids:
-        timeraid = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
-        if raid["id"] is not None and raid["status"] != "ended" and timeraid <= tonight_datetime:
-            try:
-                bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
-            except Exception as e:
-                logging.debug("detectivepikachubot:reflotar: error borrando post antiguo %s" % raid["message"])
-            raid["refloated"] = 1
-            text = format_message(raid)
-            reply_markup = get_keyboard(raid)
-            sent_message = bot.sendMessage(chat_id=raid["grupo_id"], text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-            raid["message"] = sent_message.message_id
-            saveRaid(raid)
-            if user_id is not None:
-                bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
-            time.sleep(0.05)
+    mass_refloat(bot, update, args, "today")
 
 @run_async
 def reflotaractivas(bot, update, args=None):
     logging.debug("detectivepikachubot:reflotaractivas: %s %s %s" % (bot, update, args))
+    mass_refloat(bot, update, args, "active")
+
+def mass_refloat(bot, update, args=None, mode="all"):
+    logging.debug("detectivepikachubot:mass_refloat: %s %s %s %s" % (bot, update, args, mode))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1714,16 +1655,25 @@ def reflotaractivas(bot, update, args=None):
         return
 
     group = getGroup(chat_id)
-    intwohours_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) + timedelta(minutes = 90)
     raids = getActiveRaidsforGroup(chat_id)
+
+    if mode == "active":
+        refloat_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) + timedelta(minutes = 90)
+        refloat_all = False
+    elif mode == "today":
+        refloat_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"]), hour=23, minute=59)
+        refloat_all = False
+    elif mode == "all":
+        refloat_all = True
 
     for raid in raids:
         timeraid = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
-        if raid["id"] is not None and raid["status"] != "ended" and timeraid <= intwohours_datetime:
+        if raid["id"] is not None and raid["status"] != "ended" and ( refloat_all is True or timeraid <= refloat_datetime):
+            logging.debug("detectivepikachubot:mass_refloat: Refloating raid %s" % (raid["id"]))
             try:
                 bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
             except Exception as e:
-                logging.debug("detectivepikachubot:reflotar: error borrando post antiguo %s" % raid["message"])
+                logging.debug("detectivepikachubot:mass_refloat: error borrando post antiguo %s" % raid["message"])
             raid["refloated"] = 1
             text = format_message(raid)
             reply_markup = get_keyboard(raid)
@@ -1732,7 +1682,7 @@ def reflotaractivas(bot, update, args=None):
             saveRaid(raid)
             if user_id is not None:
                 bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha reflotado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
-            time.sleep(0.05)
+            time.sleep(1.0)
 
 @run_async
 def reflotar(bot, update, args=None):
