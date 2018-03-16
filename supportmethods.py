@@ -461,7 +461,7 @@ def auto_refloat(bot):
                         logging.debug("supportmethods:auto_refloat: error borrando post antiguo %s" % raid["message"])
                 except:
                     logging.debug("supportmethods:auto_refloat: error reflotando incursión %s mensaje %s" % (raid["id"], raid["message"]))
-                time.sleep(0.015)
+                time.sleep(1.0)
 
 def error_callback(bot, update, error):
     try:
