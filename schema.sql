@@ -58,6 +58,7 @@ CREATE TABLE `grupos` (
   `timezone` VARCHAR(60) NOT NULL DEFAULT 'Europe/Madrid',
   `rankingweek` TINYINT NOT NULL DEFAULT '10',
   `rankingmonth` TINYINT NOT NULL DEFAULT '15',
+  `rankingauto` TINYINT NOT NULL DEFAULT '0',
   `banned` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -149,6 +150,16 @@ CREATE TABLE `validaciones` (
   `level` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Table structure for table `rankings`
+--
+
+CREATE TABLE `rankings` (
+  `grupo_id` BIGINT(20) NOT NULL,
+  `startdate` DATE NOT NULL,
+  `enddate` DATE NOT NULL,
+  `ranking` MEDIUMTEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Indexes for dumped tables
@@ -208,6 +219,12 @@ ALTER TABLE `validaciones`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `rankings`
+--
+ALTER TABLE `alertas`
+  ADD PRIMARY KEY (`grupo_id`,`startdate`,`enddate`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -215,24 +232,24 @@ ALTER TABLE `validaciones`
 -- AUTO_INCREMENT for table `gimnasios`
 --
 ALTER TABLE `gimnasios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=387;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 --
 -- AUTO_INCREMENT for table `incursiones`
 --
 ALTER TABLE `incursiones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1020;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 
 --
 -- AUTO_INCREMENT for table `alertas`
 --
 ALTER TABLE `alertas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 
 --
 -- AUTO_INCREMENT for table `validaciones`
 --
 ALTER TABLE `validaciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 COMMIT;
 
 --
@@ -259,3 +276,9 @@ ALTER TABLE `incursiones`
 ALTER TABLE `voy`
   ADD CONSTRAINT `incursionvoy` FOREIGN KEY (`incursion_id`) REFERENCES `incursiones` (`id`),
   ADD CONSTRAINT `usuariovoy` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
+
+--
+-- Constraints for table `rankings`
+--
+ALTER TABLE `rankings`
+  ADD CONSTRAINT `gruporanking` FOREIGN KEY (`grupo_id`) REFERENCES `grupos` (`id`);

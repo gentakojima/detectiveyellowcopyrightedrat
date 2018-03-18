@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from pytz import timezone
 import time
 import html
@@ -36,7 +36,7 @@ import googlemaps
 import math
 
 from config import config
-from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, getZones, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace, getGroupTimezoneOffsetFromServer, getCurrentPokemons, getCurrentGyms, removeIncompleteRaids
+from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, getZones, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace, getGroupTimezoneOffsetFromServer, getCurrentPokemons, getCurrentGyms, removeIncompleteRaids, getAutorankingGroups, getRanking, getCachedRanking, saveCachedRanking
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
@@ -463,6 +463,76 @@ def auto_refloat(bot):
                     logging.debug("supportmethods:auto_refloat: error reflotando incursión %s mensaje %s" % (raid["id"], raid["message"]))
                 time.sleep(1.0)
 
+def auto_ranking(bot):
+    logging.debug("supportmethods:auto_ranking")
+    groups = getAutorankingGroups()
+    logging.debug("supportmethods:auto_ranking testing for %i groups..." % len(groups))
+    for g in groups:
+        (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods(g["timezone"])
+        if g["rankingweek"] > 0:
+            logging.debug("supportmethods:auto_ranking testing weekly auto ranking group %s %s" % (g["id"],g["title"]))
+            rankingtext = getCachedRanking(g["id"], lastweek_start.strftime("%y-%m-%d"), lastweek_end.strftime("%y-%m-%d"))
+            if rankingtext == None:
+                logging.debug("supportmethods:auto_ranking [!] publishing weekly auto ranking group %s %s" % (g["id"],g["title"]))
+                output = ranking_text(g, lastweek_start, lastweek_end, "week")
+                bot.sendMessage(chat_id=g["id"], text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+                time.sleep(1.0)
+        if g["rankingmonth"] > 0:
+            logging.debug("supportmethods:auto_ranking testing monthly auto ranking group %s %s" % (g["id"],g["title"]))
+            rankingtext = getCachedRanking(g["id"], lastmonth_start.strftime("%y-%m-%d"), lastmonth_end.strftime("%y-%m-%d"))
+            if rankingtext == None:
+                logging.debug("supportmethods:auto_ranking [!] publishing monthly auto ranking group %s %s" % (g["id"],g["title"]))
+                output = ranking_text(g, lastmonth_start, lastmonth_end, "month")
+                bot.sendMessage(chat_id=g["id"], text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+                time.sleep(1.0)
+
+def ranking_text(group, startdate, enddate, type="week"):
+    logging.debug("supportmethods:ranking_text")
+    # Group name
+    if group["alias"] is not None:
+        group_text = "<a href='https://t.me/%s'>%s</a>" % (group["alias"],html.escape(group["title"]))
+    else:
+        try:
+            group_text = "<i>%s</i>" % (html.escape(group["title"]))
+        except:
+            group_text = "<i>(Grupo sin nombre guardado)</i>"
+    # Prepare output
+    if type == "month":
+        months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+        month_text = "%s" % months[startdate.month-1]
+        output = "TOP %s de participación en incursiones del <b>mes de %s</b> en %s" % (group["rankingmonth"],month_text,group_text)
+        maxposition = group["rankingmonth"]
+    else:
+        daymonth_text = "%s/%s" % (startdate.day, startdate.month)
+        output = "TOP %s de participación en incursiones de la <b>semana del %s</b> en %s" % (group["rankingweek"],daymonth_text,group_text)
+        maxposition = group["rankingweek"]
+    position = 0
+    counter = 0
+    lastraidno = 0
+    medallas = ["🥇","🥈","🥉"]
+    icons = iconthemes[group["icontheme"]]
+    # Try to get cached ranking from database
+    rankingtext = getCachedRanking(group["id"], startdate.strftime("%y-%m-%d"), enddate.strftime("%y-%m-%d"))
+    if rankingtext is None:
+        logging.debug("detectivepikachubot:stats: No cached ranking found, forging a new one")
+        groupstats_lastmonth = getRanking(group["id"], startdate, enddate)
+        rankingtext = ""
+        logging.debug(groupstats_lastmonth)
+        for gs in groupstats_lastmonth:
+            counter = counter + 1
+            if gs["incursiones"] != lastraidno:
+                position = counter
+                if position > maxposition:
+                    break
+            lastraidno = gs["incursiones"]
+            trainername = gs["trainername"] if gs["trainername"] is not None else "@%s" % gs["username"]
+            user_text = "<a href='https://t.me/%s'>%s</a>" % (gs["username"], trainername)
+            medalla_text = "" if position > 3 else " %s" % medallas[position-1]
+            rankingtext = rankingtext + "\n %s. %s %s (%s)%s" % (position, icons[gs["team"]], user_text, gs["incursiones"], medalla_text)
+        saveCachedRanking(group["id"], startdate.strftime("%y-%m-%d"), enddate.strftime("%y-%m-%d"), rankingtext)
+    output = output + rankingtext
+    return output
+
 def error_callback(bot, update, error):
     try:
         raise error
@@ -654,6 +724,10 @@ def get_settings_keyboard(chat_id, keyboard="main"):
         rankingmonth_text = "✅ Ranking mensual (TOP %s)" % group["rankingmonth"]
     else:
         rankingmonth_text = "▪️ Ranking mensual"
+    if group["rankingauto"] == 1:
+        rankingauto_text = "✅ Publicar automáticamente"
+    else:
+        rankingauto_text = "▪️ Publicar automáticamente"
     icons = iconthemes[group["icontheme"]]
     icontheme_text = "%s%s%s Tema de iconos" % (icons["Rojo"],icons["Azul"],icons["Amarillo"])
 
@@ -668,7 +742,7 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     elif keyboard == "raids":
         settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(plusdisaggregatedinline_text, callback_data='settings_plusdisaggregatedinline')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(raidcommandorder_text, callback_data='settings_raidcommandorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
     elif keyboard == "ranking":
-        settings_keyboard = [[InlineKeyboardButton(rankingweek_text, callback_data='settings_rankingweek')], [InlineKeyboardButton(rankingmonth_text, callback_data='settings_rankingmonth')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(rankingweek_text, callback_data='settings_rankingweek')], [InlineKeyboardButton(rankingmonth_text, callback_data='settings_rankingmonth')], [InlineKeyboardButton(rankingauto_text, callback_data='settings_rankingauto')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
 
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
@@ -1381,3 +1455,17 @@ def already_sent_location(user_id, location_id):
     else:
         locations_sent.append(k)
         return False
+
+def ranking_time_periods(tz, weeks):
+    now = datetime.now(timezone(tz)) + timedelta(hours=2)
+    lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=now.weekday(), weeks=1)
+    lastweek_end = lastweek_start.replace(hour=23,minute=59) + timedelta(days=6)
+    lastmonth_start = now.replace(hour=0,minute=0) - timedelta(days=(now.day-1))
+    if lastmonth_start.month in [2,4,6,8,9,11,1]:
+        lastmonth_start = lastmonth_start - timedelta(days=31)
+    elif lastmonth_start.month in [5,7,10,12]:
+        lastmonth_start = lastmonth_start - timedelta(days=30)
+    else:
+        lastmonth_start = lastmonth_start - timedelta(days=28) # FIXME leap year
+    lastmonth_end = now.replace(hour=23,minute=59) - timedelta(days=now.day)
+    return (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end)

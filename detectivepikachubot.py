@@ -52,8 +52,8 @@ from Levenshtein import distance
 import html
 
 from config import config
-from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, closeRaid, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getGroupStats, getRemovedAlerts, getCurrentGyms
-from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, update_settings_message_timed, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address, get_pokemons_keyboard, get_gyms_keyboard, get_zones_keyboard, get_times_keyboard, get_endtimes_keyboard, get_days_keyboard, format_text_creating, remove_incomplete_raids, send_edit_instructions
+from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, closeRaid, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getRanking, getRemovedAlerts, getCurrentGyms, getCachedRanking, saveCachedRanking, resetCachedRanking
+from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, update_settings_message_timed, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address, get_pokemons_keyboard, get_gyms_keyboard, get_zones_keyboard, get_times_keyboard, get_endtimes_keyboard, get_days_keyboard, format_text_creating, remove_incomplete_raids, send_edit_instructions, ranking_time_periods, auto_ranking, ranking_text
 from alerts import alerts, addalert, clearalerts, delalert, processLocation
 
 def cleanup(signum, frame):
@@ -819,18 +819,18 @@ def stats(bot, update, args = None):
                         group_text = "<i>%s</i>" % (html.escape(g["title"]))
                     except:
                         group_text = "<i>(Grupo sin nombre guardado)</i>"
-                now = datetime.now(timezone(g["timezone"]))
-                lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
-                lastweek_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday())
-                twoweeksago_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=2)
-                twoweeksago_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday(), weeks=1)
+                now = datetime.now(timezone(g["timezone"])) + timedelta(hours=2)
+                lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=now.weekday(), weeks=1)
+                lastweek_end = lastweek_start.replace(hour=23,minute=59) + timedelta(days=6)
+                twoweeksago_start = now.replace(hour=0,minute=0) - timedelta(days=now.weekday(), weeks=2)
+                twoweeksago_end = twoweeksago_start.replace(hour=23,minute=59) + timedelta(days=6)
                 # Personal stats
                 userstats_lastweek = getGroupUserStats(g["id"], user_id, lastweek_start, lastweek_end)
                 userraids_lastweek = userstats_lastweek["incursiones"] if userstats_lastweek is not None else 0
                 userstats_twoweeksago = getGroupUserStats(g["id"], user_id, twoweeksago_start, twoweeksago_end)
                 userraids_twoweeksago = userstats_twoweeksago["incursiones"] if userstats_twoweeksago is not None else 0
                 # Group stats
-                groupstats_lastweek = getGroupStats(g["id"], lastweek_start, lastweek_end)
+                groupstats_lastweek = getRanking(g["id"], lastweek_start, lastweek_end)
                 groupsize_lastweek = len(groupstats_lastweek)
                 if groupsize_lastweek == 0:
                     continue
@@ -880,74 +880,19 @@ def stats(bot, update, args = None):
                 show_week = True
         # Get group info
         group = getGroup(chat_id)
-        icons = iconthemes[group["icontheme"]]
-        now = datetime.now(timezone(group["timezone"]))
-        if group["alias"] is not None:
-            group_text = "<a href='https://t.me/%s'>%s</a>" % (group["alias"],html.escape(group["title"]))
-        else:
-            try:
-                group_text = "<i>%s</i>" % (html.escape(group["title"]))
-            except:
-                group_text = "<i>(Grupo sin nombre guardado)</i>"
         # Arrange time periods
-        lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=date.today().weekday(), weeks=1)
-        lastweek_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().weekday())
-        lastmonth_start = now.replace(hour=0,minute=0) - timedelta(days=(date.today().day-1))
-        if lastmonth_start.month in [2,4,6,8,9,11,1]:
-            lastmonth_start = lastmonth_start - timedelta(days=31)
-        elif lastmonth_start.month in [5,7,10,12]:
-            lastmonth_start = lastmonth_start - timedelta(days=30)
-        else:
-            lastmonth_start = lastmonth_start - timedelta(days=28) # FIXME leap year
-        lastmonth_end = now.replace(hour=23,minute=59) - timedelta(days=date.today().day)
-        logging.debug("Ranking from %s to %s" % (lastmonth_start, lastmonth_end))
-        medallas = ["🥇","🥈","🥉"]
+        (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods(group["timezone"])
         if show_month:
             if group["rankingmonth"] == 0:
                 return
-            # Last month stats
-            groupstats_lastmonth = getGroupStats(chat_id, lastmonth_start, lastmonth_end)
-            months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
-            month_text = "%s" % months[lastmonth_start.month-1]
-            # Prepare output
-            output = "TOP %s de participación en incursiones del <b>mes de %s</b> en %s" % (group["rankingmonth"],month_text,group_text)
-            position = 0
-            counter = 0
-            lastraidno = 0
-            for gs in groupstats_lastmonth:
-                counter = counter + 1
-                if gs["incursiones"] != lastraidno:
-                    position = counter
-                    if position > group["rankingmonth"]:
-                        break
-                lastraidno = gs["incursiones"]
-                trainername = gs["trainername"] if gs["trainername"] is not None else "@%s" % gs["username"]
-                user_text = "<a href='https://t.me/%s'>%s</a>" % (gs["username"], trainername)
-                medalla_text = "" if position > 3 else " %s" % medallas[position-1]
-                output = output + "\n %s. %s %s (%s)%s" % (position, icons[gs["team"]], user_text, gs["incursiones"], medalla_text)
+            logging.debug("Ranking from %s to %s" % (lastmonth_start, lastmonth_end))
+            output = ranking_text(group, lastmonth_start, lastmonth_end, "month")
             bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
         elif show_week:
             if group["rankingweek"] == 0:
                 return
-            # Last week stats
-            groupstats_lastweek = getGroupStats(chat_id, lastweek_start, lastweek_end)
-            daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
-            # Prepare output
-            output = "TOP %s de participación en incursiones de la <b>semana del %s</b> en %s" % (group["rankingweek"],daymonth_text,group_text)
-            position = 0
-            counter = 0
-            lastraidno = 0
-            for gs in groupstats_lastweek:
-                counter = counter + 1
-                if gs["incursiones"] != lastraidno:
-                    position = counter
-                    if position > group["rankingweek"]:
-                        break
-                lastraidno = gs["incursiones"]
-                trainername = gs["trainername"] if gs["trainername"] is not None else "@%s" % gs["username"]
-                user_text = "<a href='https://t.me/%s'>%s</a>" % (gs["username"], trainername)
-                medalla_text = "" if position > 3 else " %s" % medallas[position-1]
-                output = output + "\n %s. %s %s (%s)%s" % (position, icons[gs["team"]], user_text, gs["incursiones"], medalla_text)
+            logging.debug("Ranking from %s to %s" % (lastweek_start, lastweek_end))
+            output = ranking_text(group, lastweek_start, lastweek_end, "week")
             bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 @run_async
@@ -2095,9 +2040,9 @@ def raidbutton(bot, update):
       else:
           delete_message(chat_id, message_id, bot)
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder", "settings_plusdisaggregated":"plusdisaggregated", "settings_plusdisaggregatedinline":"plusdisaggregatedinline", "settings_raidcommandorder":"raidcommandorder"}
+  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder", "settings_plusdisaggregated":"plusdisaggregated", "settings_plusdisaggregatedinline":"plusdisaggregatedinline", "settings_raidcommandorder":"raidcommandorder", "settings_rankingauto":"rankingauto"}
 
-  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids", "settings_raidcommandorder":"raids", "settings_rankingweek":"ranking", "settings_rankingmonth":"ranking"}
+  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids", "settings_raidcommandorder":"raids", "settings_rankingweek":"ranking", "settings_rankingmonth":"ranking", "settings_rankingauto":"ranking"}
 
   for k in settings:
       if data==k:
@@ -2197,6 +2142,8 @@ def raidbutton(bot, update):
               group["rankingmonth"] = 0
           saveGroup(group)
           update_settings_message(chat_id, bot, settings_categories[data])
+      (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods("Europe/Madrid")
+      resetCachedRanking(group["id"], lastmonth_start.strftime("%y-%m-%d"), lastmonth_end.strftime("%y-%m-%d"))
 
   if data=="settings_rankingweek":
         if not is_admin(chat_id, user_id, bot):
@@ -2217,6 +2164,9 @@ def raidbutton(bot, update):
                 group["rankingweek"] = 0
             saveGroup(group)
             update_settings_message(chat_id, bot, settings_categories[data])
+        (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods("Europe/Madrid")
+        resetCachedRanking(group["id"], lastweek_start.strftime("%y-%m-%d"), lastweek_end.strftime("%y-%m-%d"))
+
 
   if data=="settings_refloatauto":
     if not is_admin(chat_id, user_id, bot):
@@ -2290,9 +2240,12 @@ def callback_update_validations_status(bot, job):
 job2 = j.run_repeating(callback_update_validations_status, interval=60, first=18)
 def callback_auto_refloat(bot, job):
     Thread(target=auto_refloat, args=(bot,)).start()
-job3 = j.run_repeating(callback_auto_refloat, interval=60, first=26)
+job3 = j.run_repeating(callback_auto_refloat, interval=120, first=26)
 def callback_remove_incomplete_raids(bot, job):
     Thread(target=remove_incomplete_raids, args=(bot,)).start()
 job4 = j.run_repeating(callback_remove_incomplete_raids, interval=15, first=42)
+def callback_auto_ranking(bot, job):
+    Thread(target=auto_ranking, args=(bot,)).start()
+job6 = j.run_repeating(callback_auto_ranking, interval=300, first=10) # FIXME change
 
 updater.start_polling()
