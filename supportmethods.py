@@ -1456,7 +1456,7 @@ def already_sent_location(user_id, location_id):
         locations_sent.append(k)
         return False
 
-def ranking_time_periods(tz, weeks):
+def ranking_time_periods(tz):
     now = datetime.now(timezone(tz)) + timedelta(hours=2)
     lastweek_start = now.replace(hour=0,minute=0) - timedelta(days=now.weekday(), weeks=1)
     lastweek_end = lastweek_start.replace(hour=23,minute=59) + timedelta(days=6)
