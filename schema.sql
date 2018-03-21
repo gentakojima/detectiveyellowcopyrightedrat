@@ -221,7 +221,7 @@ ALTER TABLE `validaciones`
 --
 -- Indexes for table `rankings`
 --
-ALTER TABLE `alertas`
+ALTER TABLE `rankings`
   ADD PRIMARY KEY (`grupo_id`,`startdate`,`enddate`);
 
 --
