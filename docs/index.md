@@ -214,9 +214,11 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 #### Funcionamiento de rankings ####
 
-1. **Ranking Semanal**. Si está ativado, permite a los administradores de un grupo mostrar un TOP 5, 10, 15, 20 o 25 semanal de participación en incursiones (según la opción seleccionada, por defecto 10) utilizando el comando `/ranking week` (o simplemente `/ranking`).
+1. **Ranking Semanal**. Si está activado, permite a los administradores de un grupo mostrar un TOP 5, 10, 15, 20 o 25 semanal de participación en incursiones (según la opción seleccionada, por defecto 10) utilizando el comando `/ranking week` (o simplemente `/ranking`).
 
-1. **Ranking Mensual**. Si está ativado, permite a los administradores de un grupo mostrar un TOP 15, 25, 35 o 50 mensual de participación en incursiones (según la opción seleccionada, por defecto 15) utilizando el comando `/ranking month`.
+2. **Ranking Mensual**. Si está activado, permite a los administradores de un grupo mostrar un TOP 15, 25, 35 o 50 mensual de participación en incursiones (según la opción seleccionada, por defecto 15) utilizando el comando `/ranking month`.
+
+3. **Publicar automáticamente**. Si la opción está activada, publicará los rankings que no estén desactivados de forma automática tan pronto como estén disponibles.
 
 ### Ubicaciones de gimnasios ###
 
@@ -243,11 +245,11 @@ La quinta columna es opcional y siempre puedes cubrirla más tarde. Revisa la se
 
 La sexta columna también es opcional. Revisa la sección sobre [zonas](#zonas) donde se explica más en detalle.
 
-Una vez tengas lista la hoja de cálculo, debes pulsar en el botón **Compartir** para obtener un enlace público a la hoja de cálculo y establecerlo con el comando `/setspreadsheet` en el grupo. Por ejemplo:
+Una vez tengas lista la hoja de cálculo, debes pulsar en el botón **Compartir** para obtener un enlace público a la hoja de cálculo y establecerlo con el comando `/spreadsheet` en el grupo. Por ejemplo:
 
-    /setspreadsheet https://docs.google.com/spreadsheets/d/1s2K8_hayc1aHt8bZeKucRz0s4G4rn9YUrDB2ZvvEJ4A/edit?usp=sharing
+    /spreadsheet https://docs.google.com/spreadsheets/d/1s2K8_hayc1aHt8bZeKucRz0s4G4rn9YUrDB2ZvvEJ4A/edit?usp=sharing
 
-Una vez establecida, debes utilizar el comando `/refresh` para que la cargue. Cada vez que hagas cambios, debes volver a utilizar `/refresh` para recargar la lista. No es necesario volver a utilizar `/setspreadsheet` a no ser que cambies la hoja de cálculo por otra.
+Una vez establecida, debes utilizar el comando `/refresh` para que la cargue. Cada vez que hagas cambios, debes volver a utilizar `/refresh` para recargar la lista. No es necesario volver a utilizar `/spreadsheet` a no ser que cambies la hoja de cálculo por otra.
 
 Se pueden probar las ubicaciones preguntando por ellas con el comando `/gym`. Por ejemplo:
 
@@ -333,10 +335,10 @@ Para eliminar el grupo para hablar se puede pasar una barra horizontal como argu
 
 El bot reconoce la hora que escriben los usuarios y hace operaciones con ellas, por lo que es importante que la hora que utilice el bot se corresponda con la hora real de tu grupo.
 
-Para establecer la zona horaria correcta se debe utilizar el comando `/settimezone` con la zona horaria correspondiente como parámetro siguiendo el formato del [listado de zonas horarias de la IANA](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Por ejemplo:
+Para establecer la zona horaria correcta se debe utilizar el comando `/timezone` con la zona horaria correspondiente como parámetro siguiendo el formato del [listado de zonas horarias de la IANA](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Por ejemplo:
 
-    /settimezone Europe/Madrid
-    /settimezone Atlantic/Canary
+    /timezone Europe/Madrid
+    /timezone Atlantic/Canary
 
 ### Rankings ###
 
@@ -345,6 +347,8 @@ El bot puede mostrar los rankings de la **semana pasada** (contando de lunes a d
 En estos rankings aparecen ordenados por participación en incursiones el número de usuarios [configurado en el grupo o canal](#funcionamiento-de-rankings). Por defecto, un TOP 10 semanal y un TOP 15 mensual.
 
 En caso de empate en número de incursiones, se muestran en la misma posición. Solo se tienen en cuenta los usuarios que se han apuntado a la incursión **antes de la hora de inicio** y que han pulsado el botón de **Estoy**.
+
+Los rankings están disponibles a partir de las 10 de la noche del día anterior a que termine el periodo correspondiente. Es decir, el ranking mensual estará disponible a las 10 de la noche del último día del mes.
 
 ### Otros comandos exclusivos para administradores ###
 

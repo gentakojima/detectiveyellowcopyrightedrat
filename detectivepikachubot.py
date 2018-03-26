@@ -283,7 +283,7 @@ def refresh(bot, update, args=None):
 
   grupo = getGroup(chat_id)
   if grupo is None or grupo["spreadsheet"] is None:
-    bot.sendMessage(chat_id=chat_id, text="❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/setspreadsheet`", parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.sendMessage(chat_id=chat_id, text="❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/spreadsheet`", parse_mode=telegram.ParseMode.MARKDOWN)
     return
 
   sent_message = bot.sendMessage(chat_id=chat_id, text="🌎 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
@@ -592,9 +592,9 @@ def channelCommands(bot, update):
     if m is not None:
         command = m.group(1).lower()
         logging.debug("detectivepikachubot:channelCommands: Possible command %s" % command)
-        if command == "setspreadsheet":
+        if command == "setspreadsheet" or command == "spreadsheet":
             setspreadsheet(bot, update, args)
-        elif command == "settimezone":
+        elif command == "settimezone" or command == "timezone":
             settimezone(bot, update, args)
         elif command == "refresh":
             refresh(bot, update, args)
@@ -2194,8 +2194,8 @@ dispatcher.add_handler(CommandHandler('register', register))
 dispatcher.add_handler(CommandHandler('profile', profile))
 dispatcher.add_handler(CommandHandler(['stats','ranking'], stats, pass_args=True))
 # Admin commands
-dispatcher.add_handler(CommandHandler('setspreadsheet', setspreadsheet, pass_args=True))
-dispatcher.add_handler(CommandHandler('settimezone', settimezone, pass_args=True))
+dispatcher.add_handler(CommandHandler(['setspreadsheet', 'spreadsheet'], setspreadsheet, pass_args=True))
+dispatcher.add_handler(CommandHandler(['settimezone', 'timezone'], settimezone, pass_args=True))
 dispatcher.add_handler(CommandHandler('settalkgroup', settalkgroup, pass_args=True))
 dispatcher.add_handler(CommandHandler('refresh', refresh))
 dispatcher.add_handler(CommandHandler('list', list))
