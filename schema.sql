@@ -144,6 +144,7 @@ CREATE TABLE `validaciones` (
   `step` enum('waitingtrainername','waitingscreenshot','failed','expired','completed') NOT NULL DEFAULT 'waitingtrainername',
   `tries` int(11) NOT NULL DEFAULT '0',
   `pokemon` varchar(15) NOT NULL,
+  `pokemon2` varchar(15) DEFAULT NULL,
   `pokemonname` varchar(15) NOT NULL,
   `trainername` varchar(20) DEFAULT NULL,
   `team` enum('Azul','Rojo','Amarillo','') DEFAULT NULL,

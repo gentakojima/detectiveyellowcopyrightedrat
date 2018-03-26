@@ -50,7 +50,7 @@ iconthemes = [
     { "Rojo": "🦊", "Azul": "🐳", "Amarillo": "🐥" }
 ]
 
-validation_pokemons = ["chikorita", "machop", "growlithe", "diglett", "spinarak", "ditto", "teddiursa", "cubone", "sentret", "voltorb"]
+validation_pokemons = ["chikorita", "machop", "growlithe", "diglett", "spinarak", "ditto", "teddiursa", "cubone", "sentret", "voltorb", "zigzagoon", "gulpin", "jigglypuff"]
 validation_profiles = ["model1", "model2", "model3", "model4", "model5", "model6"]
 validation_names = ["Calabaza", "Puerro", "Cebolleta", "Remolacha", "Aceituna", "Pimiento", "Zanahoria", "Tomate", "Guisante", "Coliflor", "Pepino", "Berenjena", "Perejil", "Batata", "Aguacate", "Alcaparra", "Escarola", "Lechuga", "Hinojo"]
 
@@ -1148,7 +1148,7 @@ def raidend_is_near_raidtime(timeraid, timeend, tzone):
     else:
         return -1
 
-def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilename="failed"):
+def parse_profile_image(filename, desired_pokemon, desired_pokemon_2 = None, inspect=False, inspectFilename="failed"):
     logging.debug("supportmethods:parse_profile_image %s" % filename)
 
     new_file, tmpfilename = tempfile.mkstemp(suffix=".png")
@@ -1160,17 +1160,17 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
         os.makedirs(inspectdir)
 
     # Load possible pokemons
-    if desired_pokemon is not None:
-        thispoke_models = []
-        for j in range(1, 10):
-            pokfname = sys.path[0] + "/modelimgs/pokemon/%s%d.png" % (desired_pokemon,j)
-            if not os.path.isfile(pokfname):
-                break
-            p = cv2.imread(pokfname)
-            p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
-            p = cv2.resize(p, (60,60))
-            thispoke_models.append(p)
-        pokemon = { "models":thispoke_models }
+    pokemon_models = []
+    for dp in [desired_pokemon, desired_pokemon_2]:
+        if dp is not None:
+            for j in range(1, 10):
+                pokfname = sys.path[0] + "/modelimgs/pokemon/%s%d.png" % (dp,j)
+                if not os.path.isfile(pokfname):
+                    break
+                p = cv2.imread(pokfname)
+                p = cv2.cvtColor(p, cv2.COLOR_BGR2GRAY)
+                p = cv2.resize(p, (60,60))
+                pokemon_models.append({"pokemon":dp, "model":p})
 
     # Load possible profiles
     profiles = {}
@@ -1423,18 +1423,17 @@ def parse_profile_image(filename, desired_pokemon, inspect=False, inspectFilenam
     # Test extracted pokemon against possible pokemons
     chosen_pokemon = None
     chosen_similarity = 0.0
-    if desired_pokemon is not None:
-        for pokemon_model in pokemon["models"]:
-            pokemon["similarity"] = ssim(pokemon_model, pokemon_gray)
-            logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (desired_pokemon,pokemon["similarity"]))
-            if pokemon["similarity"] > 0.7 and \
-               (chosen_pokemon is None or chosen_similarity < pokemon["similarity"]):
-               chosen_pokemon = desired_pokemon
-               chosen_similarity = pokemon["similarity"]
-               if pokemon["similarity"] > 0.9:
-                   break
-    else:
-        chosen_pokemon = None
+    for pm in pokemon_models:
+        model = pm["model"]
+        pokemon = pm["pokemon"]
+        similarity = ssim(model, pokemon_gray)
+        logging.debug("supportmethods:parse_profile_image: Similarity with %s: %.2f" % (pokemon, similarity))
+        if similarity > 0.7 and \
+           (chosen_pokemon is None or chosen_similarity < similarity):
+           chosen_pokemon = pokemon
+           chosen_similarity = similarity
+           if similarity > 0.9:
+               break
 
     if inspect:
         cv2.imwrite(inspectdir + "/%s_pokemon_img.png" % inspectFilename, pokemon_img)

@@ -136,7 +136,7 @@ def getValidationsByUser(user_id):
     db = getDbConnection()
     logging.debug("storagemethods:getValidationsByUser: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`, `startedtime`, `step`, `tries`, `pokemon`, `pokemonname`, `usuario_id` FROM `validaciones` \
+        sql = "SELECT `id`, `startedtime`, `step`, `tries`, `pokemon`, `pokemon2`, `pokemonname`, `usuario_id` FROM `validaciones` \
         WHERE validaciones.usuario_id = %s"
         cursor.execute(sql, (user_id))
         result = cursor.fetchall()
@@ -147,7 +147,7 @@ def getCurrentValidation(user_id):
     db = getDbConnection()
     logging.debug("storagemethods:getCurrentValidation: %s" % (user_id))
     with db.cursor() as cursor:
-        sql = "SELECT `id`, `startedtime`, `step`, `tries`, `pokemon`, `pokemonname`, `usuario_id`, `trainername`, `team`, `level` FROM `validaciones` \
+        sql = "SELECT `id`, `startedtime`, `step`, `tries`, `pokemon`, `pokemon2`, `pokemonname`, `usuario_id`, `trainername`, `team`, `level` FROM `validaciones` \
         WHERE `validaciones`.`usuario_id` = %s AND (`step` = 'waitingtrainername' OR `step` = 'waitingscreenshot' OR `step` = 'failed')"
         cursor.execute(sql, (user_id))
         result = cursor.fetchone()
@@ -157,16 +157,16 @@ def getCurrentValidation(user_id):
 def saveValidation(validation):
     db = getDbConnection()
     logging.debug("storagemethods:saveValidation: %s" % (validation))
-    for k in ["id","trainername","team","level"]:
+    for k in ["id","trainername","team","level","pokemon2"]:
         if k not in validation.keys():
             validation[k] = None
     for k in ["tries"]:
         if k not in validation.keys():
             validation[k] = 0
     with db.cursor() as cursor:
-        sql = "INSERT INTO validaciones (id, pokemon, pokemonname, usuario_id) VALUES (%s, %s, %s, %s) \
+        sql = "INSERT INTO validaciones (id, pokemon, pokemon2, pokemonname, usuario_id) VALUES (%s, %s, %s, %s, %s) \
         ON DUPLICATE KEY UPDATE trainername = %s, step = %s, tries = %s, team = %s, level = %s;"
-        cursor.execute(sql, (validation["id"], validation["pokemon"], validation["pokemonname"], validation["usuario_id"], validation["trainername"], validation["step"], validation["tries"], validation["team"], validation["level"]))
+        cursor.execute(sql, (validation["id"], validation["pokemon"], validation["pokemon2"], validation["pokemonname"], validation["usuario_id"], validation["trainername"], validation["step"], validation["tries"], validation["team"], validation["level"]))
     db.commit()
     db.close()
     return True

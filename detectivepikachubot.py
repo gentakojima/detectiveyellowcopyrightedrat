@@ -130,9 +130,9 @@ def register(bot, update):
         user = {"id": user_id, "username": user_username}
         saveUser(user)
 
-    pokemon = random.choice(validation_pokemons)
+    pokemons = random.sample(validation_pokemons,2 )
     name = random.choice(validation_names)
-    validation = { "usuario_id": chat_id, "step": "waitingtrainername", "pokemon": pokemon, "pokemonname": name }
+    validation = { "usuario_id": chat_id, "step": "waitingtrainername", "pokemon": pokemons[0], "pokemon2": pokemons[1], "pokemonname": name }
     saveValidation(validation)
 
     bot.sendMessage(chat_id=chat_id, text="¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 6 horas, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esas 6 horas._", parse_mode=telegram.ParseMode.MARKDOWN)
@@ -464,7 +464,7 @@ def processMessage(bot, update):
                         validation["trainername"] = text
                         validation["step"] = "waitingscreenshot"
                         saveValidation(validation)
-                        bot.sendMessage(chat_id=chat_id, text="Así que tu nombre de entrenador es *%s*.\n\nPara completar el registro, debes enviarme una captura de pantalla de tu perfil del juego. En la captura de pantalla debes tener un *%s* llamado *%s* como compañero. Si no tienes ninguno, o no te apetece cambiar ahora de compañero, puedes volver a comenzar el registro en cualquier otro momento." % (validation["trainername"], validation["pokemon"].capitalize(),validation["pokemonname"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text="Así que tu nombre de entrenador es *%s*.\n\nPara completar el registro, debes enviarme una captura de pantalla de tu perfil del juego, con un *%s* o un *%s* como compañero y que tengan de nombre *%s*. Si no tienes ninguno de esos pokémon, o no te apetece cambiar ahora de compañero, puedes volver a comenzar el registro en cualquier otro momento después de que caduque." % (validation["trainername"], validation["pokemon"].capitalize(), validation["pokemon2"].capitalize(),validation["pokemonname"]), parse_mode=telegram.ParseMode.MARKDOWN)
                     else:
                         bot.sendMessage(chat_id=chat_id, text="❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Si realmente es tuyo, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.\n\nSi lo has escrito mal y realmente no era ese el nombre, dime entonces, ¿cómo es el nombre de entrenador que aparece en tu perfil del juego?" % config["telegram"]["validationsmail"], parse_mode=telegram.ParseMode.MARKDOWN)
                         return
@@ -478,7 +478,7 @@ def processMessage(bot, update):
                 filename = sys.path[0] + "/photos/profile-%s-%s-%s.jpg" % (user_id, validation["id"], int(time.time()))
                 urllib.request.urlretrieve(photo["file_path"], filename)
                 try:
-                    (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename, validation["pokemon"])
+                    (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name, chosen_profile) = parse_profile_image(filename, validation["pokemon"], validation["pokemon2"])
                     #output = "Información reconocida:\n - Nombre de entrenador: %s\n - Nivel: %s\n - Equipo: %s\n - Pokémon: %s\n - Nombre del Pokémon: %s" % (trainer_name, level, chosen_color, chosen_pokemon, pokemon_name)
                     #bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
                     output = None
@@ -497,8 +497,8 @@ def processMessage(bot, update):
                     output = "❌ No he reconocido correctamente el *equipo*. Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
                 elif pokemon_name.lower() != validation["pokemonname"].lower() and distance(pokemon_name.lower(),validation["pokemonname"].lower())>2:
                     output = "❌ No he reconocido correctamente el *nombre del Pokémon*. ¿Le has cambiado el nombre a *%s* como te dije? Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % (validation["pokemonname"], config["telegram"]["validationsmail"])
-                elif chosen_pokemon != validation["pokemon"]:
-                    output = "❌ No he reconocido correctamente el *Pokémon*. ¿Has puesto de compañero a *%s* como te dije? Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % (validation["pokemon"], config["telegram"]["validationsmail"])
+                elif (chosen_pokemon != validation["pokemon"] and chosen_pokemon != validation["pokemon2"]) or chosen_pokemon is None:
+                    output = "❌ No he reconocido correctamente el *Pokémon*. ¿Has puesto de compañero a *%s* o a *%s* como te dije? Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % (validation["pokemon"], validation["pokemon2"], config["telegram"]["validationsmail"])
                 if output is not None:
                     validation["tries"] = validation["tries"] + 1
                     if validation["tries"] > 3:
