@@ -164,7 +164,10 @@ def send_alerts(raid, bot):
         logging.debug("supportmethods:send_alerts: Sending %i alerts" % len(alerts))
         for alert in alerts:
             logging.debug("supportmethods:send_alerts: Sending alert %s" % alert)
-            bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una %s %s en <b>%s</b> %sa las <b>%s</b> en el grupo %s.\n\n<i>Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando</i> <code>/clearalerts</code>" % (incursion_text, what_text, raid["gimnasio_text"], what_day, extract_time(raid["timeraid"]), group_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            try:
+                bot.sendMessage(chat_id=alert["user_id"], text="🔔 Se ha creado una %s %s en <b>%s</b> %sa las <b>%s</b> en el grupo %s.\n\n<i>Recibes esta alerta porque has activado las alertas para ese gimnasio. Si no deseas recibir más alertas, puedes usar el comando</i> <code>/clearalerts</code>" % (incursion_text, what_text, raid["gimnasio_text"], what_day, extract_time(raid["timeraid"]), group_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            except:
+                logging.debug("supportmethods:send_alerts: Error sending alert %s" % alert)
 
 def update_message(chat_id, message_id, reply_markup, bot):
     logging.debug("supportmethods:update_message: %s %s %s" % (chat_id, message_id, reply_markup))
