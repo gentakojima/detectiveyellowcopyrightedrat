@@ -23,6 +23,8 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    6. [Zona horaria](#zona-horaria)
    7. [Rankings](#rankings)
    8. [Otros comandos exclusivos para administradores](#otros-comandos-exclusivos-para-administradores)
+3. [Política de tramposos](#politica-de-tramposos)
+4. [Protección de datos](#proteccion-de-datos)
 
 ## Ayuda para entrenadores ##
 
@@ -357,3 +359,26 @@ Para revertir la cancelación de una incursión puedes usar el comando `/descanc
 Un administrador siempre puede cancelar incursiones con el comando `/cancelar`, aunque sean antiguas. Normalmente, un creador de incursión solo puede cancelar incursiones que no sean más antiguas de tres horas.
 
 Para reflotar todas las incursiones activas una vez, sin necesidad de usar el reflotado automático, se puede usar el comando `/reflotaractivas`. También se pueden reflotar todas las incursiones, incluídas las EX que transcurrirán dentro de varias horas o días, con `/reflotartodas`.
+
+# Política de tramposos #
+
+Este bot no puede ser utilizado en grupos o canales que promueven el uso de trampas en el juego. Si bien no se puede evitar que sea utilizado casi por cualquiera, el bot implementa algunas medidas anti-trampas que detectan determinados comportamientos que pueden llevar a un baneo preventivo.
+
+En caso de ser baneado, el bot no contestará ningún comando ni permitirá apuntarse a las incursiones. Para comprobar si tu cuenta está baneada, puedes utilizar el comando `/profile` por privado. El estado de tu cuenta será **Baneada**.
+
+Si crees que se te ha baneado por error, pásate por el [grupo de ayuda](https://t.me/detectivepikachuayuda) y pide que revisen tu caso.
+
+# Protección de datos #
+
+Este bot recoge la siguiente información sobre sus usuarios en un fichero automatizado:
+
+  * Identificador numérico de Telegram
+  * Alias público de Telegram
+  * Estado de la cuenta (validada, no validada o baneada)
+  * Datos relacionados con la cuenta de Pokémon GO facilitados por el usuario: equipo, nombre de entrenador y nivel
+
+Estos datos son necesarios para el correcto funcionamiento del bot y no son compartidos en ningún caso con otros usuarios ni terceros. El alias público de Telegram y los datos relacionados con la cuenta de Pokémon GO sí aparecerán en listados de incursiones y rankings de los grupos, en caso de participar en incursiones o crearlas. El acceso a estos datos será público o no dependiendo de la configuración de cada grupo.
+
+En caso de querer eliminar los datos almacenados en el fichero automatizado, se debe enviar un correo a `validations@detectivepik.ac` indicándolo. El bot guardará el identificador numérico de Telegram junto con una marca que indica este deseo. En este caso, no será posible utilizar el bot y el estado de la cuenta aparecerá como **baneada**.
+
+El bot también almacena unos ficheros no ordenados con las interacciones en grupos y directas con el bot en los últimos 60 días (*logs*), con el objetivo de poder trazar problemas técnicos y atender a las apelaciones de baneo.

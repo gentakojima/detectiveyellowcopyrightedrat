@@ -766,9 +766,6 @@ def profile(bot, update):
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
-    if isBanned(chat_id):
-        return
-
     if not edit_check_private(chat_id, chat_type, user_username, "profile", bot):
         delete_message(chat_id, message.message_id, bot)
         return
