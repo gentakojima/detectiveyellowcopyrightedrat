@@ -23,8 +23,8 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    6. [Zona horaria](#zona-horaria)
    7. [Rankings](#rankings)
    8. [Otros comandos exclusivos para administradores](#otros-comandos-exclusivos-para-administradores)
-3. [Política de tramposos](#politica-de-tramposos)
-4. [Protección de datos](#proteccion-de-datos)
+3. [Política de tramposos](#política-de-tramposos)
+4. [Protección de datos](#protección-de-datos)
 
 ## Ayuda para entrenadores ##
 
