@@ -217,150 +217,150 @@ def settalkgroup(bot, update, args=None):
 
 @run_async
 def setspreadsheet(bot, update, args=None):
-  logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
-  (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-  chat_title = message.chat.title
-  group_alias = None
-  if hasattr(message.chat, 'username') and message.chat.username is not None:
-      group_alias = message.chat.username
+    logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    chat_title = message.chat.title
+    group_alias = None
+    if hasattr(message.chat, 'username') and message.chat.username is not None:
+        group_alias = message.chat.username
 
-  if chat_type == "private":
-    bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos.")
-    return
-
-  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
-    return
-
-  try:
-      bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-  except:
-      pass
-
-  if args is None or len(args)!=1:
-    bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro.")
-    return
-
-  m = re.search('docs.google.com/.*spreadsheets/d/([a-zA-Z0-9_-]+)', args[0], flags=re.IGNORECASE)
-  if m is None:
-    bot.sendMessage(chat_id=chat_id, text="❌ Vaya, no he reconocido esa URL... %s" % args[0])
-  else:
-    spreadsheet_id = m.group(1)
-    group = getGroup(chat_id)
-
-    if group is None:
-        if chat_type == "channel":
-            bot.sendMessage(chat_id=chat_id, text="No tengo información de este canal. Un administrador debe utilizar al menos una vez el comando `/settings` antes de poder utilizarme en un canal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
-        else:
-            bot.sendMessage(chat_id=chat_id, text="No consigo encontrar la información de este grupo. ¿He saludado al entrar? Prueba a echarme y a meterme de nuevo. Si lo has promocionado a supergrupo después de entrar yo, esto es normal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+    if chat_type == "private":
+        bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos.")
         return
 
-    group["title"] = chat_title
-    group["spreadsheet"] = spreadsheet_id
-    group["alias"] = group_alias
-    saveGroup(group)
-    bot.sendMessage(chat_id=chat_id, text="👌 Establecido hoja de cálculo con identificador `%s`.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos." % ensure_escaped(spreadsheet_id), parse_mode=telegram.ParseMode.MARKDOWN)
+    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
+        return
+
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+    except:
+        pass
+
+    if args is None or len(args)!=1:
+        bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro.")
+        return
+
+    m = re.search('docs.google.com/.*spreadsheets/d/([a-zA-Z0-9_-]+)', args[0], flags=re.IGNORECASE)
+    if m is None:
+        bot.sendMessage(chat_id=chat_id, text="❌ Vaya, no he reconocido esa URL... %s" % args[0])
+    else:
+        spreadsheet_id = m.group(1)
+        group = getGroup(chat_id)
+
+        if group is None:
+            if chat_type == "channel":
+                bot.sendMessage(chat_id=chat_id, text="No tengo información de este canal. Un administrador debe utilizar al menos una vez el comando `/settings` antes de poder utilizarme en un canal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+            else:
+                bot.sendMessage(chat_id=chat_id, text="No consigo encontrar la información de este grupo. ¿He saludado al entrar? Prueba a echarme y a meterme de nuevo. Si lo has promocionado a supergrupo después de entrar yo, esto es normal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+            return
+
+        group["title"] = chat_title
+        group["spreadsheet"] = spreadsheet_id
+        group["alias"] = group_alias
+        saveGroup(group)
+        bot.sendMessage(chat_id=chat_id, text="👌 Establecido hoja de cálculo con identificador `%s`.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos." % ensure_escaped(spreadsheet_id), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def refresh(bot, update, args=None):
-  logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
-  (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-  chat_title = message.chat.title
-  group_alias = None
-  if hasattr(message.chat, 'username') and message.chat.username is not None:
-      group_alias = message.chat.username
+    logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    chat_title = message.chat.title
+    group_alias = None
+    if hasattr(message.chat, 'username') and message.chat.username is not None:
+        group_alias = message.chat.username
 
-  if chat_type == "private":
-    bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos.")
-    return
-
-  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
-    return
-
-  try:
-      bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-  except:
-      pass
-
-  grupo = getGroup(chat_id)
-  if grupo is None or grupo["spreadsheet"] is None:
-    bot.sendMessage(chat_id=chat_id, text="❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/spreadsheet`", parse_mode=telegram.ParseMode.MARKDOWN)
-    return
-
-  sent_message = bot.sendMessage(chat_id=chat_id, text="🌎 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
-  Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
-
-  response = requests.get("https://docs.google.com/spreadsheet/ccc?key=%s&output=csv" % grupo["spreadsheet"] )
-  if response.status_code == 200:
-    places = []
-    f = StringIO(response.content.decode('utf-8'))
-    csvreader = csv.reader(f, delimiter=',', quotechar='"')
-    counter = 0
-    incomplete_rows = []
-    for row in csvreader:
-      if counter > 3000:
-          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se permiten más de 3000 gimnasios por grupo!")
-          return
-      if counter == 0 and len(row) == 0:
-          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han encontrado datos! ¿La hoja de cálculo es pública?")
-      elif len(row) < 4:
-          rownumber = counter + 1
-          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! La fila %s no tiene las 4 columnas requeridas." % rownumber)
-          return
-      names = row[3].split(",")
-      latitude = str(row[1]).replace(",",".")
-      longitude = str(row[2]).replace(",",".")
-      m = re.search('^-?[0-9]+.[0-9]+$', latitude, flags=re.IGNORECASE)
-      m2 = re.search('^-?[0-9]+.[0-9]+$', longitude, flags=re.IGNORECASE)
-      if m is None or m2 is None:
-        rownumber = counter + 1
-        bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! El formato de las coordenadas en la fila %s es incorrecto. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas." % (rownumber))
+    if chat_type == "private":
+        bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos.")
         return
-      for i,r in enumerate(names):
-        names[i] = names[i].strip()
-        if len(names[i]) < 2:
-          del names[i]
-      if len(names)==0:
-        incomplete_rows.append(counter)
-      if len(row) > 4:
-          tags = row[4].split(",")
-          for i,r in enumerate(tags):
-              tags[i] = tags[i].strip()
-      else:
-          tags = []
-      if len(row) > 5 and row[5].strip()!="":
-          zones = row[5].split(",")
-          for i,r in enumerate(zones):
-              zones[i] = zones[i].strip()
-      else:
-          zones = []
-      places.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names, "tags":tags, "zones":zones});
-      counter = counter + 1
 
-    if counter > 1:
-      grupo["title"] = chat_title
-      grupo["alias"] = group_alias
-      saveGroup(grupo)
-      removedalerts = getRemovedAlerts(chat_id, places)
-      if savePlaces(chat_id, places):
-          places = getPlaces(grupo["id"])
-          if len(incomplete_rows) > 0:
-              bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!\n⚠️ %i gimnasios no tienen palabras clave. Recuerda que son obligatorias para que puedan ser encontrados." % (len(places), len(incomplete_rows)))
-          else:
-              bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
-          # Warn users with removed alerts due to deleted/replaced gyms
-          if removedalerts is not None and len(removedalerts)>0:
-              for ra in removedalerts:
-                  try:
-                      bot.sendMessage(chat_id=ra["usuario_id"], text="🚫 Se ha borrado una alerta que tenías programada para el gimnasio <b>%s</b> del grupo <b>%s</b> porque un administrador lo ha borrado o reemplazado por otro con un nombre diferente." % (ra["gimnasio_name"],ra["grupo_title"]), parse_mode=telegram.ParseMode.HTML)
-                  except:
-                      logging.debug("detectivepikachubot:refresh: Can't alert user %s about deleted alert on %s" % (ra["usuario_id"],ra["gimnasio_name"]))
-                      pass
-      else:
-          bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre.")
+    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
+        return
+
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+    except:
+        pass
+
+    grupo = getGroup(chat_id)
+    if grupo is None or grupo["spreadsheet"] is None:
+        bot.sendMessage(chat_id=chat_id, text="❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/spreadsheet`", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    sent_message = bot.sendMessage(chat_id=chat_id, text="🌎 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
+    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+
+    response = requests.get("https://docs.google.com/spreadsheet/ccc?key=%s&output=csv" % grupo["spreadsheet"] )
+    if response.status_code == 200:
+        places = []
+        f = StringIO(response.content.decode('utf-8'))
+        csvreader = csv.reader(f, delimiter=',', quotechar='"')
+        counter = 0
+        incomplete_rows = []
+        for row in csvreader:
+            if counter > 3000:
+                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se permiten más de 3000 gimnasios por grupo!")
+                return
+            if counter == 0 and len(row) == 0:
+                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han encontrado datos! ¿La hoja de cálculo es pública?")
+            elif len(row) < 4:
+                rownumber = counter + 1
+                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! La fila %s no tiene las 4 columnas requeridas." % rownumber)
+                return
+            names = row[3].split(",")
+            latitude = str(row[1]).replace(",",".")
+            longitude = str(row[2]).replace(",",".")
+            m = re.search('^-?[0-9]+.[0-9]+$', latitude, flags=re.IGNORECASE)
+            m2 = re.search('^-?[0-9]+.[0-9]+$', longitude, flags=re.IGNORECASE)
+            if m is None or m2 is None:
+                rownumber = counter + 1
+                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! El formato de las coordenadas en la fila %s es incorrecto. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas." % (rownumber))
+                return
+            for i,r in enumerate(names):
+                names[i] = names[i].strip()
+                if len(names[i]) < 2:
+                    del names[i]
+            if len(names)==0:
+                incomplete_rows.append(counter)
+            if len(row) > 4:
+                tags = row[4].split(",")
+                for i,r in enumerate(tags):
+                    tags[i] = tags[i].strip()
+            else:
+                tags = []
+            if len(row) > 5 and row[5].strip()!="":
+                zones = row[5].split(",")
+                for i,r in enumerate(zones):
+                    zones[i] = zones[i].strip()
+            else:
+                zones = []
+            places.append({"desc":row[0],"latitude":latitude,"longitude":longitude,"names":names, "tags":tags, "zones":zones});
+            counter = counter + 1
+
+        if counter > 1:
+            grupo["title"] = chat_title
+            grupo["alias"] = group_alias
+            saveGroup(grupo)
+            removedalerts = getRemovedAlerts(chat_id, places)
+            if savePlaces(chat_id, places):
+                places = getPlaces(grupo["id"])
+                if len(incomplete_rows) > 0:
+                    bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!\n⚠️ %i gimnasios no tienen palabras clave. Recuerda que son obligatorias para que puedan ser encontrados." % (len(places), len(incomplete_rows)))
+                else:
+                    bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
+                # Warn users with removed alerts due to deleted/replaced gyms
+                if removedalerts is not None and len(removedalerts)>0:
+                    for ra in removedalerts:
+                        try:
+                            bot.sendMessage(chat_id=ra["usuario_id"], text="🚫 Se ha borrado una alerta que tenías programada para el gimnasio <b>%s</b> del grupo <b>%s</b> porque un administrador lo ha borrado o reemplazado por otro con un nombre diferente." % (ra["gimnasio_name"],ra["grupo_title"]), parse_mode=telegram.ParseMode.HTML)
+                        except:
+                            logging.debug("detectivepikachubot:refresh: Can't alert user %s about deleted alert on %s" % (ra["usuario_id"],ra["gimnasio_name"]))
+                            pass
+            else:
+                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre.")
+        else:
+            bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto? Ten en cuenta que para que funcione, debe haber al menos 2 gimnasios en el documento.")
     else:
-      bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto? Ten en cuenta que para que funcione, debe haber al menos 2 gimnasios en el documento.")
-  else:
-    bot.sendMessage(chat_id=chat_id, text="❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?")
+        bot.sendMessage(chat_id=chat_id, text="❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?")
 
 @run_async
 def registerOak(bot, update):
@@ -641,10 +641,10 @@ def settings(bot, update):
     chat_title = message.chat.title
 
     if chat_type == "private":
-      bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
-      return
+        bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
+        return
     if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
-      return
+        return
 
     try:
         bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
@@ -679,31 +679,31 @@ def settings(bot, update):
 
 @run_async
 def list(bot, update):
-  logging.debug("detectivepikachubot:list: %s %s" % (bot, update))
-  (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-  if chat_type == "private":
-    bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
-    return
+    logging.debug("detectivepikachubot:list: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    if chat_type == "private":
+        bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
+        return
 
-  try:
-      bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-  except:
-      pass
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+    except:
+        pass
 
-  if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
-    return
+    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
+        return
 
-  gyms = getPlaces(chat_id)
-  if len(gyms)==0:
-    bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo")
-    return
-  output = "Lista de gimnasios conocidos (%i):" % len(gyms)
-  bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
-  for p in gyms:
-    output = output + ("\n - %s%s" % (p["desc"], format_gym_emojis(p["tags"])))
-  if len(output) > 4096:
-      output = output[:4006].rsplit('\n', 1)[0]+"...\n_(El mensaje se ha cortado porque era demasiado largo)_"
-  bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
+    gyms = getPlaces(chat_id)
+    if len(gyms)==0:
+        bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo")
+        return
+    output = "Lista de gimnasios conocidos (%i):" % len(gyms)
+    bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
+    for p in gyms:
+        output = output + ("\n - %s%s" % (p["desc"], format_gym_emojis(p["tags"])))
+    if len(output) > 4096:
+        output = output[:4006].rsplit('\n', 1)[0]+"...\n_(El mensaje se ha cortado porque era demasiado largo)_"
+    bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def raids(bot, update):
@@ -955,219 +955,219 @@ def gym(bot, update, args=None):
 
 @run_async
 def raid(bot, update, args=None):
-  logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
-  (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
-  if chat_type != "channel":
-    user_username = message.from_user.username
-    thisuser = refreshUsername(user_id, user_username)
-
-  if isBanned(chat_id) or isBanned(user_id):
-    return
-
-  if chat_type == "private":
-    bot.sendMessage(chat_id=chat_id, text="Las incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
-    return
-
-  current_raid = {}
-  group = getGroup(chat_id)
-
-  if group is None:
-      if chat_type == "channel":
-          bot.sendMessage(chat_id=chat_id, text="No tengo información de este canal. Un administrador debe utilizar al menos una vez el comando `/settings` antes de poder utilizarme en un canal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
-      else:
-          bot.sendMessage(chat_id=chat_id, text="No consigo encontrar la información de este grupo. ¿He saludado al entrar? Prueba a echarme y a meterme de nuevo. Si lo has promocionado a supergrupo después de entrar yo, esto es normal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
-      return
-
-  try:
-    bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-  except:
-    pass
-
-  if chat_type != "channel" and (group["raidcommand"] == 0 and not is_admin(chat_id, user_id, bot)):
-      return
-
-  if chat_type != "channel" and isBanned(user_id):
-      return
-
-  if chat_type != "channel" and thisuser["username"] is None:
-      sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
-      Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
-      return
-
-  if chat_type != "channel" and thisuser["validation"] == "none" and group["validationrequired"] == 1:
-      sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero en este grupo es obligatorio validarse antes de poder crear incursiones o participar en ellas!\nAbre un privado con @%s y escribe `/help` para saber cómo puedes validarte.\n\n_(Este mensaje se borrará en unos segundos)_" % config["telegram"]["botalias"], parse_mode=telegram.ParseMode.MARKDOWN)
-      Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
-      return
-
-  currgyms = getCurrentGyms(chat_id)
-  if (len(args) == 0 or args == None) and len(currgyms) >= 2 and group["locations"] == 1:
-      keyboard = get_pokemons_keyboard()
-      if chat_type != "channel":
-          creating_text = format_text_creating(thisuser)
-      else:
-          creating_text = format_text_creating(None)
-      sent_message = bot.sendMessage(chat_id=chat_id, text="🤔 %s\n\nElige el <b>Pokémon</b> o el huevo del que quieres realizar la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y créala manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % creating_text, reply_markup=keyboard, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-
-      current_raid = {}
-      current_raid["grupo_id"] = chat_id
-      current_raid["usuario_id"] = user_id
-      current_raid["message"] = sent_message.message_id
-      current_raid["status"] = "creating"
-      current_raid["id"] = saveRaid(current_raid)
-      return
-
-  if args is None or len(args)<3:
     if chat_type != "channel":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text), parse_mode=telegram.ParseMode.MARKDOWN)
-    else:
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text), parse_mode=telegram.ParseMode.MARKDOWN)
-    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
-    return
+        user_username = message.from_user.username
+        thisuser = refreshUsername(user_id, user_username)
 
-  if chat_type != "channel":
-    current_raid["username"] = thisuser["username"]
-  else:
-    current_raid["username"] = None
+    if isBanned(chat_id) or isBanned(user_id):
+        return
 
-  if args[0].lower() == "de":
-    del args[0]
+    if chat_type == "private":
+        bot.sendMessage(chat_id=chat_id, text="Las incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
+        return
 
-  if args[0].lower() == "nivel" and args[1] in ["1","2","3","4","5"]:
-      del args[0]
-      args[0] = "N%s" % args[0]
+    current_raid = {}
+    group = getGroup(chat_id)
 
-  if args[0].lower() == "legendaria":
-      args[0] = "N5"
+    if group is None:
+        if chat_type == "channel":
+            bot.sendMessage(chat_id=chat_id, text="No tengo información de este canal. Un administrador debe utilizar al menos una vez el comando `/settings` antes de poder utilizarme en un canal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            bot.sendMessage(chat_id=chat_id, text="No consigo encontrar la información de este grupo. ¿He saludado al entrar? Prueba a echarme y a meterme de nuevo. Si lo has promocionado a supergrupo después de entrar yo, esto es normal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+        return
 
-  (current_raid["pokemon"], current_raid["egg"]) = parse_pokemon(args[0])
-  if current_raid["pokemon"] is None and current_raid["egg"] is None:
-    if chat_type != "channel":
-      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n`/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
-    else:
-      sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n`/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text),parse_mode=telegram.ParseMode.MARKDOWN)
-    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
-    return
-
-  del args[0]
-  if args[0].lower() == "a" and (args[1].lower() == "las" or args[1].lower() == "la"):
-    del args[0]
-    del args[0]
-
-  current_raid["timeraid"] = parse_time(args[0], group["timezone"])
-  if current_raid["timeraid"] is None:
-      if chat_type != "channel":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *la hora*. ¿La has puesto bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
-      else:
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No he entendido *la hora*. ¿La has puesto bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text),parse_mode=telegram.ParseMode.MARKDOWN)
-      Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
-      return
-
-  raid_datetime = datetime.strptime(current_raid["timeraid"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(group["timezone"]))
-  now_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"]))
-  if raid_datetime < now_datetime:
-      now_datetime_str = now_datetime.strftime("%Y-%m-%d %H:%M:%S")
-      now_time = extract_time(now_datetime_str)
-      if chat_type != "channel":
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s si no he entendido mal quieres poner la incursión a las *%s*, pero ya son las *%s*. ¿Has puesto bien la hora?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), extract_time(current_raid["timeraid"]), now_time, text),parse_mode=telegram.ParseMode.MARKDOWN)
-      else:
-        sent_message = bot.sendMessage(chat_id=chat_id, text="❌ Si no he entendido mal quieres poner la incursión a las *%s*, pero ya son las *%s*. ¿Has puesto bien la hora?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (extract_time(current_raid["timeraid"]), now_time, text),parse_mode=telegram.ParseMode.MARKDOWN)
-      Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
-      return
-
-  current_raid["timeend"] = parse_time(args[-1], group["timezone"], strict=True)
-
-  if current_raid["timeend"] is not None:
-      raidend_datetime = datetime.strptime(current_raid["timeend"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(group["timezone"]))
-      raidend_datetime = raidend_datetime.replace(day=raid_datetime.day, month=raid_datetime.month, year=raid_datetime.year)
-      if raidend_datetime < raid_datetime or raidend_datetime > (raid_datetime + timedelta(minutes = 180)):
-          now_datetime_str = now_datetime.strftime("%Y-%m-%d %H:%M:%S")
-          now_time = extract_time(now_datetime_str)
-          if chat_type != "channel":
-            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s si no he entendido mal quieres poner la hora de finalización de la incursión a las *%s*, pero la incursión es a las *%s*. ¿Has puesto bien la hora de finalización?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), extract_time(current_raid["timeend"]), extract_time(current_raid["timeraid"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
-          else:
-            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ Si no he entendido mal quieres poner la hora de finalización de la incursión a las *%s*, pero la incursión es a las *%s*. ¿Has puesto bien la hora de finalización?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (extract_time(current_raid["timeend"]), extract_time(current_raid["timeraid"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
-          Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
-          return
-
-  if current_raid["timeend"] is not None:
-      del args[-1]
-      try:
-          if args[-4] == "se" and args[-3] == "va" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
-              del args[-1]
-              del args[-1]
-              del args[-1]
-              del args[-1]
-          elif args[-3] == "está" and args[-2] == "hasta" and (args[-1] == "las" or args[-1] == "la"):
-              del args[-1]
-              del args[-1]
-              del args[-1]
-          elif args[-3] == "desaparece" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
-              del args[-1]
-              del args[-1]
-              del args[-1]
-      except:
-          pass
-
-  del args[0]
-  if args[0].lower() == "en":
-    del args[0]
-
-  current_raid["gimnasio_text"] = ""
-  for i in range (0,len(args)):
-      current_raid["gimnasio_text"] = current_raid["gimnasio_text"] + "%s " % args[i]
-  current_raid["gimnasio_text"] = current_raid["gimnasio_text"].strip()
-
-  if group["locations"] == 1:
-      chosengym = None
-      gyms = getPlaces(chat_id, ordering="id")
-      for p in gyms:
-        for n in p["names"]:
-          if re.search(re.escape(unidecode(n)),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) is not None:
-            logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(current_raid["gimnasio_text"])))
-            chosengym = p
-            break
-        if chosengym is not None:
-          break
-      if chosengym is not None:
-        current_raid["gimnasio_text"] = chosengym["desc"]
-        current_raid["gimnasio_id"] = chosengym["id"]
-
-  current_raid["grupo_id"] = chat_id
-  current_raid["usuario_id"] = user_id
-  current_raid["id"] = saveRaid(current_raid)
-
-  text  = format_message(current_raid)
-  reply_markup = get_keyboard(current_raid)
-  sent_message = bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-  current_raid["message"] = sent_message.message_id
-  saveRaid(current_raid)
-
-  if chat_type != "channel":
-      send_edit_instructions(group, current_raid, user_id, bot)
-
-  if group["locations"] == 1:
-      if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] is not None:
-          Thread(target=send_alerts_delayed, args=(current_raid, bot)).start()
-      elif chat_type != "channel":
-          if group["alerts"] == 1:
-              text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
-          else:
-              text_alertas = ""
-          try:
-              bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _%s_\n\nDebes cambiarlo por un gimnasio reconocido para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto del final:\n\n`/cambiargimnasio %s %s`\n\nSi no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente." % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
-          except:
-              logging.debug("Error sending warning in private. Maybe conversation not started?")
-
-  raid_difftime = raid_datetime - now_datetime
-  if raid_difftime.total_seconds() < 900:
-    suggested_datetime = raid_datetime + timedelta(minutes = 20)
-    suggested_datetime_str = suggested_datetime.strftime("%Y-%m-%d %H:%M:%S")
-    suggested_time = extract_time(suggested_datetime_str)
     try:
-        bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Has creado la incursión para dentro de muy poco tiempo, *solo faltan %s minutos*. ¿Quizás prefieras cambiarla para más tarde para que se pueda unir más gente? Para hacerlo, pon aquí este comando:\n\n`/cambiarhora %s %s`" % (int(raid_difftime.total_seconds()/60), current_raid["id"], suggested_time), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
     except:
-        logging.debug("Error sending warning in private. Maybe conversation not started?")
+        pass
+
+    if chat_type != "channel" and (group["raidcommand"] == 0 and not is_admin(chat_id, user_id, bot)):
+        return
+
+    if chat_type != "channel" and isBanned(user_id):
+        return
+
+    if chat_type != "channel" and thisuser["username"] is None:
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\nEn Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n\n_(Este mensaje se borrará en unos segundos)_", parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+        return
+
+    if chat_type != "channel" and thisuser["validation"] == "none" and group["validationrequired"] == 1:
+        sent_message = bot.sendMessage(chat_id=chat_id, text="¡Lo siento, pero en este grupo es obligatorio validarse antes de poder crear incursiones o participar en ellas!\nAbre un privado con @%s y escribe `/help` para saber cómo puedes validarte.\n\n_(Este mensaje se borrará en unos segundos)_" % config["telegram"]["botalias"], parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+        return
+
+    currgyms = getCurrentGyms(chat_id)
+    if (len(args) == 0 or args == None) and len(currgyms) >= 2 and group["locations"] == 1:
+        keyboard = get_pokemons_keyboard()
+        if chat_type != "channel":
+            creating_text = format_text_creating(thisuser)
+        else:
+            creating_text = format_text_creating(None)
+        sent_message = bot.sendMessage(chat_id=chat_id, text="🤔 %s\n\nElige el <b>Pokémon</b> o el huevo del que quieres realizar la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y créala manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % creating_text, reply_markup=keyboard, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+        current_raid = {}
+        current_raid["grupo_id"] = chat_id
+        current_raid["usuario_id"] = user_id
+        current_raid["message"] = sent_message.message_id
+        current_raid["status"] = "creating"
+        current_raid["id"] = saveRaid(current_raid)
+        return
+
+    if args is None or len(args)<3:
+        if chat_type != "channel":
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text), parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No te entiendo. Debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text), parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
+        return
+
+    if chat_type != "channel":
+        current_raid["username"] = thisuser["username"]
+    else:
+        current_raid["username"] = None
+
+    if args[0].lower() == "de":
+        del args[0]
+
+    if args[0].lower() == "nivel" and args[1] in ["1","2","3","4","5"]:
+        del args[0]
+        args[0] = "N%s" % args[0]
+
+    if args[0].lower() == "legendaria":
+        args[0] = "N5"
+
+    (current_raid["pokemon"], current_raid["egg"]) = parse_pokemon(args[0])
+    if current_raid["pokemon"] is None and current_raid["egg"] is None:
+        if chat_type != "channel":
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n`/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n`/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text),parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
+        return
+
+    del args[0]
+    if args[0].lower() == "a" and (args[1].lower() == "las" or args[1].lower() == "la"):
+        del args[0]
+        del args[0]
+
+    current_raid["timeraid"] = parse_time(args[0], group["timezone"])
+    if current_raid["timeraid"] is None:
+        if chat_type != "channel":
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s no he entendido *la hora*. ¿La has puesto bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ No he entendido *la hora*. ¿La has puesto bien?\nRecuerda que debes poner los parámetros de la incursión en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplo:\n `/raid pikachu 12:00 la lechera`\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (text),parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
+        return
+
+    raid_datetime = datetime.strptime(current_raid["timeraid"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(group["timezone"]))
+    now_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"]))
+    if raid_datetime < now_datetime:
+        now_datetime_str = now_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        now_time = extract_time(now_datetime_str)
+        if chat_type != "channel":
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s si no he entendido mal quieres poner la incursión a las *%s*, pero ya son las *%s*. ¿Has puesto bien la hora?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), extract_time(current_raid["timeraid"]), now_time, text),parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            sent_message = bot.sendMessage(chat_id=chat_id, text="❌ Si no he entendido mal quieres poner la incursión a las *%s*, pero ya son las *%s*. ¿Has puesto bien la hora?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (extract_time(current_raid["timeraid"]), now_time, text),parse_mode=telegram.ParseMode.MARKDOWN)
+        Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
+        return
+
+    current_raid["timeend"] = parse_time(args[-1], group["timezone"], strict=True)
+
+    if current_raid["timeend"] is not None:
+        raidend_datetime = datetime.strptime(current_raid["timeend"],"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(group["timezone"]))
+        raidend_datetime = raidend_datetime.replace(day=raid_datetime.day, month=raid_datetime.month, year=raid_datetime.year)
+        if raidend_datetime < raid_datetime or raidend_datetime > (raid_datetime + timedelta(minutes = 180)):
+            now_datetime_str = now_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            now_time = extract_time(now_datetime_str)
+            if chat_type != "channel":
+                sent_message = bot.sendMessage(chat_id=chat_id, text="❌ @%s si no he entendido mal quieres poner la hora de finalización de la incursión a las *%s*, pero la incursión es a las *%s*. ¿Has puesto bien la hora de finalización?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(thisuser["username"]), extract_time(current_raid["timeend"]), extract_time(current_raid["timeraid"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
+            else:
+                sent_message = bot.sendMessage(chat_id=chat_id, text="❌ Si no he entendido mal quieres poner la hora de finalización de la incursión a las *%s*, pero la incursión es a las *%s*. ¿Has puesto bien la hora de finalización?\n\nEl mensaje original era:\n`%s`\n\n_(Este mensaje se borrará en unos segundos)_" % (extract_time(current_raid["timeend"]), extract_time(current_raid["timeraid"]), text),parse_mode=telegram.ParseMode.MARKDOWN)
+            Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
+            return
+
+    if current_raid["timeend"] is not None:
+        del args[-1]
+        try:
+            if args[-4] == "se" and args[-3] == "va" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
+                del args[-1]
+                del args[-1]
+                del args[-1]
+                del args[-1]
+            elif args[-3] == "está" and args[-2] == "hasta" and (args[-1] == "las" or args[-1] == "la"):
+                del args[-1]
+                del args[-1]
+                del args[-1]
+            elif args[-3] == "desaparece" and args[-2] == "a" and (args[-1] == "las" or args[-1] == "la"):
+                del args[-1]
+                del args[-1]
+                del args[-1]
+        except:
+            pass
+
+    del args[0]
+    if args[0].lower() == "en":
+        del args[0]
+
+    current_raid["gimnasio_text"] = ""
+    for i in range (0,len(args)):
+        current_raid["gimnasio_text"] = current_raid["gimnasio_text"] + "%s " % args[i]
+    current_raid["gimnasio_text"] = current_raid["gimnasio_text"].strip()
+
+    if group["locations"] == 1:
+        chosengym = None
+        gyms = getPlaces(chat_id, ordering="id")
+        for p in gyms:
+            for n in p["names"]:
+                if re.search(re.escape(unidecode(n)),unidecode(current_raid["gimnasio_text"]),flags=re.IGNORECASE) is not None:
+                    logging.debug("Match! «%s» with «%s»" % (unidecode(n),unidecode(current_raid["gimnasio_text"])))
+                    chosengym = p
+                    break
+            if chosengym is not None:
+                break
+        if chosengym is not None:
+            current_raid["gimnasio_text"] = chosengym["desc"]
+            current_raid["gimnasio_id"] = chosengym["id"]
+
+    current_raid["grupo_id"] = chat_id
+    current_raid["usuario_id"] = user_id
+    current_raid["id"] = saveRaid(current_raid)
+
+    text = format_message(current_raid)
+    reply_markup = get_keyboard(current_raid)
+    sent_message = bot.sendMessage(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+    current_raid["message"] = sent_message.message_id
+    saveRaid(current_raid)
+
+    if chat_type != "channel":
+        send_edit_instructions(group, current_raid, user_id, bot)
+
+    if group["locations"] == 1:
+        if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] is not None:
+            Thread(target=send_alerts_delayed, args=(current_raid, bot)).start()
+        elif chat_type != "channel":
+            if group["alerts"] == 1:
+                text_alertas = " y la gente que tenga activadas las alertas pueda recibirlas"
+            else:
+                text_alertas = ""
+            try:
+                bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _%s_\n\nDebes cambiarlo por un gimnasio reconocido para que aparezca la ubicación%s. Para hacerlo, utiliza este comando cambiando el texto del final:\n\n`/cambiargimnasio %s %s`\n\nSi no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente." % (current_raid["gimnasio_text"], text_alertas, current_raid["id"], current_raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
+            except:
+                logging.debug("Error sending warning in private. Maybe conversation not started?")
+
+    raid_difftime = raid_datetime - now_datetime
+    if raid_difftime.total_seconds() < 900:
+        suggested_datetime = raid_datetime + timedelta(minutes = 20)
+        suggested_datetime_str = suggested_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        suggested_time = extract_time(suggested_datetime_str)
+        try:
+            bot.send_message(chat_id=user_id, text="⚠️ *¡Cuidado!* Has creado la incursión para dentro de muy poco tiempo, *solo faltan %s minutos*. ¿Quizás prefieras cambiarla para más tarde para que se pueda unir más gente? Para hacerlo, pon aquí este comando:\n\n`/cambiarhora %s %s`" % (int(raid_difftime.total_seconds()/60), current_raid["id"], suggested_time), parse_mode=telegram.ParseMode.MARKDOWN)
+        except:
+            logging.debug("Error sending warning in private. Maybe conversation not started?")
 
 @run_async
 def cerrar(bot, update, args=None):
@@ -1744,410 +1744,410 @@ def cambiarpokemon(bot, update, args=None):
 
 @run_async
 def raidbutton(bot, update):
-  query = update.callback_query
-  original_text = query.message.text
-  data = query.data
-  user_id = query.from_user.id
-  user_username = query.from_user.username
-  chat_id = query.message.chat.id
-  message_id = query.message.message_id
-  chat_type = query.message.chat.type
+    query = update.callback_query
+    original_text = query.message.text
+    data = query.data
+    user_id = query.from_user.id
+    user_username = query.from_user.username
+    chat_id = query.message.chat.id
+    message_id = query.message.message_id
+    chat_type = query.message.chat.type
 
-  if isBanned(user_id) or isBanned(chat_id):
-    return
-
-  thisuser = refreshUsername(user_id, user_username)
-
-  update_text = False
-
-  logging.debug("detectivepikachubot:raidbutton:%s: %s %s" % (data, bot, update))
-
-  if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
-    and (thisuser["username"] is None or thisuser["username"] == "None"):
-    bot.answerCallbackQuery(text="No puedes unirte a una incursión si no tienes definido un alias.\nEn Telegram, ve a 'Ajustes' y selecciona la opción 'Alias'.", show_alert="true", callback_query_id=update.callback_query.id)
-    return
-
-  group = getGroup(chat_id)
-
-  if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
-    and (group["validationrequired"] == 1 and thisuser["validation"] == "none"):
-    bot.answerCallbackQuery(text="No puedes unirte a una incursión en este grupo si no te has validado antes.\nAbre un privado con @%s y escribe '/help' para saber cómo puedes hacerlo." % config["telegram"]["botalias"], show_alert="true", callback_query_id=update.callback_query.id)
-    return
-
-  if data == "voy":
-      result = raidVoy(chat_id, message_id, user_id)
-      if result is True:
-          if group["plusmax"]>0:
-              bot.answerCallbackQuery(text="¡Te has apuntado! Si vas con más gente, pulsa +1", callback_query_id=update.callback_query.id)
-          else:
-              bot.answerCallbackQuery(text="¡Te has apuntado correctamente!", callback_query_id=update.callback_query.id)
-          update_text = True
-      elif result == "no_changes":
-          bot.answerCallbackQuery(text="¡Ya te habías apuntado antes!", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "old_raid":
-          bot.answerCallbackQuery(text="Ya no te puedes apuntar a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_raid":
-          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          bot.answerCallbackQuery(text="¡No has podido apuntarte! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
-  elif data in ["plus1", "plus1red", "plus1yellow", "plus1blue"]:
-      plus1type = data.replace("plus1","")
-      result = raidPlus1(chat_id, message_id, user_id, plus1type = plus1type)
-      if result == "old_raid":
-          bot.answerCallbackQuery(text="Ya no te puedes apuntar a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_raid":
-          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "demasiados":
-          group = getGroup(chat_id)
-          bot.answerCallbackQuery(text="No puedes apuntarte con más de %s personas. Si quieres borrar personas, pulsa en el botón «Voy»." % group["plusmax"], callback_query_id=update.callback_query.id, show_alert="true")
-      elif str(result).isdigit():
-          bot.answerCallbackQuery(text="¡Te has apuntado con %i más! Si sois más, pulsa +1" % result, callback_query_id=update.callback_query.id)
-          update_text = True
-      else:
-          bot.answerCallbackQuery(text="¡No has podido apuntarte con más gente! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
-  elif data == "novoy":
-      result = raidNovoy(chat_id, message_id, user_id)
-      if result is True:
-          bot.answerCallbackQuery(text="Te has desapuntado de la incursión", callback_query_id=update.callback_query.id)
-          update_text = True
-      elif result == "old_raid":
-          bot.answerCallbackQuery(text="Ya no te puedes desapuntar de esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_raid":
-          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "no_changes":
-          bot.answerCallbackQuery(text="¡Ya te habías desapuntado antes! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          bot.answerCallbackQuery(text="¡No has podido desapuntarte! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
-  elif data == "estoy":
-      result = raidEstoy(chat_id, message_id, user_id)
-      if result is True:
-          bot.answerCallbackQuery(text="Has marcardo que has llegado a la incursión", callback_query_id=update.callback_query.id)
-          update_text = True
-      elif result == "no_changes":
-          bot.answerCallbackQuery(text="¡Ya habías marcado antes que estás! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "old_raid":
-          bot.answerCallbackQuery(text="Ya no puedes marcar que estás en esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_raid":
-          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          bot.answerCallbackQuery(text="¡No has podido marcar como llegado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
-  elif data == "llegotarde":
-      result = raidLlegotarde(chat_id, message_id, user_id)
-      if result is True:
-          bot.answerCallbackQuery(text="Has marcardo que llegarás tarde a la incursión", callback_query_id=update.callback_query.id)
-          update_text = True
-      elif result == "no_changes":
-          bot.answerCallbackQuery(text="¡Ya habías marcado que llegas tarde! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "old_raid":
-          bot.answerCallbackQuery(text="Ya no puedes decir que has llegado tarde a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_raid":
-          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          bot.answerCallbackQuery(text="¡No has podido marcar como que llegas tarde! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
-  elif data == "lotengo":
-      result = raidLotengo(chat_id, message_id, user_id)
-      if result is True:
-          bot.answerCallbackQuery(text="Has marcado que lo has capturado, ¡enhorabuena!", callback_query_id=update.callback_query.id)
-          update_text = True
-      elif result == "no_changes":
-          bot.answerCallbackQuery(text="¡Ya habías marcado antes que lo has capturado!", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "old_raid":
-          bot.answerCallbackQuery(text="Ya no puedes marcar que has capturado este Pokémon.", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_raid":
-          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_going":
-          bot.answerCallbackQuery(text="No pudes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_now":
-          bot.answerCallbackQuery(text="No puedes marcar que has capturado este Pokémon porque no te habías apuntado a la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          bot.answerCallbackQuery(text="¡No has podido marcar que lo has capturado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
-  elif data == "escapou":
-      result = raidEscapou(chat_id, message_id, user_id)
-      if result is True:
-          bot.answerCallbackQuery(text="Has marcado que ha escapado, ¡lo siento!", callback_query_id=update.callback_query.id)
-          update_text = True
-      elif result == "no_changes":
-          bot.answerCallbackQuery(text="¡Ya habías marcado antes que se te ha escapado!", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "old_raid":
-          bot.answerCallbackQuery(text="Ya no puedes marcar que se te ha escapado este Pokémon.", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_raid":
-          bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_going":
-          bot.answerCallbackQuery(text="No pudes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
-      elif result == "not_now":
-          bot.answerCallbackQuery(text="No puedes marcar que se te ha escapado este Pokémon porque no te habías apuntado a la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          bot.answerCallbackQuery(text="¡No has podido marcar que se te ha escapado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
-  if update_text:
-      raid = getRaidbyMessage(chat_id, message_id)
-      if raid is not None:
-        reply_markup = get_keyboard(raid)
-        update_message(chat_id, message_id, reply_markup, bot)
-      else:
-        bot.answerCallbackQuery(text="Error actualizando incursión", callback_query_id=update.callback_query.id, show_alert="true")
-
-  if data=="ubicacion":
-    raid = getRaidbyMessage(chat_id, message_id)
-    if raid is not None and raid["gimnasio_id"] is not None:
-      try:
-        gym = getPlace(raid["gimnasio_id"])
-        if gym is not None:
-          if gym["address"] is None:
-              gym = fetch_gym_address(gym)
-          bot.sendVenue(chat_id=user_id, latitude=gym["latitude"], longitude=gym["longitude"], title=gym["desc"], address=gym["address"])
-          if not already_sent_location(user_id, raid["gimnasio_id"]):
-              bot.answerCallbackQuery(text="🌎 Te envío la ubicación por privado", callback_query_id=update.callback_query.id)
-          else:
-              bot.answerCallbackQuery(text="Cuando pulsas el botón de Ubicación, se envía un mensaje privado con la ubicación. Comprueba tu lista de conversaciones.", show_alert="true", callback_query_id=update.callback_query.id)
-        else:
-          bot.answerCallbackQuery(text="❌ La ubicación es desconocida", callback_query_id=update.callback_query.id)
-      except:
-        bot.answerCallbackQuery(text="Para que te pueda enviar la ubicación, debes abrir un privado antes con @%s y pulsar en 'Iniciar'" % config["telegram"]["botalias"], callback_query_id=update.callback_query.id, show_alert="true")
-    else:
-      bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id, show_alert="true")
-
-  # Create raid interactively
-  if re.match("^iraid_.+", data) != None:
-    raid = getRaidbyMessage(chat_id, message_id)
-
-    if (chat_type == "channel" and not is_admin(chat_id, user_id, bot)) or (chat_type != "channel" and user_id != raid["usuario_id"]):
-        bot.answerCallbackQuery(text="Solo puede seleccionar las opciones de la incursión el usuario que la está creando.", callback_query_id=update.callback_query.id, show_alert="true")
+    if isBanned(user_id) or isBanned(chat_id):
         return
 
-    if re.match("^iraid_pokemon_.+", data) != None:
-        m = re.match("^iraid_pokemon_(.+)", data)
-        if m.group(1) in pokemonlist:
-            raid["pokemon"] = m.group(1)
-        elif m.group(1) in egglist:
-            raid["egg"] = m.group(1)
+    thisuser = refreshUsername(user_id, user_username)
+
+    update_text = False
+
+    logging.debug("detectivepikachubot:raidbutton:%s: %s %s" % (data, bot, update))
+
+    if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
+        and (thisuser["username"] is None or thisuser["username"] == "None"):
+        bot.answerCallbackQuery(text="No puedes unirte a una incursión si no tienes definido un alias.\nEn Telegram, ve a 'Ajustes' y selecciona la opción 'Alias'.", show_alert="true", callback_query_id=update.callback_query.id)
+        return
+
+    group = getGroup(chat_id)
+
+    if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
+        and (group["validationrequired"] == 1 and thisuser["validation"] == "none"):
+        bot.answerCallbackQuery(text="No puedes unirte a una incursión en este grupo si no te has validado antes.\nAbre un privado con @%s y escribe '/help' para saber cómo puedes hacerlo." % config["telegram"]["botalias"], show_alert="true", callback_query_id=update.callback_query.id)
+        return
+
+    if data == "voy":
+            result = raidVoy(chat_id, message_id, user_id)
+            if result is True:
+                    if group["plusmax"]>0:
+                            bot.answerCallbackQuery(text="¡Te has apuntado! Si vas con más gente, pulsa +1", callback_query_id=update.callback_query.id)
+                    else:
+                            bot.answerCallbackQuery(text="¡Te has apuntado correctamente!", callback_query_id=update.callback_query.id)
+                    update_text = True
+            elif result == "no_changes":
+                    bot.answerCallbackQuery(text="¡Ya te habías apuntado antes!", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "old_raid":
+                    bot.answerCallbackQuery(text="Ya no te puedes apuntar a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_raid":
+                    bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
+            else:
+                    bot.answerCallbackQuery(text="¡No has podido apuntarte! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
+    elif data in ["plus1", "plus1red", "plus1yellow", "plus1blue"]:
+            plus1type = data.replace("plus1","")
+            result = raidPlus1(chat_id, message_id, user_id, plus1type = plus1type)
+            if result == "old_raid":
+                    bot.answerCallbackQuery(text="Ya no te puedes apuntar a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_raid":
+                    bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "demasiados":
+                    group = getGroup(chat_id)
+                    bot.answerCallbackQuery(text="No puedes apuntarte con más de %s personas. Si quieres borrar personas, pulsa en el botón «Voy»." % group["plusmax"], callback_query_id=update.callback_query.id, show_alert="true")
+            elif str(result).isdigit():
+                    bot.answerCallbackQuery(text="¡Te has apuntado con %i más! Si sois más, pulsa +1" % result, callback_query_id=update.callback_query.id)
+                    update_text = True
+            else:
+                    bot.answerCallbackQuery(text="¡No has podido apuntarte con más gente! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
+    elif data == "novoy":
+            result = raidNovoy(chat_id, message_id, user_id)
+            if result is True:
+                    bot.answerCallbackQuery(text="Te has desapuntado de la incursión", callback_query_id=update.callback_query.id)
+                    update_text = True
+            elif result == "old_raid":
+                    bot.answerCallbackQuery(text="Ya no te puedes desapuntar de esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_raid":
+                    bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "no_changes":
+                    bot.answerCallbackQuery(text="¡Ya te habías desapuntado antes! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
+            else:
+                    bot.answerCallbackQuery(text="¡No has podido desapuntarte! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
+    elif data == "estoy":
+            result = raidEstoy(chat_id, message_id, user_id)
+            if result is True:
+                    bot.answerCallbackQuery(text="Has marcardo que has llegado a la incursión", callback_query_id=update.callback_query.id)
+                    update_text = True
+            elif result == "no_changes":
+                    bot.answerCallbackQuery(text="¡Ya habías marcado antes que estás! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "old_raid":
+                    bot.answerCallbackQuery(text="Ya no puedes marcar que estás en esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_raid":
+                    bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
+            else:
+                    bot.answerCallbackQuery(text="¡No has podido marcar como llegado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
+    elif data == "llegotarde":
+            result = raidLlegotarde(chat_id, message_id, user_id)
+            if result is True:
+                    bot.answerCallbackQuery(text="Has marcardo que llegarás tarde a la incursión", callback_query_id=update.callback_query.id)
+                    update_text = True
+            elif result == "no_changes":
+                    bot.answerCallbackQuery(text="¡Ya habías marcado que llegas tarde! Si te has equivocado, pulsa en «voy».", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "old_raid":
+                    bot.answerCallbackQuery(text="Ya no puedes decir que has llegado tarde a esta incursión", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_raid":
+                    bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
+            else:
+                    bot.answerCallbackQuery(text="¡No has podido marcar como que llegas tarde! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
+    elif data == "lotengo":
+            result = raidLotengo(chat_id, message_id, user_id)
+            if result is True:
+                    bot.answerCallbackQuery(text="Has marcado que lo has capturado, ¡enhorabuena!", callback_query_id=update.callback_query.id)
+                    update_text = True
+            elif result == "no_changes":
+                    bot.answerCallbackQuery(text="¡Ya habías marcado antes que lo has capturado!", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "old_raid":
+                    bot.answerCallbackQuery(text="Ya no puedes marcar que has capturado este Pokémon.", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_raid":
+                    bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_going":
+                    bot.answerCallbackQuery(text="No pudes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_now":
+                    bot.answerCallbackQuery(text="No puedes marcar que has capturado este Pokémon porque no te habías apuntado a la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
+            else:
+                    bot.answerCallbackQuery(text="¡No has podido marcar que lo has capturado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
+    elif data == "escapou":
+            result = raidEscapou(chat_id, message_id, user_id)
+            if result is True:
+                    bot.answerCallbackQuery(text="Has marcado que ha escapado, ¡lo siento!", callback_query_id=update.callback_query.id)
+                    update_text = True
+            elif result == "no_changes":
+                    bot.answerCallbackQuery(text="¡Ya habías marcado antes que se te ha escapado!", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "old_raid":
+                    bot.answerCallbackQuery(text="Ya no puedes marcar que se te ha escapado este Pokémon.", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_raid":
+                    bot.answerCallbackQuery(text="La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot.", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_going":
+                    bot.answerCallbackQuery(text="No pudes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
+            elif result == "not_now":
+                    bot.answerCallbackQuery(text="No puedes marcar que se te ha escapado este Pokémon porque no te habías apuntado a la incursión.", callback_query_id=update.callback_query.id, show_alert="true")
+            else:
+                    bot.answerCallbackQuery(text="¡No has podido marcar que se te ha escapado! Error desconocido", callback_query_id=update.callback_query.id, show_alert="true")
+    if update_text:
+            raid = getRaidbyMessage(chat_id, message_id)
+            if raid is not None:
+                reply_markup = get_keyboard(raid)
+                update_message(chat_id, message_id, reply_markup, bot)
+            else:
+                bot.answerCallbackQuery(text="Error actualizando incursión", callback_query_id=update.callback_query.id, show_alert="true")
+
+    if data=="ubicacion":
+        raid = getRaidbyMessage(chat_id, message_id)
+        if raid is not None and raid["gimnasio_id"] is not None:
+            try:
+                gym = getPlace(raid["gimnasio_id"])
+                if gym is not None:
+                    if gym["address"] is None:
+                            gym = fetch_gym_address(gym)
+                    bot.sendVenue(chat_id=user_id, latitude=gym["latitude"], longitude=gym["longitude"], title=gym["desc"], address=gym["address"])
+                    if not already_sent_location(user_id, raid["gimnasio_id"]):
+                            bot.answerCallbackQuery(text="🌎 Te envío la ubicación por privado", callback_query_id=update.callback_query.id)
+                    else:
+                            bot.answerCallbackQuery(text="Cuando pulsas el botón de Ubicación, se envía un mensaje privado con la ubicación. Comprueba tu lista de conversaciones.", show_alert="true", callback_query_id=update.callback_query.id)
+                else:
+                    bot.answerCallbackQuery(text="❌ La ubicación es desconocida", callback_query_id=update.callback_query.id)
+            except:
+                bot.answerCallbackQuery(text="Para que te pueda enviar la ubicación, debes abrir un privado antes con @%s y pulsar en 'Iniciar'" % config["telegram"]["botalias"], callback_query_id=update.callback_query.id, show_alert="true")
         else:
+            bot.answerCallbackQuery(text="La ubicación es desconocida", callback_query_id=update.callback_query.id, show_alert="true")
+
+    # Create raid interactively
+    if re.match("^iraid_.+", data) != None:
+        raid = getRaidbyMessage(chat_id, message_id)
+
+        if (chat_type == "channel" and not is_admin(chat_id, user_id, bot)) or (chat_type != "channel" and user_id != raid["usuario_id"]):
+            bot.answerCallbackQuery(text="Solo puede seleccionar las opciones de la incursión el usuario que la está creando.", callback_query_id=update.callback_query.id, show_alert="true")
             return
-        saveRaid(raid)
-        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-        creating_text = format_text_creating(thisuser)
-        if raid["egg"] != "EX":
-            reply_markup = get_times_keyboard(group["timezone"])
-            bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s. Ahora selecciona la hora a la que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-        else:
-            reply_markup = get_days_keyboard(group["timezone"])
-            bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s. Ahora selecciona el día en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
-    if re.match("^iraid_date_[0-9]{1,2}/00:[0-9]{1,2}$", data) != None:
-        m = re.match("^iraid_date_([0-9]{1,2}/00:[0-9]{1,2})$", data)
-        raid["timeraid"] = parse_time(m.group(1), group["timezone"])
-        saveRaid(raid)
-        m2 = re.match("^iraid_date_[0-9]{1,2}/00:([0-9]{1,2})$", data)
-        time_offset = False if m2.group(1) == "00" else True
-        reply_markup = get_times_keyboard(group["timezone"], date=raid["timeraid"], offset=time_offset)
-        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-        creating_text = format_text_creating(thisuser)
-        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
-        if text_day != "":
-            text_day = " " + text_day
-        text_time = extract_time(raid["timeraid"])
-        bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s. Ahora selecciona la hora a la que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        if re.match("^iraid_pokemon_.+", data) != None:
+            m = re.match("^iraid_pokemon_(.+)", data)
+            if m.group(1) in pokemonlist:
+                raid["pokemon"] = m.group(1)
+            elif m.group(1) in egglist:
+                raid["egg"] = m.group(1)
+            else:
+                return
+            saveRaid(raid)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+            creating_text = format_text_creating(thisuser)
+            if raid["egg"] != "EX":
+                reply_markup = get_times_keyboard(group["timezone"])
+                bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s. Ahora selecciona la hora a la que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            else:
+                reply_markup = get_days_keyboard(group["timezone"])
+                bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s. Ahora selecciona el día en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
-    if re.match("^iraid_time_[0-9]{1,2}/[0-9]{2}:[0-9]{2}$", data) != None:
-        m = re.match("^iraid_time_([0-9]{1,2}/[0-9]{2}:[0-9]{2})$", data)
-        raid["timeraid"] = parse_time(m.group(1), group["timezone"])
-        saveRaid(raid)
-        reply_markup = get_gyms_keyboard(group["id"])
-        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-        creating_text = format_text_creating(thisuser)
-        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
-        if text_day != "":
-            text_day = " " + text_day
-        text_time = extract_time(raid["timeraid"])
-        gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
-        reply_markup = get_zones_keyboard(group["id"], gyms_ordering)
-        if reply_markup is False:
-            reply_markup = get_gyms_keyboard(group["id"], order=gyms_ordering)
+        if re.match("^iraid_date_[0-9]{1,2}/00:[0-9]{1,2}$", data) != None:
+            m = re.match("^iraid_date_([0-9]{1,2}/00:[0-9]{1,2})$", data)
+            raid["timeraid"] = parse_time(m.group(1), group["timezone"])
+            saveRaid(raid)
+            m2 = re.match("^iraid_date_[0-9]{1,2}/00:([0-9]{1,2})$", data)
+            time_offset = False if m2.group(1) == "00" else True
+            reply_markup = get_times_keyboard(group["timezone"], date=raid["timeraid"], offset=time_offset)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+            creating_text = format_text_creating(thisuser)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            if text_day != "":
+                text_day = " " + text_day
+            text_time = extract_time(raid["timeraid"])
+            bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s. Ahora selecciona la hora a la que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+        if re.match("^iraid_time_[0-9]{1,2}/[0-9]{2}:[0-9]{2}$", data) != None:
+            m = re.match("^iraid_time_([0-9]{1,2}/[0-9]{2}:[0-9]{2})$", data)
+            raid["timeraid"] = parse_time(m.group(1), group["timezone"])
+            saveRaid(raid)
+            reply_markup = get_gyms_keyboard(group["id"])
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+            creating_text = format_text_creating(thisuser)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            if text_day != "":
+                text_day = " " + text_day
+            text_time = extract_time(raid["timeraid"])
+            gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
+            reply_markup = get_zones_keyboard(group["id"], gyms_ordering)
+            if reply_markup is False:
+                reply_markup = get_gyms_keyboard(group["id"], order=gyms_ordering)
+                bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crearla. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            else:
+                bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona la zona del gimnasio en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+        if re.match("^iraid_zone_.+$", data) != None:
+            m = re.match("^iraid_zone_(.+)$", data)
+            raid["gimnasio_text"] = m.group(1)
+            saveRaid(raid)
+            gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
+            reply_markup = get_gyms_keyboard(group["id"], 0, m.group(1), order=gyms_ordering)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+            creating_text = format_text_creating(thisuser)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            if text_day != "":
+                text_day = " " + text_day
+            text_time = extract_time(raid["timeraid"])
+            bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+
+        if re.match("^iraid_gyms_page[1-9]$", data) != None:
+            m = re.match("^iraid_gyms_page([1-9])$", data)
+            gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
+            reply_markup = get_gyms_keyboard(group["id"], page=int(m.group(1))-1, zone=raid["gimnasio_text"], order=gyms_ordering)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+            creating_text = format_text_creating(thisuser)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            if text_day != "":
+                text_day = " " + text_day
+            text_time = extract_time(raid["timeraid"])
             bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crearla. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
-        else:
-            bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona la zona del gimnasio en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
-    if re.match("^iraid_zone_.+$", data) != None:
-        m = re.match("^iraid_zone_(.+)$", data)
-        raid["gimnasio_text"] = m.group(1)
-        saveRaid(raid)
-        gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
-        reply_markup = get_gyms_keyboard(group["id"], 0, m.group(1), order=gyms_ordering)
-        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-        creating_text = format_text_creating(thisuser)
-        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
-        if text_day != "":
-            text_day = " " + text_day
-        text_time = extract_time(raid["timeraid"])
-        bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        if re.match("^iraid_gym_[0-9]+$", data) != None: # NEWCODE
+            m = re.match("^iraid_gym_([0-9]+)$", data)
+            gym = getPlace(m.group(1))
+            raid["gimnasio_id"] = gym["id"]
+            raid["gimnasio_text"] = gym["desc"]
+            saveRaid(raid)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+            creating_text = format_text_creating(thisuser)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            if text_day != "":
+                text_day = " " + text_day
+            text_time = extract_time(raid["timeraid"])
+            text_gym = gym["desc"]
+            reply_markup = get_endtimes_keyboard(raid["timeraid"])
+            bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b> en <b>%s</b>. Ahora selecciona la hora <b>a la que desaparece</b> el Pokémon.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time, text_gym), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
-    if re.match("^iraid_gyms_page[1-9]$", data) != None:
-        m = re.match("^iraid_gyms_page([1-9])$", data)
-        gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
-        reply_markup = get_gyms_keyboard(group["id"], page=int(m.group(1))-1, zone=raid["gimnasio_text"], order=gyms_ordering)
-        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-        creating_text = format_text_creating(thisuser)
-        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
-        if text_day != "":
-            text_day = " " + text_day
-        text_time = extract_time(raid["timeraid"])
-        bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b>. Ahora selecciona el gimnasio en el que quieres crearla. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        if re.match("^iraid_endtime_.+$", data) != None: # OLDCODE
+            m = re.match("^iraid_endtime_(.+)$", data)
+            if m.group(1) != "unknown":
+                raid["timeend"] = parse_time(m.group(1), group["timezone"])
+            raid["status"] = "waiting"
+            saveRaid(raid)
+            reply_markup = get_keyboard(raid)
+            updated = update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
+            if chat_type != "channel":
+                send_edit_instructions(group, raid, user_id, bot)
+            if raid["gimnasio_id"] is not None:
+                Thread(target=send_alerts_delayed, args=(raid, bot)).start()
 
-    if re.match("^iraid_gym_[0-9]+$", data) != None: # NEWCODE
-        m = re.match("^iraid_gym_([0-9]+)$", data)
-        gym = getPlace(m.group(1))
-        raid["gimnasio_id"] = gym["id"]
-        raid["gimnasio_text"] = gym["desc"]
-        saveRaid(raid)
-        text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-        creating_text = format_text_creating(thisuser)
-        text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
-        if text_day != "":
-            text_day = " " + text_day
-        text_time = extract_time(raid["timeraid"])
-        text_gym = gym["desc"]
-        reply_markup = get_endtimes_keyboard(raid["timeraid"])
-        bot.edit_message_text(text="🤔 %s\n\nHas escogido una incursión %s%s a las <b>%s</b> en <b>%s</b>. Ahora selecciona la hora <b>a la que desaparece</b> el Pokémon.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>" % (creating_text, text_pokemon, text_day, text_time, text_gym), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+        if data == "iraid_cancel":
+            raid["status"] = "deleted"
+            saveRaid(raid)
+            bot.deleteMessage(chat_id=chat_id, message_id=message_id)
 
-    if re.match("^iraid_endtime_.+$", data) != None: # OLDCODE
-        m = re.match("^iraid_endtime_(.+)$", data)
-        if m.group(1) != "unknown":
-            raid["timeend"] = parse_time(m.group(1), group["timezone"])
-        raid["status"] = "waiting"
-        saveRaid(raid)
-        reply_markup = get_keyboard(raid)
-        updated = update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
-        if chat_type != "channel":
-            send_edit_instructions(group, raid, user_id, bot)
-        if raid["gimnasio_id"] is not None:
-            Thread(target=send_alerts_delayed, args=(raid, bot)).start()
+    # Settings and admin stuff
+    settings_goto = {"settings_goto_main":"main", "settings_goto_raids":"raids", "settings_goto_commands":"commands", "settings_goto_behaviour": "behaviour", "settings_goto_raidbehaviour": "raidbehaviour", "settings_goto_ranking":"ranking"}
 
-    if data == "iraid_cancel":
-        raid["status"] = "deleted"
-        saveRaid(raid)
-        bot.deleteMessage(chat_id=chat_id, message_id=message_id)
+    for k in settings_goto:
+        if data==k:
+            if not is_admin(chat_id, user_id, bot):
+                bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+            else:
+                update_settings_message(chat_id, bot, keyboard = settings_goto[k])
 
-  # Settings and admin stuff
-  settings_goto = {"settings_goto_main":"main", "settings_goto_raids":"raids", "settings_goto_commands":"commands", "settings_goto_behaviour": "behaviour", "settings_goto_raidbehaviour": "raidbehaviour", "settings_goto_ranking":"ranking"}
-
-  for k in settings_goto:
-      if data==k:
+    if data=="settings_done":
         if not is_admin(chat_id, user_id, bot):
             bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
         else:
-            update_settings_message(chat_id, bot, keyboard = settings_goto[k])
+            delete_message(chat_id, message_id, bot)
 
-  if data=="settings_done":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          delete_message(chat_id, message_id, bot)
+    settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder", "settings_plusdisaggregated":"plusdisaggregated", "settings_plusdisaggregatedinline":"plusdisaggregatedinline", "settings_raidcommandorder":"raidcommandorder", "settings_rankingauto":"rankingauto"}
 
-  settings = {"settings_alertas":"alerts", "settings_desagregado":"disaggregated", "settings_botonllegotarde":"latebutton", "settings_reflotar": "refloat", "settings_lotengo": "gotitbuttons", "settings_borrar":"candelete", "settings_locations":"locations", "settings_raidcommand":"raidcommand", "settings_gymcommand":"gymcommand", "settings_babysitter":"babysitter", "settings_timeformat":"timeformat", "settings_validationrequired":"validationrequired", "settings_listorder":"listorder", "settings_plusdisaggregated":"plusdisaggregated", "settings_plusdisaggregatedinline":"plusdisaggregatedinline", "settings_raidcommandorder":"raidcommandorder", "settings_rankingauto":"rankingauto"}
+    settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids", "settings_raidcommandorder":"raids", "settings_rankingweek":"ranking", "settings_rankingmonth":"ranking", "settings_rankingauto":"ranking"}
 
-  settings_categories = {"settings_alertas":"behaviour", "settings_desagregado":"raids", "settings_botonllegotarde":"raidbehaviour", "settings_reflotar": "commands", "settings_lotengo": "raidbehaviour", "settings_borrar":"commands", "settings_locations":"behaviour", "settings_raidcommand":"commands", "settings_gymcommand":"commands", "settings_babysitter":"behaviour", "settings_timeformat":"raids", "settings_validationrequired":"behaviour", "settings_icontheme":"raids", "settings_plusmax":"raidbehaviour", "settings_refloatauto":"behaviour", "settings_listorder":"raids", "settings_snail":"raids", "settings_plusdisaggregated":"raidbehaviour", "settings_plusdisaggregatedinline":"raids", "settings_raidcommandorder":"raids", "settings_rankingweek":"ranking", "settings_rankingmonth":"ranking", "settings_rankingauto":"ranking"}
+    for k in settings:
+        if data==k:
+            if not is_admin(chat_id, user_id, bot):
+                bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+            else:
+                group = getGroup(chat_id)
+                if group[settings[k]] == 1:
+                    group[settings[k]] = 0
+                    if k == "settings_locations" and group["alerts"] == 1:
+                        group["alerts"] = 0
+                        bot.answerCallbackQuery(text="Al desactivar las ubicaciones, se han desactivado también automáticamente las alertas.", callback_query_id=update.callback_query.id, show_alert="true")
+                    elif k == "settings_plusdisaggregated" and group["plusdisaggregatedinline"] == 1:
+                        group["plusdisaggregatedinline"] = 0
+                        bot.answerCallbackQuery(text="Al desactivar los botones +1 por equipo, se ha desactivado también automáticamente la visualización de +1 disgregados por línea en las opciones de vista.", callback_query_id=update.callback_query.id, show_alert="true")
+                else:
+                    group[settings[k]] = 1
+                    if k == "settings_alertas" and group["locations"] == 0:
+                        group["locations"] = 1
+                        bot.answerCallbackQuery(text="Al activar las alertas, se han activado también automáticamente las ubicaciones.", callback_query_id=update.callback_query.id, show_alert="true")
+                    elif k == "settings_plusdisaggregatedinline" and group["plusdisaggregated"] == 0:
+                        group["plusdisaggregated"] = 1
+                        bot.answerCallbackQuery(text="Al activar la visualización de +1 disagregados en línea, se han activado también automáticamente los botones +1 por equipo.", callback_query_id=update.callback_query.id, show_alert="true")
+                    elif k == "settings_plusdisaggregated" and group["plusmax"] == 0:
+                        group["plusmax"] = 5
+                        bot.answerCallbackQuery(text="Al activar los botones +1 por cada equipo, se ha activado también automáticamente el botón «+1» con un máximo por defecto de 5 acompañantes.", callback_query_id=update.callback_query.id, show_alert="true")
+                saveGroup(group)
+                update_settings_message(chat_id, bot, settings_categories[k])
 
-  for k in settings:
-      if data==k:
-          if not is_admin(chat_id, user_id, bot):
-              bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-          else:
-              group = getGroup(chat_id)
-              if group[settings[k]] == 1:
-                  group[settings[k]] = 0
-                  if k == "settings_locations" and group["alerts"] == 1:
-                      group["alerts"] = 0
-                      bot.answerCallbackQuery(text="Al desactivar las ubicaciones, se han desactivado también automáticamente las alertas.", callback_query_id=update.callback_query.id, show_alert="true")
-                  elif k == "settings_plusdisaggregated" and group["plusdisaggregatedinline"] == 1:
-                      group["plusdisaggregatedinline"] = 0
-                      bot.answerCallbackQuery(text="Al desactivar los botones +1 por equipo, se ha desactivado también automáticamente la visualización de +1 disgregados por línea en las opciones de vista.", callback_query_id=update.callback_query.id, show_alert="true")
-              else:
-                  group[settings[k]] = 1
-                  if k == "settings_alertas" and group["locations"] == 0:
-                      group["locations"] = 1
-                      bot.answerCallbackQuery(text="Al activar las alertas, se han activado también automáticamente las ubicaciones.", callback_query_id=update.callback_query.id, show_alert="true")
-                  elif k == "settings_plusdisaggregatedinline" and group["plusdisaggregated"] == 0:
-                      group["plusdisaggregated"] = 1
-                      bot.answerCallbackQuery(text="Al activar la visualización de +1 disagregados en línea, se han activado también automáticamente los botones +1 por equipo.", callback_query_id=update.callback_query.id, show_alert="true")
-                  elif k == "settings_plusdisaggregated" and group["plusmax"] == 0:
-                      group["plusmax"] = 5
-                      bot.answerCallbackQuery(text="Al activar los botones +1 por cada equipo, se ha activado también automáticamente el botón «+1» con un máximo por defecto de 5 acompañantes.", callback_query_id=update.callback_query.id, show_alert="true")
-              saveGroup(group)
-              update_settings_message(chat_id, bot, settings_categories[k])
+    if data=="settings_icontheme":
+        if not is_admin(chat_id, user_id, bot):
+            bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            group = getGroup(chat_id)
+            group["icontheme"] = group["icontheme"] + 1
+            if group["icontheme"] >= len(iconthemes):
+                    group["icontheme"] = 0
+            saveGroup(group)
+            update_settings_message(chat_id, bot, settings_categories[data])
 
-  if data=="settings_icontheme":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          group = getGroup(chat_id)
-          group["icontheme"] = group["icontheme"] + 1
-          if group["icontheme"] >= len(iconthemes):
-              group["icontheme"] = 0
-          saveGroup(group)
-          update_settings_message(chat_id, bot, settings_categories[data])
+    if data=="settings_plusmax":
+        if not is_admin(chat_id, user_id, bot):
+            bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            group = getGroup(chat_id)
+            if group["plusmax"] == 0:
+                group["plusmax"] = 1
+            elif group["plusmax"] == 1:
+                group["plusmax"] = 2
+            elif group["plusmax"] == 2:
+                group["plusmax"] = 3
+            elif group["plusmax"] == 3:
+                group["plusmax"] = 5
+            elif group["plusmax"] == 5:
+                group["plusmax"] = 10
+            else:
+                group["plusmax"] = 0
+                if group["plusdisaggregatedinline"] == 1 or group["plusdisaggregated"] == 1:
+                    group["plusdisaggregatedinline"] = 0
+                    group["plusdisaggregated"] = 0
+                    bot.answerCallbackQuery(text="Al desactivar el botón +1, se han desactivado también los botones +1 por equipo y la visualización de +1 disgregados por línea automáticamente.", callback_query_id=update.callback_query.id, show_alert="true")
+            saveGroup(group)
+            update_settings_message(chat_id, bot, settings_categories[data])
 
-  if data=="settings_plusmax":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          group = getGroup(chat_id)
-          if group["plusmax"] == 0:
-              group["plusmax"] = 1
-          elif group["plusmax"] == 1:
-              group["plusmax"] = 2
-          elif group["plusmax"] == 2:
-              group["plusmax"] = 3
-          elif group["plusmax"] == 3:
-              group["plusmax"] = 5
-          elif group["plusmax"] == 5:
-              group["plusmax"] = 10
-          else:
-              group["plusmax"] = 0
-              if group["plusdisaggregatedinline"] == 1 or group["plusdisaggregated"] == 1:
-                  group["plusdisaggregatedinline"] = 0
-                  group["plusdisaggregated"] = 0
-                  bot.answerCallbackQuery(text="Al desactivar el botón +1, se han desactivado también los botones +1 por equipo y la visualización de +1 disgregados por línea automáticamente.", callback_query_id=update.callback_query.id, show_alert="true")
-          saveGroup(group)
-          update_settings_message(chat_id, bot, settings_categories[data])
+    if data=="settings_snail":
+        if not is_admin(chat_id, user_id, bot):
+            bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            group = getGroup(chat_id)
+            if group["snail"] == 0:
+                group["snail"] = 1
+            elif group["snail"] == 1:
+                group["snail"] = 3
+            elif group["snail"] == 3:
+                group["snail"] = 5
+            elif group["snail"] == 5:
+                group["snail"] = 10
+            else:
+                group["snail"] = 0
+            saveGroup(group)
+            update_settings_message(chat_id, bot, settings_categories[data])
 
-  if data=="settings_snail":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          group = getGroup(chat_id)
-          if group["snail"] == 0:
-              group["snail"] = 1
-          elif group["snail"] == 1:
-              group["snail"] = 3
-          elif group["snail"] == 3:
-              group["snail"] = 5
-          elif group["snail"] == 5:
-              group["snail"] = 10
-          else:
-              group["snail"] = 0
-          saveGroup(group)
-          update_settings_message(chat_id, bot, settings_categories[data])
+    if data=="settings_rankingmonth":
+        if not is_admin(chat_id, user_id, bot):
+            bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            group = getGroup(chat_id)
+            if group["rankingmonth"] == 0:
+                group["rankingmonth"] = 15
+            elif group["rankingmonth"] == 15:
+                group["rankingmonth"] = 25
+            elif group["rankingmonth"] == 25:
+                group["rankingmonth"] = 35
+            elif group["rankingmonth"] == 35:
+                group["rankingmonth"] = 50
+            else:
+                group["rankingmonth"] = 0
+            saveGroup(group)
+            update_settings_message(chat_id, bot, settings_categories[data])
+        (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods("Europe/Madrid")
+        resetCachedRanking(group["id"], lastmonth_start.strftime("%y-%m-%d"), lastmonth_end.strftime("%y-%m-%d"))
 
-  if data=="settings_rankingmonth":
-      if not is_admin(chat_id, user_id, bot):
-          bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-      else:
-          group = getGroup(chat_id)
-          if group["rankingmonth"] == 0:
-              group["rankingmonth"] = 15
-          elif group["rankingmonth"] == 15:
-              group["rankingmonth"] = 25
-          elif group["rankingmonth"] == 25:
-              group["rankingmonth"] = 35
-          elif group["rankingmonth"] == 35:
-              group["rankingmonth"] = 50
-          else:
-              group["rankingmonth"] = 0
-          saveGroup(group)
-          update_settings_message(chat_id, bot, settings_categories[data])
-      (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods("Europe/Madrid")
-      resetCachedRanking(group["id"], lastmonth_start.strftime("%y-%m-%d"), lastmonth_end.strftime("%y-%m-%d"))
-
-  if data=="settings_rankingweek":
+    if data=="settings_rankingweek":
         if not is_admin(chat_id, user_id, bot):
             bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
         else:
@@ -2170,23 +2170,23 @@ def raidbutton(bot, update):
         resetCachedRanking(group["id"], lastweek_start.strftime("%y-%m-%d"), lastweek_end.strftime("%y-%m-%d"))
 
 
-  if data=="settings_refloatauto":
-    if not is_admin(chat_id, user_id, bot):
-        bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
-    else:
-        group = getGroup(chat_id)
-        if group["refloatauto"] == 0:
-            group["refloatauto"] = 5
-        elif group["refloatauto"] == 5:
-            group["refloatauto"] = 10
-        elif group["refloatauto"] == 10:
-            group["refloatauto"] = 15
-        elif group["refloatauto"] == 15:
-            group["refloatauto"] = 30
+    if data=="settings_refloatauto":
+        if not is_admin(chat_id, user_id, bot):
+            bot.answerCallbackQuery(text="Solo los administradores del grupo pueden configurar el bot", callback_query_id=update.callback_query.id, show_alert="true")
         else:
-            group["refloatauto"] = 0
-        saveGroup(group)
-        update_settings_message(chat_id, bot, settings_categories[data])
+            group = getGroup(chat_id)
+            if group["refloatauto"] == 0:
+                group["refloatauto"] = 5
+            elif group["refloatauto"] == 5:
+                group["refloatauto"] = 10
+            elif group["refloatauto"] == 10:
+                group["refloatauto"] = 15
+            elif group["refloatauto"] == 15:
+                group["refloatauto"] = 30
+            else:
+                group["refloatauto"] = 0
+            saveGroup(group)
+            update_settings_message(chat_id, bot, settings_categories[data])
 
 # Basic and register commands
 dispatcher.add_handler(CommandHandler('start', start))
