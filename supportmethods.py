@@ -1361,7 +1361,7 @@ def parse_profile_image(filename, desired_pokemon, desired_pokemon_2 = None, ins
         print("Originally recognized text: %s" % text)
     trainer_name = re.sub(r'\n+.*$','',text)
     trainer_name = trainer_name.replace(" ","")
-    pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text).replace(" ","")
+    pokemon_name = re.sub(r'^.*\n+([^ ]+)[ ]?','',text).replace(" ","").replace("^.*\n","")
     if pokemon_name == "":
         # Alternative pokemon name parsing
         pokemon_name = re.sub(r'^.*\n+(et|&|y|e)[ ]*','',text)

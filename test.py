@@ -38,6 +38,8 @@ passed_tests = failed_tests = 0
 
 # Load test files
 for root, dirs, filenames in os.walk("testingimgs"):
+    if root != "testingimgs":
+        continue
     for f in filenames:
         m = re.match(r'(Rojo|Amarillo|Azul)_([0-9]{2})_([A-Za-z0-9]{3,15})_([A-Za-z]{3,12})_([A-Za-z0-9]{3,12})\.jpg', f)
         if m is None:
