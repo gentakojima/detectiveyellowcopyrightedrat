@@ -754,8 +754,16 @@ def get_pokemons_keyboard():
     logging.debug("supportmethods:get_pokemons_keyboard")
     keyboard = []
     current_pokemons = getCurrentPokemons()
-    for i in range(0,min(12,len(current_pokemons)-2),3):
-        keyboard.append([InlineKeyboardButton(current_pokemons[i]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i]["pokemon"]), InlineKeyboardButton(current_pokemons[i+1]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+1]["pokemon"]), InlineKeyboardButton(current_pokemons[i+2]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+2]["pokemon"])])
+    maxpokes = min(12,len(current_pokemons))
+
+    for i in range(0, maxpokes ,3):
+        keyboard_row = [InlineKeyboardButton(current_pokemons[i]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i]["pokemon"])]
+        if i+1 < len(current_pokemons):
+            keyboard_row.append(InlineKeyboardButton(current_pokemons[i+1]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+1]["pokemon"]))
+        if i+2 < len(current_pokemons):
+            keyboard_row.append(InlineKeyboardButton(current_pokemons[i+2]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+2]["pokemon"]))
+        keyboard.append(keyboard_row)
+
     keyboard.append([InlineKeyboardButton("Niv. 5", callback_data="iraid_pokemon_N5"), InlineKeyboardButton("Niv. 4", callback_data="iraid_pokemon_N4"), InlineKeyboardButton("Niv. 3", callback_data="iraid_pokemon_N3"), InlineKeyboardButton("EX", callback_data="iraid_pokemon_EX")])
     keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
     reply_markup = InlineKeyboardMarkup(keyboard)
