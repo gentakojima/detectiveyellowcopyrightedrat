@@ -770,17 +770,16 @@ def profile(bot, update):
         delete_message(chat_id, message.message_id, bot)
         return
 
-    if isBanned(user_id):
-        return
+    if not isBanned(user_id):
+        user = refreshUsername(user_id, user_username)
 
-    user = refreshUsername(user_id, user_username)
     user = getUser(chat_id)
     if user is not None:
         text_alias = ("*%s*" % user["username"]) if user["username"] is not None else "_Desconocido_"
         text_trainername = ("*%s*" % user["trainername"]) if user["trainername"] is not None else "_Desconocido_"
         text_team = ("*%s*" % user["team"]) if user["team"] is not None else "_Desconocido_"
         text_level = ("*%s*" % user["level"]) if user["level"] is not None else "_Desconocido_"
-        if user["banned"] == "1":
+        if user["banned"] == 1:
             text_validationstatus = "*Baneada*"
         elif user["validation"] == "internal" or user["validation"] == "oak":
             text_validationstatus = "*Validada*"
