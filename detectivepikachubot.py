@@ -770,6 +770,10 @@ def profile(bot, update):
         delete_message(chat_id, message.message_id, bot)
         return
 
+    if isBanned(user_id):
+        return
+
+    user = refreshUsername(user_id, user_username)
     user = getUser(chat_id)
     if user is not None:
         text_alias = ("*%s*" % user["username"]) if user["username"] is not None else "_Desconocido_"
@@ -955,12 +959,14 @@ def raid(bot, update, args=None):
     logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
+    if isBanned(chat_id):
+        return
+
     if chat_type != "channel":
         user_username = message.from_user.username
+        if isBanned(user_id):
+            return
         thisuser = refreshUsername(user_id, user_username)
-
-    if isBanned(chat_id) or isBanned(user_id):
-        return
 
     if chat_type == "private":
         bot.sendMessage(chat_id=chat_id, text="Las incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda.")
@@ -1176,9 +1182,9 @@ def cerrar(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
@@ -1218,9 +1224,9 @@ def cancelar(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
@@ -1263,9 +1269,9 @@ def descancelar(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
@@ -1303,9 +1309,9 @@ def borrar(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
@@ -1345,9 +1351,9 @@ def cambiarhora(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
@@ -1414,9 +1420,9 @@ def cambiarhorafin(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
@@ -1492,9 +1498,9 @@ def cambiargimnasio(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
@@ -1638,9 +1644,9 @@ def reflotar(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
@@ -1689,9 +1695,9 @@ def cambiarpokemon(bot, update, args=None):
 
     if chat_type != "channel":
         user_username = message.from_user.username
-        thisuser = refreshUsername(user_id, user_username)
         if isBanned(user_id):
             return
+        thisuser = refreshUsername(user_id, user_username)
     else:
         user_username = None
         thisuser = None
