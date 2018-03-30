@@ -406,20 +406,20 @@ def registerOak(bot, update):
                             thisuser["validation"] = "internal"
                         else:
                             thisuser["validation"] = "oak"
-                        bot.sendMessage(chat_id=chat_id, text="👌 ¡De acuerdo! He reconocido que tu nombre de entrenador es *%s*, eres del equipo *%s* y de *nivel %s*.\n\nA partir de ahora aparecerá tu equipo y nivel en las incursiones en las que participes. Si subes de nivel o te cambias el nombre de entrenador, repite esta operación para que pueda reflejarlo bien en las incursiones." % (ensure_escaped(thisuser["trainername"]), thisuser["team"], thisuser["level"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text=_("👌 ¡De acuerdo! He reconocido que tu nombre de entrenador es *{0}*, eres del equipo *{1}* y de *nivel {2}*.\n\nA partir de ahora aparecerá tu equipo y nivel en las incursiones en las que participes. Si subes de nivel o te cambias el nombre de entrenador, repite esta operación para que pueda reflejarlo bien en las incursiones.").format(ensure_escaped(thisuser["trainername"]), thisuser["team"], thisuser["level"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         saveWholeUser(thisuser)
                     else:
-                        bot.sendMessage(chat_id=chat_id, text="❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Envía un correo a `%s` indicando tu alias en telegram y tu nombre de entrenador en el juego para que revisemos el caso manualmente." % config["telegram"]["validationsmail"], parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text=_("❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Envía un correo a `{0}` indicando tu alias en telegram y tu nombre de entrenador en el juego para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         return
                 else:
-                    bot.sendMessage(chat_id=chat_id, text="❌ Parece que tu cuenta aún no está completamente validada con @profesoroak\_bot. No puedo aceptar tu nivel y equipo hasta que te valides.", parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text=_("❌ Parece que tu cuenta aún no está completamente validada con @profesoroak\_bot. No puedo aceptar tu nivel y equipo hasta que te valides."), parse_mode=telegram.ParseMode.MARKDOWN)
             else:
-                bot.sendMessage(chat_id=chat_id, text="❌ Ese mensaje es demasiado antiguo. ¡Debes reenviarme un mensaje más reciente!", parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=chat_id, text=_("❌ Ese mensaje es demasiado antiguo. ¡Debes reenviarme un mensaje más reciente!"), parse_mode=telegram.ParseMode.MARKDOWN)
         else:
-            bot.sendMessage(chat_id=chat_id, text="❌ ¿Has copiado y pegado el mensaje del @profesoroak\_bot? Tienes que usar la opción de *reenviar*, no sirve copiando y pegando.", parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=chat_id, text=_("❌ ¿Has copiado y pegado el mensaje del @profesoroak\_bot? Tienes que usar la opción de *reenviar*, no sirve copiando y pegando."), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         if forward_id == 201760961:
-            bot.sendMessage(chat_id=chat_id, text="❌ No he reconocido ese mensaje de @profesoroak\_bot. ¿Seguro que le has preguntado `Quién soy?` y no otra cosa?", parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=chat_id, text=_("❌ No he reconocido ese mensaje de @profesoroak\_bot. ¿Seguro que le has preguntado `Quién soy?` y no otra cosa?"), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def joinedChat(bot, update):
@@ -434,7 +434,7 @@ def joinedChat(bot, update):
                 group = getGroup(chat_id)
                 if group is None:
                     saveGroup({"id":chat_id, "title":message.chat.title})
-                message_text = "¡Hola a todos los miembros de *%s*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir." % ensure_escaped(chat_title)
+                message_text = _("¡Hola a todos los miembros de *{0}*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir.").format(ensure_escaped(chat_title))
                 Thread(target=send_message_timed, args=(chat_id, message_text, 3, bot)).start()
     except Exception as e:
         logging.debug("detectivepikachubot:joinedChat: Exception entering in %s: %s" % (chat_title,str(e)));
@@ -473,12 +473,12 @@ def processMessage(bot, update):
                         validation["trainername"] = text
                         validation["step"] = "waitingscreenshot"
                         saveValidation(validation)
-                        bot.sendMessage(chat_id=chat_id, text="Así que tu nombre de entrenador es *%s*.\n\nPara completar el registro, debes enviarme una captura de pantalla de tu perfil del juego, con un *%s* o un *%s* como compañero y que tengan de nombre *%s*. Si no tienes ninguno de esos pokémon, o no te apetece cambiar ahora de compañero, puedes volver a comenzar el registro en cualquier otro momento después de que caduque." % (validation["trainername"], validation["pokemon"].capitalize(), validation["pokemon2"].capitalize(),validation["pokemonname"]), parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text=_("Así que tu nombre de entrenador es *{0}*.\n\nPara completar el registro, debes enviarme una captura de pantalla de tu perfil del juego, con un *{1}* o un *{2}* como compañero y que tengan de nombre *{3}*. Si no tienes ninguno de esos pokémon, o no te apetece cambiar ahora de compañero, puedes volver a comenzar el registro en cualquier otro momento después de que caduque.").format(validation["trainername"], validation["pokemon"].capitalize(), validation["pokemon2"].capitalize(),validation["pokemonname"]), parse_mode=telegram.ParseMode.MARKDOWN)
                     else:
-                        bot.sendMessage(chat_id=chat_id, text="❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Si realmente es tuyo, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.\n\nSi lo has escrito mal y realmente no era ese el nombre, dime entonces, ¿cómo es el nombre de entrenador que aparece en tu perfil del juego?" % config["telegram"]["validationsmail"], parse_mode=telegram.ParseMode.MARKDOWN)
+                        bot.sendMessage(chat_id=chat_id, text=_("❌ Ese nombre de entrenador ya está asociado a otra cuenta de Telegram. Si realmente es tuyo, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.\n\nSi lo has escrito mal y realmente no era ese el nombre, dime entonces, ¿cómo es el nombre de entrenador que aparece en tu perfil del juego?").format(config["telegram"]["validationsmail"]), parse_mode=telegram.ParseMode.MARKDOWN)
                         return
                 else:
-                    bot.sendMessage(chat_id=chat_id, text="❌ No te entiendo. Pon únicamente el nombre de entrenador que aparece en tu perfil del juego. No puede tener espacios y debe tener entre 4 y 15 caracteres de longitud.", parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendMessage(chat_id=chat_id, text=_("❌ No te entiendo. Pon únicamente el nombre de entrenador que aparece en tu perfil del juego. No puede tener espacios y debe tener entre 4 y 15 caracteres de longitud."), parse_mode=telegram.ParseMode.MARKDOWN)
                     return
             # Expecting screenshot
             elif validation["step"] == "waitingscreenshot" and hasattr(message, 'photo') and message.photo is not None and len(message.photo) > 0:
@@ -493,22 +493,22 @@ def processMessage(bot, update):
                     output = None
                 except Exception as e:
                     logging.debug("Exception validating: %s" % str(e))
-                    output = "❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                    output = _("❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda.")
                     bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
                     return
                 if chosen_profile is None:
-                    output = "❌ La captura de pantalla no parece válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                    output = _("❌ La captura de pantalla no parece válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
                 elif trainer_name.lower() != validation["trainername"].lower() and distance(trainer_name.lower(),validation["trainername"].lower())>2 and \
                      trainer_name.replace("I","l").replace("0","o").lower() != validation["trainername"].replace("I","l").replace("0","o").lower():
-                    output = "❌ No he reconocido correctamente el *nombre del entrenador*. ¿Seguro que lo has escrito bien? Puedes volver a enviar otra captura. Si te has equivocado, espera 6 horas a que caduque la validación y vuelve a comenzar de nuevo. Si lo has escrito bien y no consigues que lo reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                    output = _("❌ No he reconocido correctamente el *nombre del entrenador*. ¿Seguro que lo has escrito bien? Puedes volver a enviar otra captura. Si te has equivocado, espera 6 horas a que caduque la validación y vuelve a comenzar de nuevo. Si lo has escrito bien y no consigues que lo reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
                 elif level is None:
-                    output = "❌ No he reconocido correctamente el *nivel*. Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                    output = _("❌ No he reconocido correctamente el *nivel*. Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
                 elif chosen_color is None:
-                    output = "❌ No he reconocido correctamente el *equipo*. Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                    output = _("❌ No he reconocido correctamente el *equipo*. Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
                 elif pokemon_name.lower() != validation["pokemonname"].lower() and distance(pokemon_name.lower(),validation["pokemonname"].lower())>3:
-                    output = "❌ No he reconocido correctamente el *nombre del Pokémon*. ¿Le has cambiado el nombre a *%s* como te dije? Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % (validation["pokemonname"], config["telegram"]["validationsmail"])
+                    output = _("❌ No he reconocido correctamente el *nombre del Pokémon*. ¿Le has cambiado el nombre a *{0}* como te dije? Puedes volver a intentar completar la validación enviando otra captura. Si no consigues que la reconozca, envía un correo a `{1}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(validation["pokemonname"], config["telegram"]["validationsmail"])
                 elif (chosen_pokemon != validation["pokemon"] and chosen_pokemon != validation["pokemon2"]) or chosen_pokemon is None:
-                    output = "❌ No he reconocido correctamente el *Pokémon*. ¿Has puesto de compañero a *%s* o a *%s* como te dije? Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % (validation["pokemon"], validation["pokemon2"], config["telegram"]["validationsmail"])
+                    output = _("❌ No he reconocido correctamente el *Pokémon*. ¿Has puesto de compañero a *{0}* o a *{1}* como te dije? Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `{2}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(validation["pokemon"], validation["pokemon2"], config["telegram"]["validationsmail"])
                 if output is not None:
                     validation["tries"] = validation["tries"] + 1
                     if validation["tries"] > 3:
@@ -526,10 +526,10 @@ def processMessage(bot, update):
                 validation["team"] = chosen_color
                 validation["step"] = "completed"
                 saveValidation(validation)
-                output = "👌 Has completado el proceso de validación correctamente. Se te ha asignado el equipo *%s* y el nivel *%s*.\n\nA partir de ahora aparecerán tu nivel y equipo reflejados en las incursiones en las que participes.\n\nSi subes de nivel en el juego y quieres que se refleje en las incursiones, puedes enviarme en cualquier momento otra captura de tu perfil del juego, no es necesario que cambies tu Pokémon acompañante." % (validation["team"], validation["level"])
+                output = _("👌 Has completado el proceso de validación correctamente. Se te ha asignado el equipo *{0}* y el nivel *{1}*.\n\nA partir de ahora aparecerán tu nivel y equipo reflejados en las incursiones en las que participes.\n\nSi subes de nivel en el juego y quieres que se refleje en las incursiones, puedes enviarme en cualquier momento otra captura de tu perfil del juego, no es necesario que cambies tu Pokémon acompañante.").format(validation["team"], validation["level"])
                 bot.sendMessage(chat_id=chat_id, text=output,parse_mode=telegram.ParseMode.MARKDOWN)
             elif validation["step"] == "failed":
-                output = "❌ Has excedido el número máximo de intentos para esta validación. Debes esperar a que caduque la validación actual para volver a intentarlo. También puedes enviar un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                output = _("❌ Has excedido el número máximo de intentos para esta validación. Debes esperar a que caduque la validación actual para volver a intentarlo. También puedes enviar un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
                 bot.sendMessage(chat_id=chat_id, text=output,parse_mode=telegram.ParseMode.MARKDOWN)
         # Not expecting validation, probably screenshot to update level
         elif user is not None and (user["validation"] == "internal" or user["validation"] == "oak") and hasattr(message, 'photo') and message.photo is not None and len(message.photo) > 0:
@@ -543,28 +543,28 @@ def processMessage(bot, update):
                 #bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
                 output = None
             except Exception as e:
-                bot.sendMessage(chat_id=chat_id, text="❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=chat_id, text=_("❌ Ha ocurrido un error procesando la imagen. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Si no consigues que la reconozca, pide ayuda en @detectivepikachuayuda."), parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             if chosen_profile is None:
-                output = "❌ La captura de pantalla no parece válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                output = _("❌ La captura de pantalla no parece válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
             elif trainer_name.lower() != user["trainername"].lower() and distance(trainer_name.lower(),user["trainername"].lower())>2 and \
                  trainer_name.replace("I","l").replace("0","o").lower() != validation["trainername"].replace("I","l").replace("0","o").lower():
-                output = "❌ No he reconocido correctamente el *nombre del entrenador*. Si no consigues que lo reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                output = _("❌ No he reconocido correctamente el *nombre del entrenador*. Si no consigues que lo reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
             elif level is None:
-                output = "❌ No he reconocido correctamente el *nivel*. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                output = _("❌ No he reconocido correctamente el *nivel*. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
             elif int(user["level"]) == int(level):
-                output = "❌ En la captura pone que eres *nivel %s*, pero yo ya sabía que tenías ese nivel." % user["level"]
+                output = _("❌ En la captura pone que eres *nivel {0}*, pero yo ya sabía que tenías ese nivel.").format(user["level"])
             elif int(user["level"]) > int(level):
-                output = "❌ En la captura pone que eres *nivel %s*, pero ya eras *nivel %s*. ¿Cómo has bajado de nivel?" % (level,user["level"])
+                output = _("❌ En la captura pone que eres *nivel {0}*, pero ya eras *nivel {1}*. ¿Cómo has bajado de nivel?").format(level, user["level"])
             elif chosen_color != user["team"]:
-                output = "❌ No he reconocido correctamente el *equipo*. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente." % config["telegram"]["validationsmail"]
+                output = _("❌ No he reconocido correctamente el *equipo*. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
             if output is not None:
                 bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
                 return
             # Validation ok!
             user["level"] = level
             saveWholeUser(user)
-            output = "👌 Se ha actualizado tu nivel al *%s*.\n\nSi vuelves a subir de nivel en el juego y quieres que se refleje en las incursiones, puedes enviarme en cualquier momento otra captura de tu perfil del juego." % (user["level"])
+            output = _("👌 Se ha actualizado tu nivel al *{0}*.\n\nSi vuelves a subir de nivel en el juego y quieres que se refleje en las incursiones, puedes enviarme en cualquier momento otra captura de tu perfil del juego.").format(user["level"])
             bot.sendMessage(chat_id=chat_id, text=output,parse_mode=telegram.ParseMode.MARKDOWN)
         # Is this a forwarded message from Oak?
         if text is not None and len(text) > 0:
@@ -575,15 +575,13 @@ def processMessage(bot, update):
             delete_message(chat_id, message.message_id, bot)
             if group["talkgroup"] is not None:
                 if re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$", group["talkgroup"]) is not None:
-                    text_talkgroup="\n\nPara hablar puedes utilizar el grupo @%s." % ensure_escaped(group["talkgroup"])
+                    text_talkgroup="\n\n" + _("Para hablar puedes utilizar el grupo @{0}.").format(ensure_escaped(group["talkgroup"]))
                 else:
-                    text_talkgroup="\n\nPara hablar puedes utilizar el grupo %s." % ensure_escaped(group["talkgroup"])
+                    text_talkgroup="\n\n" + _("Para hablar puedes utilizar el grupo {0}.").format(ensure_escaped(group["talkgroup"]))
             else:
                 text_talkgroup="";
-            if user_username is not None:
-                text = "@%s en este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.%s\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(user_username), text_talkgroup)
-            else:
-                text = "En este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.%s\n\n_(Este mensaje se borrará en unos segundos)_" % text_talkgroup
+            user_text = "@%s " % ensure_escaped(user_username) if user_username is not None else ""
+            text = _("{0}En este canal solo se pueden crear incursiones y participar en ellas, pero no se puede hablar.{1}\n\n_(Este mensaje se borrará en unos segundos)_").format(user_text, text_talkgroup)
             sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
             Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 13, bot)).start()
     return
@@ -667,7 +665,7 @@ def settings(bot, update):
         saveGroup({"id":chat_id, "title":message.chat.title})
         group = getGroup(chat_id)
     elif group is None:
-        bot.sendMessage(chat_id=chat_id, text="No consigo encontrar la información de este grupo. ¿He saludado al entrar? Prueba a echarme y a meterme de nuevo. Si lo has promocionado a supergrupo después de entrar yo, esto es normal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("No tengo información de este grupo. Consulta los errores frecuentes en {0}").format(config["telegram"]["bothelp"]), parse_mode=telegram.ParseMode.MARKDOWN)
         return
     set_language(group["language"])
 
@@ -791,20 +789,21 @@ def profile(bot, update):
         user = refreshUsername(user_id, user_username)
 
     user = getUser(chat_id)
+    set_language(user["language"])
     if user is not None:
-        text_alias = ("*%s*" % user["username"]) if user["username"] is not None else "_Desconocido_"
-        text_trainername = ("*%s*" % user["trainername"]) if user["trainername"] is not None else "_Desconocido_"
-        text_team = ("*%s*" % user["team"]) if user["team"] is not None else "_Desconocido_"
-        text_level = ("*%s*" % user["level"]) if user["level"] is not None else "_Desconocido_"
+        text_alias = ("*%s*" % user["username"]) if user["username"] is not None else _("_Desconocido_")
+        text_trainername = ("*%s*" % user["trainername"]) if user["trainername"] is not None else _("_Desconocido_")
+        text_team = ("*%s*" % user["team"]) if user["team"] is not None else _("_Desconocido_")
+        text_level = ("*%s*" % user["level"]) if user["level"] is not None else _("_Desconocido_")
         if user["banned"] == 1:
-            text_validationstatus = "*Baneada*"
+            text_validationstatus = _("*Baneada*")
         elif user["validation"] == "internal" or user["validation"] == "oak":
-            text_validationstatus = "*Validada*"
+            text_validationstatus = _("*Validada*")
         else:
-            text_validationstatus = "*No validada*"
-        output = "ID de Telegram: *%s*\nAlias de Telegram: %s\nNombre de entrenador: %s\nEstado cuenta: %s\nEquipo: %s\nNivel: %s" % (user["id"], text_alias, text_trainername, text_validationstatus, text_team, text_level)
+            text_validationstatus = _("*No validada*")
+        output = _("ID de Telegram: *{0}*\nAlias de Telegram: {1}\nNombre de entrenador: {2}\nEstado cuenta: {3}\nEquipo: {4}\nNivel: {5}").format(user["id"], text_alias, text_trainername, text_validationstatus, text_team, text_level)
     else:
-        output = "❌ No tengo información sobre ti."
+        output = _("❌ No tengo información sobre ti.")
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
