@@ -123,15 +123,18 @@ def register(bot, update):
         delete_message(chat_id, message.message_id, bot)
         return
 
+    user = getUser(user_id)
+    set_language(user["language"])
+
     validation = getCurrentValidation(user_id)
     logging.debug(validation)
     if validation is not None:
-        bot.sendMessage(chat_id=chat_id, text="❌ Ya has iniciado un proceso de validación. Debes completarlo antes de intentar comenzar de nuevo, o esperar 6 horas a que caduque.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Ya has iniciado un proceso de validación. Debes completarlo antes de intentar comenzar de nuevo, o esperar 6 horas a que caduque."), parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     user = getUser(user_id)
     if user is not None and user["validation"] != "none":
-        bot.sendMessage(chat_id=chat_id, text="⚠ Ya te has validado anteriormente. *No es necesario* que vuelvas a validarte, a no ser que quieras cambiar tu nombre de entrenador, equipo o bajar de nivel. Si solo has subido de nivel, basta con que envíes una captura de pantalla de tu nuevo nivel, sin necesidad de hacer el proceso completo.\n\nSi aún así quieres, puedes continuar con el proceso, o sino *espera 6 horas* a que caduque.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("⚠ Ya te has validado anteriormente. *No es necesario* que vuelvas a validarte, a no ser que quieras cambiar tu nombre de entrenador, equipo o bajar de nivel. Si solo has subido de nivel, basta con que envíes una captura de pantalla de tu nuevo nivel, sin necesidad de hacer el proceso completo.\n\nSi aún así quieres, puedes continuar con el proceso, o sino *espera 6 horas* a que caduque."), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         user = {"id": user_id, "username": user_username}
         saveUser(user)
@@ -141,7 +144,7 @@ def register(bot, update):
     validation = { "usuario_id": chat_id, "step": "waitingtrainername", "pokemon": pokemons[0], "pokemon2": pokemons[1], "pokemonname": name }
     saveValidation(validation)
 
-    bot.sendMessage(chat_id=chat_id, text="¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 6 horas, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esas 6 horas._", parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.sendMessage(chat_id=chat_id, text=_("¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 6 horas, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esas 6 horas._"), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def settimezone(bot, update, args=None):
@@ -156,7 +159,7 @@ def settimezone(bot, update, args=None):
         return
 
     if chat_type == "private":
-        bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos"))
         return
 
     try:
@@ -165,7 +168,7 @@ def settimezone(bot, update, args=None):
         pass
 
     if args is None or len(args)!=1 or len(args[0])<3 or len(args[0])>60:
-        bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme un nombre de zona horaria en inglés, por ejemplo, `America/Montevideo` o `Europe/Madrid`.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Debes pasarme un nombre de zona horaria en inglés, por ejemplo, `America/Montevideo` o `Europe/Madrid`."), parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     tz = searchTimezone(args[0])
@@ -175,11 +178,11 @@ def settimezone(bot, update, args=None):
         group["title"] = chat_title
         group["alias"] = group_alias
         saveGroup(group)
-        bot.sendMessage(chat_id=chat_id, text="👌 Establecida zona horaria *%s*." % group["timezone"], parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("👌 Establecida zona horaria *{0}*.").format(group["timezone"]), parse_mode=telegram.ParseMode.MARKDOWN)
         now = datetime.now(timezone(group["timezone"])).strftime("%H:%M")
-        bot.sendMessage(chat_id=chat_id, text="🕒 Comprueba que la hora sea correcta: %s" % now, parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("🕒 Comprueba que la hora sea correcta: {0}").format(now), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
-        bot.sendMessage(chat_id=chat_id, text="❌ No se ha encontrado ninguna zona horaria válida con ese nombre.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha encontrado ninguna zona horaria válida con ese nombre."), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def settalkgroup(bot, update, args=None):
@@ -194,7 +197,7 @@ def settalkgroup(bot, update, args=None):
         return
 
     if chat_type == "private":
-        bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos")
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos"))
         return
 
     try:
@@ -203,7 +206,7 @@ def settalkgroup(bot, update, args=None):
         pass
 
     if args is None or len(args)!=1 or (args[0] != "-" and (len(args[0])<3 or len(args[0])>60 or re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$|https://t\.me/joinchat/[a-zA-Z0-9_]+$",args[0]) is None) ):
-        bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme por parámetro un alias de grupo o un enlace de `t.me` de un grupo privado, por ejemplo `@pokemongobadajoz` o `https://t.me/joinchat/XXXXERK2ZfB3ntXXSiWUx`.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Debes pasarme por parámetro un alias de grupo o un enlace de `t.me` de un grupo privado, por ejemplo `@pokemongoteruel` o `https://t.me/joinchat/XXXXERK2ZfB3ntXXSiWUx`."), parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     group = getGroup(chat_id)
@@ -213,13 +216,13 @@ def settalkgroup(bot, update, args=None):
         group["talkgroup"] = args[0].replace("@","")
         saveGroup(group)
         if re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$",args[0]) is not None:
-            bot.sendMessage(chat_id=chat_id, text="👌 Establecido grupo de charla a @%s." % ensure_escaped(group["talkgroup"]), parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=chat_id, text=_("👌 Establecido grupo de charla a @{0}.").format(ensure_escaped(group["talkgroup"])), parse_mode=telegram.ParseMode.MARKDOWN)
         else:
-            bot.sendMessage(chat_id=chat_id, text="👌 Establecido grupo de charla a %s." % ensure_escaped(group["talkgroup"]), parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=chat_id, text=_("👌 Establecido grupo de charla a {0}.").format(ensure_escaped(group["talkgroup"])), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         group["talkgroup"] = None
         saveGroup(group)
-        bot.sendMessage(chat_id=chat_id, text="👌 Eliminada la referencia al grupo de charla.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("👌 Eliminada la referencia al grupo de charla."), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def setspreadsheet(bot, update, args=None):
@@ -231,7 +234,7 @@ def setspreadsheet(bot, update, args=None):
         group_alias = message.chat.username
 
     if chat_type == "private":
-        bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos.")
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos."))
         return
 
     if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
@@ -243,28 +246,28 @@ def setspreadsheet(bot, update, args=None):
         pass
 
     if args is None or len(args)!=1:
-        bot.sendMessage(chat_id=chat_id, text="❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro.")
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro. Por ejemplo: `/spreadsheet https://docs.google.com/spreadsheets/d/XXXxxx`"))
         return
 
     m = re.search('docs.google.com/.*spreadsheets/d/([a-zA-Z0-9_-]+)', args[0], flags=re.IGNORECASE)
     if m is None:
-        bot.sendMessage(chat_id=chat_id, text="❌ Vaya, no he reconocido esa URL... %s" % args[0])
+        bot.sendMessage(chat_id=chat_id, text=_("❌ No he reconocido esa URL de Google Docs... `{0}`").format(args[0]))
     else:
         spreadsheet_id = m.group(1)
         group = getGroup(chat_id)
 
         if group is None:
             if chat_type == "channel":
-                bot.sendMessage(chat_id=chat_id, text="No tengo información de este canal. Un administrador debe utilizar al menos una vez el comando `/settings` antes de poder utilizarme en un canal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=chat_id, text=_("No tengo información de este canal. Consulta los errores frecuentes en {0}").format(config["telegram"]["bothelp"]), parse_mode=telegram.ParseMode.MARKDOWN)
             else:
-                bot.sendMessage(chat_id=chat_id, text="No consigo encontrar la información de este grupo. ¿He saludado al entrar? Prueba a echarme y a meterme de nuevo. Si lo has promocionado a supergrupo después de entrar yo, esto es normal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.sendMessage(chat_id=chat_id, text=_("No tengo información de este grupo. Consulta los errores frecuentes en {0}").format(config["telegram"]["bothelp"]), parse_mode=telegram.ParseMode.MARKDOWN)
             return
 
         group["title"] = chat_title
         group["spreadsheet"] = spreadsheet_id
         group["alias"] = group_alias
         saveGroup(group)
-        bot.sendMessage(chat_id=chat_id, text="👌 Establecido hoja de cálculo con identificador `%s`.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos." % ensure_escaped(spreadsheet_id), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("👌 Establecido hoja de cálculo con identificador `{0}`.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos.").format(ensure_escaped(spreadsheet_id)), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def refresh(bot, update, args=None):
@@ -276,7 +279,7 @@ def refresh(bot, update, args=None):
         group_alias = message.chat.username
 
     if chat_type == "private":
-        bot.sendMessage(chat_id=chat_id, text="❌ Este comando solo funciona en canales y grupos.")
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos."))
         return
 
     if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
@@ -289,11 +292,11 @@ def refresh(bot, update, args=None):
 
     grupo = getGroup(chat_id)
     if grupo is None or grupo["spreadsheet"] is None:
-        bot.sendMessage(chat_id=chat_id, text="❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/spreadsheet`", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/spreadsheet`"), parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
-    sent_message = bot.sendMessage(chat_id=chat_id, text="🌎 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._", parse_mode=telegram.ParseMode.MARKDOWN)
-    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
+    sent_message = bot.sendMessage(chat_id=chat_id, text=_("🌎 Refrescando lista de gimnasios...\n\n_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._"), parse_mode=telegram.ParseMode.MARKDOWN)
+    Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot)).start()
 
     response = requests.get("https://docs.google.com/spreadsheet/ccc?key=%s&output=csv" % grupo["spreadsheet"] )
     if response.status_code == 200:
@@ -304,13 +307,13 @@ def refresh(bot, update, args=None):
         incomplete_rows = []
         for row in csvreader:
             if counter > 3000:
-                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se permiten más de 3000 gimnasios por grupo!")
+                bot.sendMessage(chat_id=chat_id, text=_("❌ ¡No se permiten más de 3000 gimnasios por grupo!"))
                 return
             if counter == 0 and len(row) == 0:
-                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han encontrado datos! ¿La hoja de cálculo es pública?")
+                bot.sendMessage(chat_id=chat_id, text=_("❌ ¡No se han encontrado datos! ¿La hoja de cálculo es pública?"))
             elif len(row) < 4:
                 rownumber = counter + 1
-                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! La fila %s no tiene las 4 columnas requeridas." % rownumber)
+                bot.sendMessage(chat_id=chat_id, text=_("❌ ¡No se han podido cargar los gimnasios! La fila {0} no tiene las 4 columnas requeridas.").format(rownumber))
                 return
             names = row[3].split(",")
             latitude = str(row[1]).replace(",",".")
@@ -319,7 +322,7 @@ def refresh(bot, update, args=None):
             m2 = re.search('^-?[0-9]+.[0-9]+$', longitude, flags=re.IGNORECASE)
             if m is None or m2 is None:
                 rownumber = counter + 1
-                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! El formato de las coordenadas en la fila %s es incorrecto. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas." % (rownumber))
+                bot.sendMessage(chat_id=chat_id, text=_("❌ ¡No se han podido cargar los gimnasios! El formato de las coordenadas en la fila {0} es incorrecto. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas.").format((rownumber)))
                 return
             for i,r in enumerate(names):
                 names[i] = names[i].strip()
@@ -350,23 +353,23 @@ def refresh(bot, update, args=None):
             if savePlaces(chat_id, places):
                 places = getPlaces(grupo["id"])
                 if len(incomplete_rows) > 0:
-                    bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!\n⚠️ %i gimnasios no tienen palabras clave. Recuerda que son obligatorias para que puedan ser encontrados." % (len(places), len(incomplete_rows)))
+                    bot.sendMessage(chat_id=chat_id, text=_("👌 ¡Cargados {0} gimnasios correctamente!\n⚠️ {1} gimnasios no tienen palabras clave. Recuerda que son obligatorias para que puedan ser encontrados.").format(len(places), len(incomplete_rows)))
                 else:
-                    bot.sendMessage(chat_id=chat_id, text="👌 ¡Cargados %i gimnasios correctamente!" % len(places))
+                    bot.sendMessage(chat_id=chat_id, text=_("👌 ¡Cargados {0} gimnasios correctamente!").format(len(places)))
                 # Warn users with removed alerts due to deleted/replaced gyms
                 if removedalerts is not None and len(removedalerts)>0:
                     for ra in removedalerts:
                         try:
-                            bot.sendMessage(chat_id=ra["usuario_id"], text="🚫 Se ha borrado una alerta que tenías programada para el gimnasio <b>%s</b> del grupo <b>%s</b> porque un administrador lo ha borrado o reemplazado por otro con un nombre diferente." % (ra["gimnasio_name"],ra["grupo_title"]), parse_mode=telegram.ParseMode.HTML)
+                            bot.sendMessage(chat_id=ra["usuario_id"], text=_("🚫 Se ha borrado una alerta que tenías programada para el gimnasio <b>{0}</b> del grupo <b>{1}</b> porque un administrador lo ha borrado o reemplazado por otro con un nombre diferente.").format(ra["gimnasio_name"], ra["grupo_title"]), parse_mode=telegram.ParseMode.HTML)
                         except:
                             logging.debug("detectivepikachubot:refresh: Can't alert user %s about deleted alert on %s" % (ra["usuario_id"],ra["gimnasio_name"]))
                             pass
             else:
-                bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre.")
+                bot.sendMessage(chat_id=chat_id, text=_("❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre."))
         else:
-            bot.sendMessage(chat_id=chat_id, text="❌ ¡No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto? Ten en cuenta que para que funcione, debe haber al menos 2 gimnasios en el documento.")
+            bot.sendMessage(chat_id=chat_id, text=_("❌ ¡No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto? Ten en cuenta que para que funcione, debe haber al menos 2 gimnasios en el documento."))
     else:
-        bot.sendMessage(chat_id=chat_id, text="❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?")
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?"))
 
 @run_async
 def registerOak(bot, update):
@@ -647,7 +650,9 @@ def settings(bot, update):
     chat_title = message.chat.title
 
     if chat_type == "private":
-        bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
+        user = getUser(user_id)
+        set_language(user["language"])
+        bot.sendMessage(chat_id=chat_id, text=_("El comando `/settings` solo funciona en canales y grupos"))
         return
     if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
         return
@@ -664,6 +669,7 @@ def settings(bot, update):
     elif group is None:
         bot.sendMessage(chat_id=chat_id, text="No consigo encontrar la información de este grupo. ¿He saludado al entrar? Prueba a echarme y a meterme de nuevo. Si lo has promocionado a supergrupo después de entrar yo, esto es normal. Si estaba funcionando hasta ahora y he dejado de hacerlo, avisa en @detectivepikachuayuda.", parse_mode=telegram.ParseMode.MARKDOWN)
         return
+    set_language(group["language"])
 
     if group["settings_message"] is not None:
         try:
@@ -678,7 +684,7 @@ def settings(bot, update):
     group["title"] = chat_title
 
     settings_markup = get_settings_keyboard(chat_id)
-    message = bot.sendMessage(chat_id=chat_id, text="Cargando preferencias del grupo. Un momento...")
+    message = bot.sendMessage(chat_id=chat_id, text=_("Cargando preferencias del grupo. Un momento..."))
     group["settings_message"] = message.message_id
     saveGroup(group)
     Thread(target=update_settings_message_timed, args=(chat_id, 1, bot)).start()
@@ -688,7 +694,9 @@ def list(bot, update):
     logging.debug("detectivepikachubot:list: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     if chat_type == "private":
-        bot.sendMessage(chat_id=chat_id, text="Solo funciono en canales y grupos")
+        user = getUser(user_id)
+        set_language(user["language"])
+        bot.sendMessage(chat_id=chat_id, text=_("El comando `/list` solo funciona en canales y grupos"))
         return
 
     try:
@@ -696,19 +704,22 @@ def list(bot, update):
     except:
         pass
 
-    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
+    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id) or is_banned(chat_id)):
         return
+
+    group = getGroup(chat_id)
+    set_language(group["language"])
 
     gyms = getPlaces(chat_id)
     if len(gyms)==0:
-        bot.sendMessage(chat_id=chat_id, text="No estoy configurado en este grupo")
+        bot.sendMessage(chat_id=chat_id, text=_("No hay gimnasios configurados en este grupo/canal"))
         return
-    output = "Lista de gimnasios conocidos (%i):" % len(gyms)
+    output = _("Lista de gimnasios conocidos ({0}):").format(len(gyms))
     bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
     for p in gyms:
         output = output + ("\n - %s%s" % (p["desc"], format_gym_emojis(p["tags"])))
     if len(output) > 4096:
-        output = output[:4006].rsplit('\n', 1)[0]+"...\n_(El mensaje se ha cortado porque era demasiado largo)_"
+        output = output[:4006].rsplit('\n', 1)[0]+"...\n" + _("_(El mensaje se ha cortado porque era demasiado largo)_")
     bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
@@ -1754,7 +1765,7 @@ def raidbutton(bot, update):
     message_id = query.message.message_id
     chat_type = query.message.chat.type
 
-    if isBanned(user_id) or isBanned(chat_id):
+    if isBanned(user_id) or isBanned(chat_id) or data == None:
         return
 
     thisuser = refreshUsername(user_id, user_username)
@@ -1888,7 +1899,7 @@ def raidbutton(bot, update):
             else:
                 bot.answerCallbackQuery(text=_("Error actualizando incursión"), callback_query_id=update.callback_query.id, show_alert="true")
 
-    if data=="ubicacion":
+    if data == "ubicacion":
         raid = getRaidbyMessage(chat_id, message_id)
         if raid is not None and raid["gimnasio_id"] is not None:
             try:

@@ -1,11 +1,11 @@
-# Detective YellowCopyrightedRat
-# Copyright (C) 2018 Jorge Suárez de Lis, contributors.
-# Jorge Suárez de Lis <hey@gentakojima.me>, 2018
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: detectiveyellowcopyrightedrat master\n"
-"POT-Creation-Date: 2018-03-30 13:21+0200\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2018-03-30 19:44+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,11 +15,11 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: detectivepikachubot.py:84
+#: detectivepikachubot.py:85
 msgid "<i>(Este mensaje se borrará en 60 segundos)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:93
+#: detectivepikachubot.py:94
 msgid ""
 "📖 ¡Echa un vistazo a <a href='{0}'>la ayuda</a> para enterarte de todas las funciones!\n"
 "\n"
@@ -33,19 +33,169 @@ msgid ""
 "Escríbeme por privado en @{2} el comando <code>/alerts</code>.{3}"
 msgstr ""
 
-#: detectivepikachubot.py:977
-msgid "Las incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda."
+#: detectivepikachubot.py:132
+msgid "❌ Ya has iniciado un proceso de validación. Debes completarlo antes de intentar comenzar de nuevo, o esperar 6 horas a que caduque."
 msgstr ""
 
-#: detectivepikachubot.py:985
+#: detectivepikachubot.py:137
+msgid ""
+"⚠ Ya te has validado anteriormente. *No es necesario* que vuelvas a validarte, a no ser que quieras cambiar tu nombre de entrenador, equipo o bajar de nivel. Si solo has subido de nivel, basta con que envíes una captura de pantalla de tu nuevo nivel, sin necesidad de hacer el proceso completo.\n"
+"\n"
+"Si aún así quieres, puedes continuar con el proceso, o sino *espera 6 horas* a que caduque."
+msgstr ""
+
+#: detectivepikachubot.py:147
+msgid ""
+"¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n"
+"\n"
+"_Acabas de iniciar el proceso de validación. Debes completarlo antes de 6 horas, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esas 6 horas._"
+msgstr ""
+
+#: detectivepikachubot.py:162 detectivepikachubot.py:200
+msgid "❌ Este comando solo funciona en canales y grupos"
+msgstr ""
+
+#: detectivepikachubot.py:171
+msgid "❌ Debes pasarme un nombre de zona horaria en inglés, por ejemplo, `America/Montevideo` o `Europe/Madrid`."
+msgstr ""
+
+#: detectivepikachubot.py:181
+msgid "👌 Establecida zona horaria *{0}*."
+msgstr ""
+
+#: detectivepikachubot.py:183
+msgid "🕒 Comprueba que la hora sea correcta: {0}"
+msgstr ""
+
+#: detectivepikachubot.py:185
+msgid "❌ No se ha encontrado ninguna zona horaria válida con ese nombre."
+msgstr ""
+
+#: detectivepikachubot.py:209
+msgid "❌ Debes pasarme por parámetro un alias de grupo o un enlace de `t.me` de un grupo privado, por ejemplo `@pokemongoteruel` o `https://t.me/joinchat/XXXXERK2ZfB3ntXXSiWUx`."
+msgstr ""
+
+#: detectivepikachubot.py:219
+msgid "👌 Establecido grupo de charla a @{0}."
+msgstr ""
+
+#: detectivepikachubot.py:221
+msgid "👌 Establecido grupo de charla a {0}."
+msgstr ""
+
+#: detectivepikachubot.py:225
+msgid "👌 Eliminada la referencia al grupo de charla."
+msgstr ""
+
+#: detectivepikachubot.py:237 detectivepikachubot.py:282
+msgid "❌ Este comando solo funciona en canales y grupos."
+msgstr ""
+
+#: detectivepikachubot.py:249
+msgid "❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro. Por ejemplo: `/spreadsheet https://docs.google.com/spreadsheets/d/XXXxxx`"
+msgstr ""
+
+#: detectivepikachubot.py:254
+msgid "❌ No he reconocido esa URL de Google Docs... `{0}`"
+msgstr ""
+
+#: detectivepikachubot.py:261 detectivepikachubot.py:997
 msgid "No tengo información de este canal. Consulta los errores frecuentes en {0}"
 msgstr ""
 
-#: detectivepikachubot.py:987
+#: detectivepikachubot.py:263 detectivepikachubot.py:999
 msgid "No tengo información de este grupo. Consulta los errores frecuentes en {0}"
 msgstr ""
 
-#: detectivepikachubot.py:1004
+#: detectivepikachubot.py:270
+msgid ""
+"👌 Establecido hoja de cálculo con identificador `{0}`.\n"
+"\n"
+"Debes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos."
+msgstr ""
+
+#: detectivepikachubot.py:295
+msgid "❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/spreadsheet`"
+msgstr ""
+
+#: detectivepikachubot.py:298
+msgid ""
+"🌎 Refrescando lista de gimnasios...\n"
+"\n"
+"_Si no recibes una confirmación tras unos segundos, algo ha ido mal. Este mensaje se borrará en unos segundos._"
+msgstr ""
+
+#: detectivepikachubot.py:310
+msgid "❌ ¡No se permiten más de 3000 gimnasios por grupo!"
+msgstr ""
+
+#: detectivepikachubot.py:313
+msgid "❌ ¡No se han encontrado datos! ¿La hoja de cálculo es pública?"
+msgstr ""
+
+#: detectivepikachubot.py:316
+msgid "❌ ¡No se han podido cargar los gimnasios! La fila {0} no tiene las 4 columnas requeridas."
+msgstr ""
+
+#: detectivepikachubot.py:325
+msgid "❌ ¡No se han podido cargar los gimnasios! El formato de las coordenadas en la fila {0} es incorrecto. Recuerda que deben tener un único separador decimal. Si tienes problemas, elimina el formato de las celdas numéricas."
+msgstr ""
+
+#: detectivepikachubot.py:356
+msgid ""
+"👌 ¡Cargados {0} gimnasios correctamente!\n"
+"⚠️ {1} gimnasios no tienen palabras clave. Recuerda que son obligatorias para que puedan ser encontrados."
+msgstr ""
+
+#: detectivepikachubot.py:358
+msgid "👌 ¡Cargados {0} gimnasios correctamente!"
+msgstr ""
+
+#: detectivepikachubot.py:363
+msgid "🚫 Se ha borrado una alerta que tenías programada para el gimnasio <b>{0}</b> del grupo <b>{1}</b> porque un administrador lo ha borrado o reemplazado por otro con un nombre diferente."
+msgstr ""
+
+#: detectivepikachubot.py:368
+msgid "❌ ¡No se han podido refrescar los gimnasios! Comprueba que no haya dos gimnasios con el mismo nombre."
+msgstr ""
+
+#: detectivepikachubot.py:370
+msgid "❌ ¡No se han podido cargar los gimnasios! ¿Seguro que está en el formato correcto? Ten en cuenta que para que funcione, debe haber al menos 2 gimnasios en el documento."
+msgstr ""
+
+#: detectivepikachubot.py:372
+msgid "❌ Error cargando la hoja de cálculo. ¿Seguro que es pública?"
+msgstr ""
+
+#: detectivepikachubot.py:655
+msgid "El comando `/settings` solo funciona en canales y grupos"
+msgstr ""
+
+#: detectivepikachubot.py:687
+msgid "Cargando preferencias del grupo. Un momento..."
+msgstr ""
+
+#: detectivepikachubot.py:699
+msgid "El comando `/list` solo funciona en canales y grupos"
+msgstr ""
+
+#: detectivepikachubot.py:715
+msgid "No hay gimnasios configurados en este grupo/canal"
+msgstr ""
+
+#: detectivepikachubot.py:717
+msgid "Lista de gimnasios conocidos ({0}):"
+msgstr ""
+
+#: detectivepikachubot.py:722
+msgid "_(El mensaje se ha cortado porque era demasiado largo)_"
+msgstr ""
+
+#: detectivepikachubot.py:989
+msgid "Las incursiones solo funcionan en canales y grupos. Si quieres probarlas, puedes pasarte por @detectivepikachuayuda."
+msgstr ""
+
+#: detectivepikachubot.py:1016
 msgid ""
 "¡Lo siento, pero no puedes crear una incursión si no tienes definido un alias!\n"
 "En Telegram, ve a *Ajustes* y selecciona la opción *Alias* para establecer un alias.\n"
@@ -53,7 +203,7 @@ msgid ""
 "_(Este mensaje se borrará en unos segundos)_"
 msgstr ""
 
-#: detectivepikachubot.py:1009
+#: detectivepikachubot.py:1021
 msgid ""
 "¡Lo siento, pero en este grupo es obligatorio validarse antes de poder crear incursiones o participar en ellas!\n"
 "Abre un privado con @{0} y escribe `/help` para saber cómo puedes validarte.\n"
@@ -61,7 +211,7 @@ msgid ""
 "_(Este mensaje se borrará en unos segundos)_"
 msgstr ""
 
-#: detectivepikachubot.py:1020
+#: detectivepikachubot.py:1032
 msgid ""
 "🤔 {0}\n"
 "\n"
@@ -70,7 +220,7 @@ msgid ""
 "<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:1037
+#: detectivepikachubot.py:1048
 msgid ""
 "❌ {0}No te entiendo. Debes poner los parámetros de la incursión en este orden:\n"
 "`/raid pokemon hora gimnasio`\n"
@@ -84,7 +234,7 @@ msgid ""
 "_(Este mensaje se borrará en unos segundos)_"
 msgstr ""
 
-#: detectivepikachubot.py:1058
+#: detectivepikachubot.py:1069
 msgid ""
 "❌ {0}No he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\n"
 "Recuerda que debes poner los parámetros en este orden:\n"
@@ -101,7 +251,7 @@ msgid ""
 "_(Este mensaje se borrará en unos segundos)_"
 msgstr ""
 
-#: detectivepikachubot.py:1069
+#: detectivepikachubot.py:1080
 msgid ""
 "❌ {0}No he entendido *la hora*. ¿La has puesto bien?\n"
 "Recuerda que debes poner los parámetros de la incursión en este orden:\n"
@@ -116,7 +266,7 @@ msgid ""
 "_(Este mensaje se borrará en unos segundos)_"
 msgstr ""
 
-#: detectivepikachubot.py:1078
+#: detectivepikachubot.py:1089
 msgid ""
 "❌ {0}Si no he entendido mal quieres poner la incursión a las *{1}*, pero ya son las *{2}*. ¿Has puesto bien la hora?\n"
 "\n"
@@ -126,7 +276,7 @@ msgid ""
 "_(Este mensaje se borrará en unos segundos)_"
 msgstr ""
 
-#: detectivepikachubot.py:1090
+#: detectivepikachubot.py:1101
 msgid ""
 "❌ {0}Si no he entendido mal quieres poner la hora de finalización de la incursión a las *{1}*, pero la incursión es a las *{2}*. ¿Has puesto bien la hora de finalización?\n"
 "\n"
@@ -136,11 +286,11 @@ msgid ""
 "_(Este mensaje se borrará en unos segundos)_"
 msgstr ""
 
-#: detectivepikachubot.py:1155
+#: detectivepikachubot.py:1166
 msgid "y la gente que tenga activadas las alertas pueda recibirlas"
 msgstr ""
 
-#: detectivepikachubot.py:1159
+#: detectivepikachubot.py:1170
 msgid ""
 "⚠️ *¡Cuidado!* Parece que el gimnasio que has indicado no se ha reconocido: _{0}_\n"
 "\n"
@@ -151,181 +301,181 @@ msgid ""
 "Si no consigues que reconozca el gimnasio, avisa a un administrador del grupo para que lo configure correctamente."
 msgstr ""
 
-#: detectivepikachubot.py:1169
+#: detectivepikachubot.py:1180
 msgid ""
 "⚠️ *¡Cuidado!* Has creado la incursión para dentro de muy poco tiempo, *solo faltan {0} minutos*. ¿Quizás prefieras cambiarla para más tarde para que se pueda unir más gente? Para hacerlo, pon aquí este comando:\n"
 "\n"
 "`/hora {1} {2}`"
 msgstr ""
 
-#: detectivepikachubot.py:1771
+#: detectivepikachubot.py:1782
 msgid ""
 "No puedes unirte a una incursión si no tienes definido un alias.\n"
 "En Telegram, ve a 'Ajustes' y selecciona la opción 'Alias'."
 msgstr ""
 
-#: detectivepikachubot.py:1776
+#: detectivepikachubot.py:1787
 msgid ""
 "No puedes unirte a una incursión en este grupo si no te has validado antes.\n"
 "Abre un privado con @{0} y escribe '/help' para saber cómo puedes hacerlo."
 msgstr ""
 
-#: detectivepikachubot.py:1783
+#: detectivepikachubot.py:1794
 msgid "¡Apuntado! Si vas con más gente, pulsa +1"
 msgstr ""
 
-#: detectivepikachubot.py:1785
+#: detectivepikachubot.py:1796
 msgid "¡Apuntado correctamente!"
 msgstr ""
 
-#: detectivepikachubot.py:1788
+#: detectivepikachubot.py:1799
 msgid "¡Ya te habías apuntado antes!"
 msgstr ""
 
-#: detectivepikachubot.py:1790 detectivepikachubot.py:1799
+#: detectivepikachubot.py:1801 detectivepikachubot.py:1810
 msgid "Ya no te puedes apuntar a esta incursión"
 msgstr ""
 
-#: detectivepikachubot.py:1792 detectivepikachubot.py:1801
-#: detectivepikachubot.py:1818 detectivepikachubot.py:1833
-#: detectivepikachubot.py:1846 detectivepikachubot.py:1859
-#: detectivepikachubot.py:1876
+#: detectivepikachubot.py:1803 detectivepikachubot.py:1812
+#: detectivepikachubot.py:1829 detectivepikachubot.py:1844
+#: detectivepikachubot.py:1857 detectivepikachubot.py:1870
+#: detectivepikachubot.py:1887
 msgid "La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."
 msgstr ""
 
-#: detectivepikachubot.py:1794
+#: detectivepikachubot.py:1805
 msgid "¡No has podido apuntarte! (Error desconocido)"
 msgstr ""
 
-#: detectivepikachubot.py:1804
+#: detectivepikachubot.py:1815
 msgid "No puedes apuntarte con más de {0} personas. Si quieres borrar personas, pulsa en el botón «Voy»."
 msgstr ""
 
-#: detectivepikachubot.py:1806
+#: detectivepikachubot.py:1817
 msgid "¡Te has apuntado con {0} más! Si sois más, pulsa +1"
 msgstr ""
 
-#: detectivepikachubot.py:1809
+#: detectivepikachubot.py:1820
 msgid "¡No has podido apuntarte con más gente! (Error desconocido)"
 msgstr ""
 
-#: detectivepikachubot.py:1813
+#: detectivepikachubot.py:1824
 msgid "Te has desapuntado de la incursión"
 msgstr ""
 
-#: detectivepikachubot.py:1816
+#: detectivepikachubot.py:1827
 msgid "Ya no te puedes desapuntar de esta incursión"
 msgstr ""
 
-#: detectivepikachubot.py:1820
+#: detectivepikachubot.py:1831
 msgid "¡Ya te habías desapuntado antes! Si te has equivocado, pulsa en «Voy»."
 msgstr ""
 
-#: detectivepikachubot.py:1822
+#: detectivepikachubot.py:1833
 msgid "¡No has podido desapuntarte! Error desconocido"
 msgstr ""
 
-#: detectivepikachubot.py:1826
+#: detectivepikachubot.py:1837
 msgid "Has marcardo que has llegado a la incursión"
 msgstr ""
 
-#: detectivepikachubot.py:1829
+#: detectivepikachubot.py:1840
 msgid "¡Ya habías marcado antes que estás! Si te has equivocado, pulsa en «voy»."
 msgstr ""
 
-#: detectivepikachubot.py:1831
+#: detectivepikachubot.py:1842
 msgid "Ya no puedes marcar que estás en esta incursión"
 msgstr ""
 
-#: detectivepikachubot.py:1835
+#: detectivepikachubot.py:1846
 msgid "¡No has podido marcar como llegado! (Error desconocido)"
 msgstr ""
 
-#: detectivepikachubot.py:1839
+#: detectivepikachubot.py:1850
 msgid "Has marcardo que llegarás tarde a la incursión"
 msgstr ""
 
-#: detectivepikachubot.py:1842
+#: detectivepikachubot.py:1853
 msgid "¡Ya habías marcado que llegas tarde! Si te has equivocado, pulsa en «voy»."
 msgstr ""
 
-#: detectivepikachubot.py:1844
+#: detectivepikachubot.py:1855
 msgid "Ya no puedes decir que has llegado tarde a esta incursión"
 msgstr ""
 
-#: detectivepikachubot.py:1848
+#: detectivepikachubot.py:1859
 msgid "¡No has podido marcar como que llegas tarde! (Error desconocido)"
 msgstr ""
 
-#: detectivepikachubot.py:1852
+#: detectivepikachubot.py:1863
 msgid "¿Lo has capturado? ¡Enhorabuena!"
 msgstr ""
 
-#: detectivepikachubot.py:1855
+#: detectivepikachubot.py:1866
 msgid "¡Ya habías marcado que lo has capturado!"
 msgstr ""
 
-#: detectivepikachubot.py:1857
+#: detectivepikachubot.py:1868
 msgid "Ya no puedes marcar que has capturado este Pokémon."
 msgstr ""
 
-#: detectivepikachubot.py:1861
-msgid "No pudes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión."
-msgstr ""
-
-#: detectivepikachubot.py:1863
-msgid "No puedes marcar que has capturado este Pokémon porque no te habías apuntado a la incursión."
-msgstr ""
-
-#: detectivepikachubot.py:1869
-msgid "¿Se te ha escapado? ¡Lo siento!"
-msgstr ""
-
 #: detectivepikachubot.py:1872
-msgid "¡Ya habías marcado antes que se te ha escapado!"
+msgid "No puedes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión."
 msgstr ""
 
 #: detectivepikachubot.py:1874
-msgid "Ya no puedes marcar que se te ha escapado este Pokémon."
-msgstr ""
-
-#: detectivepikachubot.py:1878
-msgid "No pudes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión."
+msgid "No puedes marcar que has capturado este Pokémon porque no te habías apuntado a la incursión."
 msgstr ""
 
 #: detectivepikachubot.py:1880
-msgid "No puedes marcar que se te ha escapado este Pokémon porque no te habías apuntado a la incursión."
+msgid "¿Se te ha escapado? ¡Lo siento!"
 msgstr ""
 
-#: detectivepikachubot.py:1882
-msgid "¡No has podido marcar que se te ha escapado! (Error desconocido)"
+#: detectivepikachubot.py:1883
+msgid "¡Ya habías marcado antes que se te ha escapado!"
+msgstr ""
+
+#: detectivepikachubot.py:1885
+msgid "Ya no puedes marcar que se te ha escapado este Pokémon."
 msgstr ""
 
 #: detectivepikachubot.py:1889
+msgid "No puedes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión."
+msgstr ""
+
+#: detectivepikachubot.py:1891
+msgid "No puedes marcar que se te ha escapado este Pokémon porque no te habías apuntado a la incursión."
+msgstr ""
+
+#: detectivepikachubot.py:1893
+msgid "¡No has podido marcar que se te ha escapado! (Error desconocido)"
+msgstr ""
+
+#: detectivepikachubot.py:1900
 msgid "Error actualizando incursión"
 msgstr ""
 
-#: detectivepikachubot.py:1901
+#: detectivepikachubot.py:1912
 msgid "🌎 Te envío la ubicación por privado"
 msgstr ""
 
-#: detectivepikachubot.py:1903
+#: detectivepikachubot.py:1914
 msgid "Cuando pulsas el botón de Ubicación, se envía un mensaje privado con la ubicación. Comprueba tu lista de conversaciones."
 msgstr ""
 
-#: detectivepikachubot.py:1905 detectivepikachubot.py:1909
+#: detectivepikachubot.py:1916 detectivepikachubot.py:1920
 msgid "La ubicación es desconocida"
 msgstr ""
 
-#: detectivepikachubot.py:1907
+#: detectivepikachubot.py:1918
 msgid "Para que te pueda enviar la ubicación, debes abrir un privado antes con @{0} y pulsar en «Iniciar»"
 msgstr ""
 
-#: detectivepikachubot.py:1916
+#: detectivepikachubot.py:1927
 msgid "Solo puede seleccionar las opciones de la incursión el usuario que la está creando."
 msgstr ""
 
-#: detectivepikachubot.py:1932
+#: detectivepikachubot.py:1943
 msgid ""
 "🤔 {0}\n"
 "\n"
@@ -334,7 +484,7 @@ msgid ""
 "<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:1935
+#: detectivepikachubot.py:1946
 msgid ""
 "🤔 {0}\n"
 "\n"
@@ -343,7 +493,7 @@ msgid ""
 "<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:1950
+#: detectivepikachubot.py:1961
 msgid ""
 "🤔 {0}\n"
 "\n"
@@ -352,7 +502,7 @@ msgid ""
 "<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:1967 detectivepikachubot.py:1995
+#: detectivepikachubot.py:1978 detectivepikachubot.py:2006
 msgid ""
 "🤔 {0}\n"
 "\n"
@@ -361,7 +511,7 @@ msgid ""
 "<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:1969
+#: detectivepikachubot.py:1980
 msgid ""
 "🤔 {0}\n"
 "\n"
@@ -370,7 +520,7 @@ msgid ""
 "<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:1983
+#: detectivepikachubot.py:1994
 msgid ""
 "🤔 {0}\n"
 "\n"
@@ -379,7 +529,7 @@ msgid ""
 "<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:2011
+#: detectivepikachubot.py:2022
 msgid ""
 "🤔 {0}\n"
 "\n"
@@ -388,35 +538,300 @@ msgid ""
 "<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>"
 msgstr ""
 
-#: detectivepikachubot.py:2037 detectivepikachubot.py:2043
-#: detectivepikachubot.py:2054 detectivepikachubot.py:2081
-#: detectivepikachubot.py:2092 detectivepikachubot.py:2116
-#: detectivepikachubot.py:2134 detectivepikachubot.py:2154
-#: detectivepikachubot.py:2177
+#: detectivepikachubot.py:2048 detectivepikachubot.py:2054
+#: detectivepikachubot.py:2065 detectivepikachubot.py:2092
+#: detectivepikachubot.py:2103 detectivepikachubot.py:2127
+#: detectivepikachubot.py:2145 detectivepikachubot.py:2165
+#: detectivepikachubot.py:2188
 msgid "Solo los administradores del grupo pueden configurar el bot"
 msgstr ""
 
-#: detectivepikachubot.py:2061
+#: detectivepikachubot.py:2072
 msgid "Al desactivar las ubicaciones, se han desactivado también automáticamente las alertas."
 msgstr ""
 
-#: detectivepikachubot.py:2064
+#: detectivepikachubot.py:2075
 msgid "Al desactivar los botones +1 por equipo, se ha desactivado también automáticamente la visualización de +1 disgregados por línea en las opciones de vista."
 msgstr ""
 
-#: detectivepikachubot.py:2069
+#: detectivepikachubot.py:2080
 msgid "Al activar las alertas, se han activado también automáticamente las ubicaciones."
 msgstr ""
 
-#: detectivepikachubot.py:2072
+#: detectivepikachubot.py:2083
 msgid "Al activar la visualización de +1 disagregados en línea, se han activado también automáticamente los botones +1 por equipo."
 msgstr ""
 
-#: detectivepikachubot.py:2075
+#: detectivepikachubot.py:2086
 msgid "Al activar los botones +1 por cada equipo, se ha activado también automáticamente el botón «+1» con un máximo por defecto de 5 acompañantes."
 msgstr ""
 
-#: detectivepikachubot.py:2110
+#: detectivepikachubot.py:2121
 msgid "Al desactivar el botón +1, se han desactivado también los botones +1 por equipo y la visualización de +1 disgregados por línea automáticamente."
+msgstr ""
+
+#: supportmethods.py:564
+msgid "🎈 *Reflotar incursión*: `/reflotar`"
+msgstr ""
+
+#: supportmethods.py:568
+msgid "❌ *Borrar incursión*: `/borrar`"
+msgstr ""
+
+#: supportmethods.py:584
+msgid ""
+"Puedes editar la incursión {0} {1}a las *{2}* en *{3}* (identificador `{4}`) contestando al mensaje de la incursión con los siguientes comandos:\n"
+"\n"
+"🕒 *Día/hora*: `/hora {5}{6}`\n"
+"🕒 *Hora a la que desaparece*: `/horafin {7}`\n"
+"🌎 *Gimnasio*: `/gimnasio {8}`\n"
+"👿 *Pokémon/nivel*: `/pokemon {9}`\n"
+"\n"
+"🚫 *Cancelar incursión*: `/cancelar`{10}{11}"
+msgstr ""
+
+#: supportmethods.py:645 supportmethods.py:647
+msgid "Permitir configurar alertas"
+msgstr ""
+
+#: supportmethods.py:649 supportmethods.py:651
+msgid "Mostrar totales disgregados"
+msgstr ""
+
+#: supportmethods.py:653 supportmethods.py:655
+msgid "Mostrar «+1» disgregados por línea"
+msgstr ""
+
+#: supportmethods.py:657 supportmethods.py:659
+msgid "Botón «Tardo»"
+msgstr ""
+
+#: supportmethods.py:661 supportmethods.py:663
+msgid "Reflotar incursiones (comando /reflotar)"
+msgstr ""
+
+#: supportmethods.py:665 supportmethods.py:667
+msgid "Borrar incursiones (comando /borrar)"
+msgstr ""
+
+#: supportmethods.py:669 supportmethods.py:671
+msgid "Botones «¡Lo tengo!»"
+msgstr ""
+
+#: supportmethods.py:673 supportmethods.py:675
+msgid "Ubicaciones"
+msgstr ""
+
+#: supportmethods.py:677 supportmethods.py:679
+msgid "Validación obligatoria"
+msgstr ""
+
+#: supportmethods.py:681 supportmethods.py:683
+msgid "Consultar gimnasios (comando /gym)"
+msgstr ""
+
+#: supportmethods.py:685 supportmethods.py:687
+msgid "Crear incursiones (comando /raid)"
+msgstr ""
+
+#: supportmethods.py:689 supportmethods.py:691
+msgid "Ordenar zonas/gimnasios por actividad"
+msgstr ""
+
+#: supportmethods.py:693 supportmethods.py:695
+msgid "Modo niñero (borra mensajes)"
+msgstr ""
+
+#: supportmethods.py:697 supportmethods.py:699
+msgid "Mostrar horas en formato AM/PM"
+msgstr ""
+
+#: supportmethods.py:701 supportmethods.py:703
+msgid "Agrupar apuntados por nivel/equipo"
+msgstr ""
+
+#: supportmethods.py:705
+msgid "Botón «+1» (máx. 1 acompañante)"
+msgstr ""
+
+#: supportmethods.py:707
+msgid "Botón «+1» (máx. {0} acompañantes)"
+msgstr ""
+
+#: supportmethods.py:709
+msgid "Botón «+1»"
+msgstr ""
+
+#: supportmethods.py:711 supportmethods.py:713
+msgid "Botón «+1» por cada equipo"
+msgstr ""
+
+#: supportmethods.py:715
+msgid "Marcar apuntados tarde (1 minuto)"
+msgstr ""
+
+#: supportmethods.py:717
+msgid "Marcar apuntados tarde ({0} minutos)"
+msgstr ""
+
+#: supportmethods.py:719
+msgid "Marcar apuntados tarde"
+msgstr ""
+
+#: supportmethods.py:721
+msgid "Reflotar automático ({0} minutos)"
+msgstr ""
+
+#: supportmethods.py:723
+msgid "Reflotar automático"
+msgstr ""
+
+#: supportmethods.py:725
+msgid "Ranking semanal (TOP {0})"
+msgstr ""
+
+#: supportmethods.py:727
+msgid "Ranking semanal"
+msgstr ""
+
+#: supportmethods.py:729
+msgid "Ranking mensual (TOP {0})"
+msgstr ""
+
+#: supportmethods.py:731
+msgid "Ranking mensual"
+msgstr ""
+
+#: supportmethods.py:733 supportmethods.py:735
+msgid "Publicar automáticamente"
+msgstr ""
+
+#: supportmethods.py:737
+msgid "Tema de iconos"
+msgstr ""
+
+#: supportmethods.py:740
+msgid "Comandos disponibles para usuarios »"
+msgstr ""
+
+#: supportmethods.py:740
+msgid "Funcionamiento de incursiones »"
+msgstr ""
+
+#: supportmethods.py:740
+msgid "Funcionamiento de rankings »"
+msgstr ""
+
+#: supportmethods.py:740
+msgid "Funcionamiento del grupo/canal »"
+msgstr ""
+
+#: supportmethods.py:740
+msgid "Opciones de vista de incursiones »"
+msgstr ""
+
+#: supportmethods.py:742 supportmethods.py:744 supportmethods.py:746
+#: supportmethods.py:748 supportmethods.py:750
+msgid "« Menú principal"
+msgstr ""
+
+#: supportmethods.py:769
+msgid "EX"
+msgstr ""
+
+#: supportmethods.py:769
+msgid "Niv. 3"
+msgstr ""
+
+#: supportmethods.py:769
+msgid "Niv. 4"
+msgstr ""
+
+#: supportmethods.py:769
+msgid "Niv. 5"
+msgstr ""
+
+#: supportmethods.py:770 supportmethods.py:787 supportmethods.py:790
+#: supportmethods.py:792 supportmethods.py:794 supportmethods.py:812
+#: supportmethods.py:837 supportmethods.py:898 supportmethods.py:900
+#: supportmethods.py:931
+msgid "Cancelar"
+msgstr ""
+
+#: supportmethods.py:830 supportmethods.py:832 supportmethods.py:834
+msgid "Día %d"
+msgstr ""
+
+#: supportmethods.py:894
+msgid "+{0} minutos >"
+msgstr ""
+
+#: supportmethods.py:897
+msgid "< {0} minutos"
+msgstr ""
+
+#: supportmethods.py:931
+msgid "No sé / no poner"
+msgstr ""
+
+#: supportmethods.py:942
+msgid "Voy"
+msgstr ""
+
+#: supportmethods.py:943
+msgid "No voy"
+msgstr ""
+
+#: supportmethods.py:944
+msgid "Estoy"
+msgstr ""
+
+#: supportmethods.py:945 supportmethods.py:946 supportmethods.py:947
+#: supportmethods.py:948
+msgid "+1"
+msgstr ""
+
+#: supportmethods.py:949
+msgid "Tardo"
+msgstr ""
+
+#: supportmethods.py:950
+msgid "Ubicación"
+msgstr ""
+
+#: supportmethods.py:951
+msgid "Ubi"
+msgstr ""
+
+#: supportmethods.py:979
+msgid "¡Ha escapado!"
+msgstr ""
+
+#: supportmethods.py:979
+msgid "¡Lo tengo!"
+msgstr ""
+
+#: supportmethods.py:993
+msgid "Elige una categoría para ver las opciones disponibles. Cuando termines, pulsa el botón <b>Terminado</b> para borrar el mensaje."
+msgstr ""
+
+#: supportmethods.py:995
+msgid "Estas opciones permiten cambiar la forma en la que se muestran los listados de las incursiones."
+msgstr ""
+
+#: supportmethods.py:997
+msgid "Estas opciones definen qué comandos pueden utilizar los usuarios que no son administradores. Los administradores siempre pueden utilizarlos igualmente."
+msgstr ""
+
+#: supportmethods.py:999
+msgid "Estas opciones permiten configurar características opcionales de las incursiones."
+msgstr ""
+
+#: supportmethods.py:1001
+msgid "Estas opciones son muy importantes porque definen el funcionamiento general del bot en el grupo/canal. Revisa la ayuda en caso de duda."
+msgstr ""
+
+#: supportmethods.py:1003
+msgid "Estas opciones definen el comportamiento de los rankings del bot en el grupo/canal."
 msgstr ""
 
