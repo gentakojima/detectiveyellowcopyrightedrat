@@ -1858,7 +1858,7 @@ def raidbutton(bot, update):
             elif result == "not_raid":
                 bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
             elif result == "not_going":
-                bot.answerCallbackQuery(text=_("No pudes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
+                bot.answerCallbackQuery(text=_("No puedes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
             elif result == "not_now":
                 bot.answerCallbackQuery(text=_("No puedes marcar que has capturado este Pokémon porque no te habías apuntado a la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
             else:
@@ -1875,7 +1875,7 @@ def raidbutton(bot, update):
             elif result == "not_raid":
                 bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
             elif result == "not_going":
-                bot.answerCallbackQuery(text=_("No pudes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
+                bot.answerCallbackQuery(text=_("No puedes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
             elif result == "not_now":
                 bot.answerCallbackQuery(text=_("No puedes marcar que se te ha escapado este Pokémon porque no te habías apuntado a la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
             else:

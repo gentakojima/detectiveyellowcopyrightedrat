@@ -59,6 +59,7 @@ CREATE TABLE `grupos` (
   `rankingweek` TINYINT NOT NULL DEFAULT '10',
   `rankingmonth` TINYINT NOT NULL DEFAULT '15',
   `rankingauto` TINYINT NOT NULL DEFAULT '0',
+  `language` VARCHAR(6) NOT NULL DEFAULT 'es_ES',
   `banned` TINYINT NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -99,6 +100,7 @@ CREATE TABLE `usuarios` (
   `banned` tinyint(4) NOT NULL DEFAULT '0',
   `trainername` varchar(20) DEFAULT NULL,
   `validation` enum('none','oak','internal') NOT NULL DEFAULT 'none',
+  `language` VARCHAR(6) NOT NULL DEFAULT 'es_ES',
   `validation_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
