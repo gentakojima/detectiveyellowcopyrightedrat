@@ -32,6 +32,12 @@ You must load the timezone info into the `mysql` schema. This is usually done by
 
 After all that hard work, you should be up and running!
 
+## Contributing
+
+Notify errors and ask for new features in the issue tracker. You can also propose changes by sending pull requests directly to master.
+
+To contribute to translations go to [the Telegram help group](https://t.me/detectivepikachuayuda) to say hi and [request access to the Poeditor platform](https://poeditor.com/join/project/ptifyZlsJv). Translations are not automatically synced from Poeditor, and translating them by pull request in Github could end up in duplicated efforts.
+
 ## License
 
 Copyright (C) 2017 Jorge Suárez de Lis <hey@gentakojima.me>
