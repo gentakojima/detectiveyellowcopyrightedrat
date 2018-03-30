@@ -25,6 +25,7 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
    8. [Otros comandos exclusivos para administradores](#otros-comandos-exclusivos-para-administradores)
 3. [Política de tramposos](#política-de-tramposos)
 4. [Protección de datos](#protección-de-datos)
+5. [Problemas frecuentes](#problemas-frecuentes)
 
 ## Ayuda para entrenadores ##
 
@@ -382,3 +383,17 @@ Estos datos son necesarios para el correcto funcionamiento del bot y no son comp
 En caso de querer eliminar los datos almacenados en el fichero automatizado, se debe enviar un correo a `validations@detectivepik.ac` indicándolo. El bot guardará el identificador numérico de Telegram junto con una marca que indica este deseo. En este caso, no será posible utilizar el bot y el estado de la cuenta aparecerá como **baneada**.
 
 El bot también almacena unos ficheros no ordenados con las interacciones en grupos y directas con el bot en los últimos 60 días (*logs*), con el objetivo de poder trazar problemas técnicos y atender a las apelaciones de baneo.
+
+# Problemas frecuentes #
+
+## Error: No hay información sobre el grupo ##
+
+El bot debe saludar al entrar en un grupo. Hasta que lo haga, no se creará la información necesaria para que funcione.
+
+Si has convertido el grupo en supergrupo, a efectos del bot es **un grupo diferente** y debes echarlo y volverlo a meter para que vuelva a saludar y crear la información necesaria. Ten en cuenta que al convertir un grupo en supergrupo, se perderán todas las configuraciones realizadas y las incursiones antiguas dejarán de funcionar.
+
+**Nota**: Echar al bot y volverlo a meter en un grupo o un supergrupo ya configurados no hace que se borre la información configurada ni dejarán de funcionar las incursiones.
+
+## Error: No hay información sobre el canal ##
+
+En los canales, se debe configurar el bot al menos una vez con `/settings` para que se cree la información necesaria, ya que no saluda el entrar a un canal.

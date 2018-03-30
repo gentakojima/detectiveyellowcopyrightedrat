@@ -34,6 +34,8 @@ from skimage.measure import compare_ssim as ssim
 from unidecode import unidecode
 import googlemaps
 import math
+import gettext
+from gettext import gettext as _
 
 from config import config
 from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, getZones, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace, getGroupTimezoneOffsetFromServer, getCurrentPokemons, getCurrentGyms, removeIncompleteRaids, getAutorankingGroups, getRanking, getCachedRanking, saveCachedRanking
@@ -1479,3 +1481,18 @@ def ranking_time_periods(tz):
         lastmonth_start = lastmonth_start - timedelta(days=28) # FIXME leap year
     lastmonth_end = now.replace(hour=23,minute=59) - timedelta(days=now.day)
     return (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end)
+
+available_languages = {}
+available_languages["gl_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["gl_ES"], fallback=True)
+available_languages["ca_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ca_ES"], fallback=True)
+available_languages["it_IT"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["it_IT"], fallback=True)
+available_languages["ast_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ast_ES"], fallback=True)
+available_languages["pt_PT"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["pt_PT"], fallback=True)
+available_languages["en_US"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["en_US"], fallback=True)
+
+def set_language(lang):
+    if lang in available_languages.keys():
+        available_languages[lang].install()
+        return True
+    else:
+        return False
