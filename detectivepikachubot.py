@@ -1065,7 +1065,7 @@ def raid(bot, update, args=None):
 
     (current_raid["pokemon"], current_raid["egg"]) = parse_pokemon(args[0])
     if current_raid["pokemon"] is None and current_raid["egg"] is None:
-        sent_message = bot.sendMessage(chat_id=chat_id, text=_("❌ {0}No he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n`/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`%{1}`\n\n_(Este mensaje se borrará en unos segundos)_").format(user_text, text), parse_mode=telegram.ParseMode.MARKDOWN)
+        sent_message = bot.sendMessage(chat_id=chat_id, text=_("❌ {0}No he entendido *el Pokémon* o *el huevo*. ¿Lo has escrito bien?\nRecuerda que debes poner los parámetros en este orden:\n`/raid pokemon hora gimnasio`\n\nEjemplos:\n`/raid pikachu 12:00 la lechera`\n`/raid N5 12:00 la alameda`\n`/raid EX 11/12:00 fuente vieja`\n\nEl mensaje original era:\n`{1}`\n\n_(Este mensaje se borrará en unos segundos)_").format(user_text, text), parse_mode=telegram.ParseMode.MARKDOWN)
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 20, bot)).start()
         return
 

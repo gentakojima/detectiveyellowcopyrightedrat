@@ -503,13 +503,13 @@ def ranking_text(group, startdate, enddate, type="week"):
             group_text = "<i>(Grupo sin nombre guardado)</i>"
     # Prepare output
     if type == "month":
-        months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+        months = [_("enero"), _("febrero"), _("marzo"), _("abril"), _("mayo"), _("junio"), _("julio"), _("agosto"), _("septiembre"), _("octubre"), _("noviembre"), _("diciembre")]
         month_text = "%s" % months[startdate.month-1]
-        output = "TOP %s de participación en incursiones del <b>mes de %s</b> en %s" % (group["rankingmonth"],month_text,group_text)
+        output = _("TOP {0} de participación en incursiones del <b>mes de {1}</b> en {2}").format(group["rankingmonth"], month_text, group_text)
         maxposition = group["rankingmonth"]
     else:
         daymonth_text = "%s/%s" % (startdate.day, startdate.month)
-        output = "TOP %s de participación en incursiones de la <b>semana del %s</b> en %s" % (group["rankingweek"],daymonth_text,group_text)
+        output = _("TOP {0} de participación en incursiones de la <b>semana del {1}</b> en {2}").format(group["rankingweek"], daymonth_text, group_text)
         maxposition = group["rankingweek"]
     position = 0
     counter = 0
