@@ -280,7 +280,7 @@ def getAutorankingGroups():
     db = getDbConnection()
     logging.debug("storagemethods:autorankingGroupsPending")
     with db.cursor() as cursor:
-        sql = "SELECT DISTINCT grupos.id AS id, title, alias, rankingweek, rankingmonth, icontheme, timezone \
+        sql = "SELECT DISTINCT grupos.id AS id, title, alias, rankingweek, rankingmonth, icontheme, timezone, language \
             FROM rankings \
             RIGHT JOIN grupos ON grupos.id = rankings.grupo_id \
             WHERE rankingauto = 1 AND banned = 0;"

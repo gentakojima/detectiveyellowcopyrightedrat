@@ -51,7 +51,6 @@ import random
 from Levenshtein import distance
 import html
 import gettext
-from gettext import gettext as _
 
 from config import config
 from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, closeRaid, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getRanking, getRemovedAlerts, getCurrentGyms, getCachedRanking, saveCachedRanking, resetCachedRanking
@@ -70,7 +69,10 @@ if not os.path.exists(logdir):
 logging.basicConfig(filename=logdir+'/debug.log', format='%(asctime)s %(message)s', level=logging.DEBUG)
 logging.info("--------------------- Starting bot! -----------------------")
 
-updater = Updater(token=config["telegram"]["token"], workers=6)
+# Set default language
+set_language("es_ES")
+
+updater = Updater(token=config["telegram"]["token"], workers=10)
 dispatcher = updater.dispatcher
 dispatcher.add_error_handler(error_callback)
 
@@ -89,7 +91,10 @@ def start(bot, update):
             pass
     else:
         user = getUser(chat_id)
-        set_language(user["language"])
+        if user is not None:
+            set_language(user["language"])
+        else:
+            set_language("es_ES")
         deletion_text = ""
     sent_message = bot.sendMessage(chat_id=update.message.chat_id, text=_("📖 ¡Echa un vistazo a <a href='{0}'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nEscríbeme por privado en @{1} el comando <code>/register</code>. En vez de eso, puedes preguntar <code>quién soy?</code> a @profesoroak_bot y reenviarme su respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @{2} el comando <code>/alerts</code>.{3}").format(config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"], deletion_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
     if chat_type != "private":
@@ -124,7 +129,10 @@ def register(bot, update):
         return
 
     user = getUser(user_id)
-    set_language(user["language"])
+    if user is not None:
+        set_language(user["language"])
+    else:
+        set_language("es_ES")
 
     validation = getCurrentValidation(user_id)
     logging.debug(validation)
@@ -159,6 +167,8 @@ def settimezone(bot, update, args=None):
         return
 
     if chat_type == "private":
+        user = getUser(user_id)
+        set_language(user["language"])
         bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos"))
         return
 
@@ -167,13 +177,15 @@ def settimezone(bot, update, args=None):
     except:
         pass
 
+    group = getGroup(chat_id)
+    set_language(group["language"])
+
     if args is None or len(args)!=1 or len(args[0])<3 or len(args[0])>60:
         bot.sendMessage(chat_id=chat_id, text=_("❌ Debes pasarme un nombre de zona horaria en inglés, por ejemplo, `America/Montevideo` o `Europe/Madrid`."), parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     tz = searchTimezone(args[0])
     if tz is not None:
-        group = getGroup(chat_id)
         group["timezone"] = tz["name"]
         group["title"] = chat_title
         group["alias"] = group_alias
@@ -197,6 +209,8 @@ def settalkgroup(bot, update, args=None):
         return
 
     if chat_type == "private":
+        user = getUser(user_id)
+        set_language(user["language"])
         bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos"))
         return
 
@@ -205,11 +219,13 @@ def settalkgroup(bot, update, args=None):
     except:
         pass
 
+    group = getGroup(chat_id)
+    set_language(group["language"])
+
     if args is None or len(args)!=1 or (args[0] != "-" and (len(args[0])<3 or len(args[0])>60 or re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$|https://t\.me/joinchat/[a-zA-Z0-9_]+$",args[0]) is None) ):
         bot.sendMessage(chat_id=chat_id, text=_("❌ Debes pasarme por parámetro un alias de grupo o un enlace de `t.me` de un grupo privado, por ejemplo `@pokemongoteruel` o `https://t.me/joinchat/XXXXERK2ZfB3ntXXSiWUx`."), parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
-    group = getGroup(chat_id)
     group["alias"] = group_alias
     if args[0] != "-":
         group["title"] = chat_title
@@ -234,6 +250,8 @@ def setspreadsheet(bot, update, args=None):
         group_alias = message.chat.username
 
     if chat_type == "private":
+        user = getUser(user_id)
+        set_language(user["language"])
         bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos."))
         return
 
@@ -245,6 +263,17 @@ def setspreadsheet(bot, update, args=None):
     except:
         pass
 
+    group = getGroup(chat_id)
+    if group is None:
+        if chat_type == "channel":
+            bot.sendMessage(chat_id=chat_id, text=_("No tengo información de este canal. Consulta los errores frecuentes en {0}").format(config["telegram"]["bothelp"]), parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            bot.sendMessage(chat_id=chat_id, text=_("No tengo información de este grupo. Consulta los errores frecuentes en {0}").format(config["telegram"]["bothelp"]), parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+    else:
+        group = getGroup(chat_id)
+        set_language(group["language"])
+
     if args is None or len(args)!=1:
         bot.sendMessage(chat_id=chat_id, text=_("❌ Debes pasarme la URL de la Google Spreadsheet como un único parámetro. Por ejemplo: `/spreadsheet https://docs.google.com/spreadsheets/d/XXXxxx`"))
         return
@@ -254,15 +283,6 @@ def setspreadsheet(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text=_("❌ No he reconocido esa URL de Google Docs... `{0}`").format(args[0]))
     else:
         spreadsheet_id = m.group(1)
-        group = getGroup(chat_id)
-
-        if group is None:
-            if chat_type == "channel":
-                bot.sendMessage(chat_id=chat_id, text=_("No tengo información de este canal. Consulta los errores frecuentes en {0}").format(config["telegram"]["bothelp"]), parse_mode=telegram.ParseMode.MARKDOWN)
-            else:
-                bot.sendMessage(chat_id=chat_id, text=_("No tengo información de este grupo. Consulta los errores frecuentes en {0}").format(config["telegram"]["bothelp"]), parse_mode=telegram.ParseMode.MARKDOWN)
-            return
-
         group["title"] = chat_title
         group["spreadsheet"] = spreadsheet_id
         group["alias"] = group_alias
@@ -279,6 +299,8 @@ def refresh(bot, update, args=None):
         group_alias = message.chat.username
 
     if chat_type == "private":
+        user = getUser(user_id)
+        set_language(user["language"])
         bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos."))
         return
 
@@ -291,6 +313,7 @@ def refresh(bot, update, args=None):
         pass
 
     grupo = getGroup(chat_id)
+    set_language(grupo["language"])
     if grupo is None or grupo["spreadsheet"] is None:
         bot.sendMessage(chat_id=chat_id, text=_("❌ Debes configurar primero la hoja de cálculo de las ubicaciones con el comando `/spreadsheet`"), parse_mode=telegram.ParseMode.MARKDOWN)
         return
@@ -387,6 +410,7 @@ def registerOak(bot, update):
     if isBanned(user_id):
         return
 
+    user = getUser(user_id)
     m = re.search("@?([a-zA-Z0-9]+), eres (Rojo|Azul|Amarillo) L([0-9]{1,2})[ .]",text, flags=re.IGNORECASE)
     if m is not None:
         if forward_id == 201760961:
@@ -401,7 +425,10 @@ def registerOak(bot, update):
                         thisuser["level"] = m.group(3)
                         thisuser["username"] = user_username
                         thisuser["trainername"] = m.group(1)
-                        user = getUser(user_id)
+                        if user is not None:
+                            thisuser["language"] = user["language"]
+                        else:
+                            thisuser["language"] = "es_ES"
                         if user is not None and user["validation"] == "internal":
                             thisuser["validation"] = "internal"
                         else:
@@ -459,10 +486,15 @@ def processMessage(bot, update):
     if isBanned(user_id) or isBanned(chat_id):
         return
 
+    user = getUser(user_id)
+    if user is not None:
+        set_language(user["language"])
+    else:
+        set_language("es_ES")
+
     if chat_type == "private":
         # Are we in a validation process?
         validation = getCurrentValidation(user_id)
-        user = getUser(user_id)
         if validation is not None:
             # Expecting username
             if validation["step"] == "waitingtrainername" and text is not None:
@@ -688,6 +720,13 @@ def settings(bot, update):
     Thread(target=update_settings_message_timed, args=(chat_id, 1, bot)).start()
 
 @run_async
+def setlanguage(bot, update):
+    logging.debug("detectivepikachubot:setlanguage: %s %s" % (bot, update))
+    (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
+    chat_title = message.chat.title
+    pass
+
+@run_async
 def list(bot, update):
     logging.debug("detectivepikachubot:list: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
@@ -733,22 +772,28 @@ def raids(bot, update):
         delete_message(chat_id, message.message_id, bot)
         return
 
+    user = getUser(user_id)
+    if user is not None:
+        set_language(user["language"])
+    else:
+        set_language("es_ES")
+
     raids = getActiveRaidsforUser(user_id)
     if len(raids) > 0:
-        output = "🐲 Estas son las incursiones activas en los grupos en los que participas activamente:\n"
+        output = _("🐲 Estas son las incursiones activas en los grupos en los que participas activamente:\n")
         for r in raids:
             creador = getCreadorRaid(r["id"])
             group = getGrupoRaid(r["id"])
             gym_emoji = created_text = identifier_text = ""
             if group["alias"] is not None:
-                incursion_text = "<a href='https://t.me/%s/%s'>Incursión</a>" % (group["alias"], r["message"])
-                group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], html.escape(group["title"]))
+                incursion_text = _("<a href='https://t.me/{0}/{1}'>Incursión</a>").format(group["alias"], r["message"])
+                group_text =  _("<a href='https://t.me/{0}'>{1}</a>").format(group["alias"], html.escape(group["title"]))
             else:
-                incursion_text = "Incursión"
+                incursion_text = _("Incursión")
                 try:
                     group_text = "<i>%s</i>" % (html.escape(group["title"]))
                 except:
-                    group_text = "<i>(Grupo sin nombre guardado)</i>"
+                    group_text = _("<i>(Grupo sin nombre guardado)</i>")
             if group["locations"] == 1:
                 if "gimnasio_id" in r.keys() and r["gimnasio_id"] is not None:
                     gym_emoji="🌎"
@@ -757,7 +802,7 @@ def raids(bot, update):
             if r["pokemon"] is not None:
                 what_text = "<b>%s</b>" % r["pokemon"]
             else:
-                what_text= r["egg"].replace("N","<b>Nivel ").replace("EX","<b>EX") + "</b>"
+                what_text= r["egg"].replace("N",_("<b>Nivel") + " ").replace("EX",_("<b>EX")) + "</b>"
             what_day = format_text_day(r["timeraid"], group["timezone"], "html")
             if creador["username"] is not None:
                 created_text = " por @%s" % (creador["username"])
@@ -769,10 +814,10 @@ def raids(bot, update):
                 raid_emoji = "💥"
             else:
                 continue
-            text = "\n%s %s %sa las <b>%s</b> en %s<b>%s</b>%s%s - %s en %s" % (raid_emoji, what_text, what_day, extract_time(r["timeraid"]), gym_emoji, r["gimnasio_text"], created_text, identifier_text, incursion_text, group_text)
+            text = _("\n{0} {1} {2}a las <b>{3}</b> en {4}<b>{5}</b>{6}{7} - {8} en {9}").format(raid_emoji, what_text, what_day, extract_time(r["timeraid"]), gym_emoji, r["gimnasio_text"], created_text, identifier_text, incursion_text, group_text)
             output = output + text
     else:
-        output = "🐲 No hay incursiones activas en los grupos en los que has participado recientemente"
+        output = _("🐲 No hay incursiones activas en los grupos en los que has participado recientemente")
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 @run_async
@@ -2215,6 +2260,7 @@ dispatcher.add_handler(CommandHandler('refresh', refresh))
 dispatcher.add_handler(CommandHandler('list', list))
 dispatcher.add_handler(CommandHandler(['raids','incursiones'], raids))
 dispatcher.add_handler(CommandHandler('settings', settings))
+dispatcher.add_handler(CommandHandler(['language','setlanguage'], setlanguage))
 # Commands related to raids
 dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cancelar','cancel'], cancelar, pass_args=True))

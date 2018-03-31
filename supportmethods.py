@@ -35,10 +35,9 @@ from unidecode import unidecode
 import googlemaps
 import math
 import gettext
-from gettext import gettext as _
 
 from config import config
-from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, getZones, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace, getGroupTimezoneOffsetFromServer, getCurrentPokemons, getCurrentGyms, removeIncompleteRaids, getAutorankingGroups, getRanking, getCachedRanking, saveCachedRanking
+from storagemethods import getRaidbyMessage, getCreadorRaid, getRaidPeople, getRaid, getAlertsByPlace, getGroup, getZones, updateRaidsStatus, updateValidationsStatus, getPlace, getAutorefloatGroups, getActiveRaidsforGroup, saveRaid, updateLastAutorefloat, savePlace, getGroupTimezoneOffsetFromServer, getCurrentPokemons, getCurrentGyms, removeIncompleteRaids, getAutorankingGroups, getRanking, getCachedRanking, saveCachedRanking, getUser
 from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 pokemonlist = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran♀','Nidorina','Nidoqueen','Nidoran♂','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr.Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew','Chikorita','Bayleef','Meganium','Cyndaquil','Quilava','Typhlosion','Totodile','Croconaw','Feraligatr','Sentret','Furret','Hoothoot','Noctowl','Ledyba','Ledian','Spinarak','Ariados','Crobat','Chinchou','Lanturn','Pichu','Cleffa','Igglybuff','Togepi','Togetic','Natu','Xatu','Mareep','Flaaffy','Ampharos','Bellossom','Marill','Azumarill','Sudowoodo','Politoed','Hoppip','Skiploom','Jumpluff','Aipom','Sunkern','Sunflora','Yanma','Wooper','Quagsire','Espeon','Umbreon','Murkrow','Slowking','Misdreavus','Unown','Wobbuffet','Girafarig','Pineco','Forretress','Dunsparce','Gligar','Steelix','Snubbull','Granbull','Qwilfish','Scizor','Shuckle','Heracross','Sneasel','Teddiursa','Ursaring','Slugma','Magcargo','Swinub','Piloswine','Corsola','Remoraid','Octillery','Delibird','Mantine','Skarmory','Houndour','Houndoom','Kingdra','Phanpy','Donphan','Porygon2','Stantler','Smeargle','Tyrogue','Hitmontop','Smoochum','Elekid','Magby','Miltank','Blissey','Raikou','Entei','Suicune','Larvitar','Pupitar','Tyranitar','Lugia','Ho-Oh','Celebi','Treecko','Grovyle','Sceptile','Torchic','Combusken','Blaziken','Mudkip','Marshtomp','Swampert','Poochyena','Mightyena','Zigzagoon','Linoone','Wurmple','Silcoon','Beautifly','Cascoon','Dustox','Lotad','Lombre','Ludicolo','Seedot','Nuzleaf','Shiftry','Taillow','Swellow','Wingull','Pelipper','Ralts','Kirlia','Gardevoir','Surskit','Masquerain','Shroomish','Breloom','Slakoth','Vigoroth','Slaking','Nincada','Ninjask','Shedinja','Whismur','Loudred','Exploud','Makuhita','Hariyama','Azurill','Nosepass','Skitty','Delcatty','Sableye','Mawile','Aron','Lairon','Aggron','Meditite','Medicham','Electrike','Manectric','Plusle','Minun','Volbeat','Illumise','Roselia','Gulpin','Swalot','Carvanha','Sharpedo','Wailmer','Wailord','Numel','Camerupt','Torkoal','Spoink','Grumpig','Spinda','Trapinch','Vibrava','Flygon','Cacnea','Cacturne','Swablu','Altaria','Zangoose','Seviper','Lunatone','Solrock','Barboach','Whiscash','Corphish','Crawdaunt','Baltoy','Claydol','Lileep','Cradily','Anorith','Armaldo','Feebas','Milotic','Castform','Kecleon','Shuppet','Banette','Duskull','Dusclops','Tropius','Chimecho','Absol','Wynaut','Snorunt','Glalie','Spheal','Sealeo','Walrein','Clamperl','Huntail','Gorebyss','Relicanth','Luvdisc','Bagon','Shelgon','Salamence','Beldum','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys']
@@ -218,18 +217,18 @@ def format_message(raid):
     gente = getRaidPeople(raid["id"], ordering)
 
     if "edited" in raid.keys() and raid["edited"]>0:
-        text_edited = " <em>(editada)</em>"
+        text_edited = " " + _("<em>(editada)</em>")
     else:
         text_edited = ""
     if "refloated" in raid.keys() and raid["refloated"]>0:
-        text_refloated = " <em>(reflotada)</em>"
+        text_refloated = " " +_("<em>(reflotada)</em>")
     else:
         text_refloated = ""
     if "timeend" in raid.keys() and raid["timeend"] is not None:
         t = extract_time(raid["timeend"], group["timeformat"])
         raidend_near = raidend_is_near_raidtime(raid["timeraid"], raid["timeend"], group["timezone"])
         timeend_warn = "⚠️" if raidend_near >= 0 else ""
-        text_endtime = "\n%s<em>Desaparece a las %s</em>" % (timeend_warn, t)
+        text_endtime = "\n" + timeend_warn + _("<em>Desaparece a las {0}</em>").format(t)
     else:
         timeend_warn = ""
         text_endtime = ""
@@ -249,14 +248,14 @@ def format_message(raid):
     what_day = format_text_day(raid["timeraid"], group["timezone"], "html")
     if creador["username"] is not None:
         if creador["trainername"] is not None:
-            created_text = "\nCreada por <a href='https://t.me/%s'>%s</a>%s%s" % (creador["username"], creador["trainername"], text_edited, text_refloated)
+            created_text = "\n" + _("Creada por <a href='https://t.me/{0}'>{1}</a>{2}{3}").format(creador["username"], creador["trainername"], text_edited, text_refloated)
         else:
-            created_text = "\nCreada por @%s%s%s" % (creador["username"], text_edited, text_refloated)
+            created_text = "\n" + _("Creada por @{0}{1}{2}").format(creador["username"], text_edited, text_refloated)
     else:
         created_text = ""
-    text = "Incursión %s %sa las %s<b>%s</b> en %s<b>%s</b>%s%s\n" % (what_text, what_day, timeend_warn, extract_time(raid["timeraid"], group["timeformat"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime)
+    text = _("Incursión {0} {1}a las {2}<b>{3}</b> en {4}<b>{5}</b>{6}{7}").format(what_text, what_day, timeend_warn, extract_time(raid["timeraid"], group["timeformat"]), gym_emoji, raid["gimnasio_text"], created_text, text_endtime) + "\n"
     if raid["status"] == "cancelled":
-        text = text + "❌ <b>Incursión cancelada</b>"
+        text = text + _("❌ <b>Incursión cancelada</b>")
     else:
         if group["disaggregated"] == 1:
             (numazules, numrojos, numamarillos, numotros, numgente) = count_people_disaggregated(gente)
@@ -267,7 +266,7 @@ def format_message(raid):
             text = text + "%s%s · %s%s · %s%s · %s👩‍👩‍👧‍👧%s" % (icons["Amarillo"], numamarillos, icons["Azul"], numazules, icons["Rojo"], numrojos, otros_text, numgente)
         else:
             numgente = count_people(gente)
-            text = text + "%s entrenadores apuntados:" % numgente
+            text = text + _("{0} entrenadores apuntados:").format(numgente)
     if raid["status"] != "cancelled" and gente is not None:
         diff_hours = getGroupTimezoneOffsetFromServer(group["id"])
         for user in gente:
@@ -355,9 +354,9 @@ def format_text_pokemon(pokemon, egg, format="markdown"):
         what_text = "de <b>%s</b>" % pokemon if format == "html" else "de *%s*" % pokemon
     else:
         if egg == "EX":
-            what_text = "<b>🌟EX</b>" if format == "html" else "*🌟EX*"
+            what_text = _("<b>🌟EX</b>") if format == "html" else _("*🌟EX*")
         else:
-            what_text = egg.replace("N","de <b>nivel ") + "</b>" if format == "html" else egg.replace("N","de *nivel ") + "*"
+            what_text = egg.replace("N",_("de <b>nivel") + " ") + "</b>" if format == "html" else egg.replace("N",_("de *nivel") + " ") + "*"
     return what_text
 
 def format_text_day(timeraid, tzone, format="markdown"):
@@ -369,8 +368,8 @@ def format_text_day(timeraid, tzone, format="markdown"):
     now_datetime = datetime.now(timezone(tzone))
     difftime = raid_datetime - now_datetime
     if difftime.total_seconds() > (3600*16):
-        weekdays = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
-        what_day = "el <b>%s día %s</b> " % (weekdays[raid_datetime.weekday()], raid_datetime.day) if format == "html" else "el *%s día %s* " % (weekdays[raid_datetime.weekday()], raid_datetime.day)
+        weekdays = [_("lunes"), _("martes"), _("miércoles"), _("jueves"), _("viernes"), _("sábado"), _("domingo")]
+        what_day = _("el <b>{0} día {1}</b>").format(weekdays[raid_datetime.weekday()], raid_datetime.day) + " " if format == "html" else _("el *{0} día {1}*").format(weekdays[raid_datetime.weekday()], raid_datetime.day) + " "
     else:
         what_day = ""
     return what_day
@@ -379,11 +378,11 @@ def format_text_creating(creator):
     logging.debug("supportmethods:format_text_creating");
     if creator is not None and creator["username"] is not None:
         if creator["trainername"] is not None:
-            creating_text = "<a href='https://t.me/%s'>%s</a> está creando una incursión..." % (creator["username"], creator["trainername"])
+            creating_text = _("<a href='https://t.me/{0}'>{1}</a> está creando una incursión...").format(creator["username"], creator["trainername"])
         else:
-            creating_text = "@%s está creando una incursión..." % (creator["username"])
+            creating_text = _("@{0} está creando una incursión...").format(creator["username"])
     else:
-        creating_text = "Se está creando una incursión..."
+        creating_text = _("Se está creando una incursión...")
     return creating_text
 
 def ensure_escaped(username):
@@ -400,6 +399,8 @@ def update_raids_status(bot):
         logging.debug("Updating message for raid ID %s" % (raid["id"]))
         try:
             reply_markup = get_keyboard(r)
+            group = getGroup(r["grupo_id"])
+            set_language(group["language"])
             updated = update_message(r["grupo_id"], r["message"], reply_markup, bot)
             logging.debug(updated)
         except Exception as e:
@@ -413,7 +414,9 @@ def update_validations_status(bot):
         logging.debug(v)
         logging.debug("Sending notification for validation ID %s, user ID %s" % (v["id"], v["usuario_id"]))
         try:
-            bot.sendMessage(chat_id=v["usuario_id"], text="⚠ El proceso de validación pendiente ha caducado porque han pasado 6 horas desde que empezó. Si quieres validarte, debes volver a empezar el proceso.", parse_mode=telegram.ParseMode.MARKDOWN)
+            user = getUser(v["usuario_id"])
+            set_language(user["language"])
+            bot.sendMessage(chat_id=v["usuario_id"], text=_("⚠ El proceso de validación pendiente ha caducado porque han pasado 6 horas desde que empezó. Si quieres validarte, debes volver a empezar el proceso."), parse_mode=telegram.ParseMode.MARKDOWN)
         except Exception as e:
             logging.debug("supportmethods:update_validations_status error: %s" % str(e))
         time.sleep(0.015)
@@ -439,6 +442,7 @@ def auto_refloat(bot):
         logging.debug("supportmethods:auto_refloat auto refloat group %s %s" % (g["id"],g["title"]))
         updateLastAutorefloat(g["id"])
         group = getGroup(g["id"])
+        set_language(group["language"])
         intwohours_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) + timedelta(minutes = 90)
         tenminsago_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes = 9)
         fifminsago_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes = 15)
@@ -473,6 +477,7 @@ def auto_ranking(bot):
     groups = getAutorankingGroups()
     logging.debug("supportmethods:auto_ranking testing for %i groups..." % len(groups))
     for g in groups:
+        set_language(g["language"])
         (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods(g["timezone"])
         if g["rankingweek"] > 0:
             logging.debug("supportmethods:auto_ranking testing weekly auto ranking group %s %s" % (g["id"],g["title"]))
@@ -1008,6 +1013,11 @@ def edit_check_private(chat_id, chat_type, user_username, command, bot):
     logging.debug("supportmethods:edit_check_private")
     if chat_type != "private":
         user_text = "@%s " % ensure_escaped(user_username) if user_username is not None else ""
+        group = getGroup(chat_id)
+        if group is not None:
+            set_language(group["language"])
+        else:
+            set_language("es_ES")
         text = _("{0}El comando `/{1}` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_").format(user_text, command)
         sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
@@ -1482,6 +1492,7 @@ def ranking_time_periods(tz):
 
 available_languages = {}
 available_languages["gl_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["gl_ES"], fallback=True)
+available_languages["es_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["es_ES"], fallback=True)
 available_languages["ca_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ca_ES"], fallback=True)
 available_languages["it_IT"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["it_IT"], fallback=True)
 available_languages["ast_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ast_ES"], fallback=True)
@@ -1489,8 +1500,11 @@ available_languages["pt_PT"] = gettext.translation("messages", localedir=sys.pat
 available_languages["en_US"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["en_US"], fallback=True)
 
 def set_language(lang):
+    logging.debug("supportmethods:set_language: %s" % lang)
     if lang in available_languages.keys():
+        logging.debug("supportmethods:set_language Installing language")
         available_languages[lang].install()
         return True
     else:
+        logging.debug("supportmethods:set_language Language not available")
         return False
