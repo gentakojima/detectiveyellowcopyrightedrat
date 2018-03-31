@@ -1246,6 +1246,8 @@ def cerrar(bot, update, args=None):
     if raid is None:
         return
 
+    group = getGroup(raid["grupo_id"])
+    set_language(group["language"])
     if raid is not None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             response = closeRaid(raid["id"])
@@ -1288,6 +1290,8 @@ def cancelar(bot, update, args=None):
     if raid is None:
         return
 
+    group = getGroup(raid["grupo_id"])
+    set_language(group["language"])
     if raid is not None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             response = cancelRaid(raid["id"], force=is_admin(raid["grupo_id"], user_id, bot))
@@ -1295,7 +1299,6 @@ def cancelar(bot, update, args=None):
                 update_message(raid["grupo_id"], raid["message"], None, bot)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text="👌 ¡Se ha cancelado la incursión `%s` correctamente!" % raid["id"], parse_mode=telegram.ParseMode.MARKDOWN)
-                group = getGroup(raid["grupo_id"])
                 raid_datetime = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
                 threehoursago_datetime = datetime.now(timezone(group["timezone"])) - timedelta(minutes = 180)
                 if raid_datetime > threehoursago_datetime:
@@ -1333,6 +1336,8 @@ def descancelar(bot, update, args=None):
     if raid is None:
         return
 
+    group = getGroup(raid["grupo_id"])
+    set_language(group["language"])
     if raid is not None:
         if is_admin(raid["grupo_id"], user_id, bot):
             response = uncancelRaid(raid["id"])
@@ -1374,6 +1379,7 @@ def borrar(bot, update, args=None):
         return
 
     group = getGroup(raid["grupo_id"])
+    set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or is_admin(raid["grupo_id"], user_id, bot) or (group["candelete"] == 1 and raid["usuario_id"] == user_id):
             response = deleteRaid(raid["id"])
@@ -1417,6 +1423,7 @@ def cambiarhora(bot, update, args=None):
 
     numarg = 1 if chat_type == "private" else 0
     group = getGroup(raid["grupo_id"])
+    set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["status"] == "old":
@@ -1486,6 +1493,7 @@ def cambiarhorafin(bot, update, args=None):
 
     numarg = 1 if chat_type == "private" else 0
     group = getGroup(raid["grupo_id"])
+    set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["status"] == "old":
@@ -1569,6 +1577,7 @@ def cambiargimnasio(bot, update, args=None):
     new_gymtext = new_gymtext.strip()
 
     group = getGroup(raid["grupo_id"])
+    set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["status"] == "old":
