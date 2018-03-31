@@ -557,7 +557,7 @@ def processMessage(bot, update):
             elif int(user["level"]) > int(level):
                 output = _("❌ En la captura pone que eres *nivel {0}*, pero ya eras *nivel {1}*. ¿Cómo has bajado de nivel?").format(level, user["level"])
             elif chosen_color != user["team"]:
-                output = _("❌ No he reconocido correctamente el *equipo*. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
+                output = _("❌ No he reconocido correctamente el *equipo*. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
             if output is not None:
                 bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
                 return

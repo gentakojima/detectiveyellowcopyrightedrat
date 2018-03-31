@@ -561,11 +561,11 @@ def send_edit_instructions(group, raid, user_id, bot):
     what_day = format_text_day(raid["timeraid"], group["timezone"])
     day = extract_day(raid["timeraid"], group["timezone"])
     if group["refloat"] == 1 or is_admin(raid["grupo_id"], user_id, bot):
-        text_refloat="\n🎈 *Reflotar incursión*: `/reflotar`"
+        text_refloat="\n" + _("🎈 *Reflotar incursión*: `/reflotar`")
     else:
         text_refloat=""
     if group["candelete"] == 1 or is_admin(raid["grupo_id"], user_id, bot):
-        text_delete="\n❌ *Borrar incursión*: `/borrar`"
+        text_delete="\n" + _("❌ *Borrar incursión*: `/borrar`")
     else:
         text_delete=""
     if raid["timeend"] is not None:
@@ -581,7 +581,7 @@ def send_edit_instructions(group, raid, user_id, bot):
     else:
         pokemon = raid["pokemon"]
     try:
-        bot.send_message(chat_id=user_id, text="Puedes editar la incursión %s %sa las *%s* en *%s* (identificador `%s`) contestando al mensaje de la incursión con los siguientes comandos:\n\n🕒 *Día/hora*: `/hora %s%s`\n🕒 *Hora a la que desaparece*: `/horafin %s`\n🌎 *Gimnasio*: `/gimnasio %s`\n👿 *Pokémon/nivel*: `/pokemon %s`\n\n🚫 *Cancelar incursión*: `/cancelar`%s%s" % (what_text, what_day, extract_time(raid["timeraid"]), raid["gimnasio_text"], raid["id"], daystr, extract_time(raid["timeraid"]), text_endtime, raid["gimnasio_text"], pokemon, text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(chat_id=user_id, text=_("Puedes editar la incursión {0} {1}a las *{2}* en *{3}* (identificador `{4}`) contestando al mensaje de la incursión con los siguientes comandos:\n\n🕒 *Día/hora*: `/hora {5}{6}`\n🕒 *Hora a la que desaparece*: `/horafin {7}`\n🌎 *Gimnasio*: `/gimnasio {8}`\n👿 *Pokémon/nivel*: `/pokemon {9}`\n\n🚫 *Cancelar incursión*: `/cancelar`{10}{11}").format(what_text, what_day, extract_time(raid["timeraid"]), raid["gimnasio_text"], raid["id"], daystr, extract_time(raid["timeraid"]), text_endtime, raid["gimnasio_text"], pokemon, text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
     except:
         logging.debug("Error sending instructions in private. Maybe conversation not started?")
 
@@ -642,112 +642,112 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     logging.debug("supportmethods:get_settings_keyboard")
     group = getGroup(chat_id)
     if group["alerts"] == 1:
-        alertas_text = "✅ Permitir configurar alertas"
+        alertas_text = "✅ " + _("Permitir configurar alertas")
     else:
-        alertas_text = "▪️ Permitir configurar alertas"
+        alertas_text = "▪️ " + _("Permitir configurar alertas")
     if group["disaggregated"] == 1:
-        disaggregated_text = "✅ Mostrar totales disgregados"
+        disaggregated_text = "✅ " + _("Mostrar totales disgregados")
     else:
-        disaggregated_text = "▪️ Mostrar totales disgregados"
+        disaggregated_text = "▪️ " + _("Mostrar totales disgregados")
     if group["plusdisaggregatedinline"] == 1:
-        plusdisaggregatedinline_text = "✅ Mostrar «+1» disgregados por línea"
+        plusdisaggregatedinline_text = "✅ " + _("Mostrar «+1» disgregados por línea")
     else:
-        plusdisaggregatedinline_text = "▪️ Mostrar «+1» disgregados por línea"
+        plusdisaggregatedinline_text = "▪️ " + _("Mostrar «+1» disgregados por línea")
     if group["latebutton"] == 1:
-        latebutton_text = "✅ Botón «Tardo»"
+        latebutton_text = "✅ " + _("Botón «Tardo»")
     else:
-        latebutton_text = "▪️ Botón «Tardo»"
+        latebutton_text = "▪️ " + _("Botón «Tardo»")
     if group["refloat"] == 1:
-        refloat_text = "✅ Reflotar incursiones (comando /reflotar)"
+        refloat_text = "✅ " + _("Reflotar incursiones (comando /reflotar)")
     else:
-        refloat_text = "▪️ Reflotar incursiones (comando /reflotar)"
+        refloat_text = "▪️ " + _("Reflotar incursiones (comando /reflotar)")
     if group["candelete"] == 1:
-        candelete_text = "✅ Borrar incursiones (comando /borrar)"
+        candelete_text = "✅ " + _("Borrar incursiones (comando /borrar)")
     else:
-        candelete_text = "▪️ Borrar incursiones (comando /borrar)"
+        candelete_text = "▪️ " + _("Borrar incursiones (comando /borrar)")
     if group["gotitbuttons"] == 1:
-        gotitbuttons_text = "✅ Botones «¡Lo tengo!»"
+        gotitbuttons_text = "✅ " + _("Botones «¡Lo tengo!»")
     else:
-        gotitbuttons_text = "▪️ Botones «¡Lo tengo!»"
+        gotitbuttons_text = "▪️ " + _("Botones «¡Lo tengo!»")
     if group["locations"] == 1:
-        locations_text = "✅ Ubicaciones"
+        locations_text = "✅ " + _("Ubicaciones")
     else:
-        locations_text = "▪️ Ubicaciones"
+        locations_text = "▪️ " + _("Ubicaciones")
     if group["validationrequired"] == 1:
-        validationrequired_text = "✅ Validación obligatoria"
+        validationrequired_text = "✅ " + _("Validación obligatoria")
     else:
-        validationrequired_text = "▪️ Validación obligatoria"
+        validationrequired_text = "▪️ " + _("Validación obligatoria")
     if group["gymcommand"] == 1:
-        gymcommand_text = "✅ Consultar gimnasios (comando /gym)"
+        gymcommand_text = "✅ " + _("Consultar gimnasios (comando /gym)")
     else:
-        gymcommand_text = "▪️ Consultar gimnasios (comando /gym)"
+        gymcommand_text = "▪️ " + _("Consultar gimnasios (comando /gym)")
     if group["raidcommand"] == 1:
-        raidcommand_text = "✅ Crear incursiones (comando /raid)"
+        raidcommand_text = "✅ " + _("Crear incursiones (comando /raid)")
     else:
-        raidcommand_text = "▪️ Crear incursiones (comando /raid)"
+        raidcommand_text = "▪️ " + _("Crear incursiones (comando /raid)")
     if group["raidcommandorder"] == 1:
-        raidcommandorder_text = "✅ Ordenar zonas/gimnasios por actividad"
+        raidcommandorder_text = "✅ " + _("Ordenar zonas/gimnasios por actividad")
     else:
-        raidcommandorder_text = "▪️ Ordenar zonas/gimnasios por actividad"
+        raidcommandorder_text = "▪️ " + _("Ordenar zonas/gimnasios por actividad")
     if group["babysitter"] == 1:
-        babysitter_text = "✅ Modo niñero (borra mensajes)"
+        babysitter_text = "✅ " + _("Modo niñero (borra mensajes)")
     else:
-        babysitter_text = "▪️ Modo niñero (borra mensajes)"
+        babysitter_text = "▪️ " + _("Modo niñero (borra mensajes)")
     if group["timeformat"] == 1:
-        timeformat_text = "✅ Mostrar horas en formato AM/PM"
+        timeformat_text = "✅ " + _("Mostrar horas en formato AM/PM")
     else:
-        timeformat_text = "▪️ Mostrar horas en formato AM/PM"
+        timeformat_text = "▪️ " + _("Mostrar horas en formato AM/PM")
     if group["listorder"] == 1:
-        listorder_text = "✅ Agrupar apuntados por nivel/equipo"
+        listorder_text = "✅ " + _("Agrupar apuntados por nivel/equipo")
     else:
-        listorder_text = "▪️ Agrupar apuntados por nivel/equipo"
+        listorder_text = "▪️ " + _("Agrupar apuntados por nivel/equipo")
     if group["plusmax"] == 1:
-        plusmax_text = "✅ Botón «+1» (máx. 1 acompañante)"
+        plusmax_text = "✅ " + _("Botón «+1» (máx. 1 acompañante)")
     elif group["plusmax"] in [2,3,5,10]:
-        plusmax_text = "✅ Botón «+1» (máx. %s acompañantes)" % group["plusmax"]
+        plusmax_text = "✅ " + _("Botón «+1» (máx. {0} acompañantes)").format(group["plusmax"])
     else:
-        plusmax_text = "▪️ Botón «+1»"
+        plusmax_text = "▪️ " + _("Botón «+1»")
     if group["plusdisaggregated"] == 1:
-        plusdisaggregated_text = "✅ Botón «+1» por cada equipo"
+        plusdisaggregated_text = "✅ " + _("Botón «+1» por cada equipo")
     else:
-        plusdisaggregated_text = "▪️ Botón «+1» por cada equipo"
+        plusdisaggregated_text = "▪️ " + _("Botón «+1» por cada equipo")
     if group["snail"] == 1:
-        snail_text = "✅ Marcar apuntados tarde (1 minuto)"
+        snail_text = "✅ " + _("Marcar apuntados tarde (1 minuto)")
     elif group["snail"] in [3,5,10]:
-        snail_text = "✅ Marcar apuntados tarde (%s minutos)" % group["snail"]
+        snail_text = "✅ " + _("Marcar apuntados tarde ({0} minutos)").format(group["snail"])
     else:
-        snail_text = "▪️ Marcar apuntados tarde"
+        snail_text = "▪️ " + _("Marcar apuntados tarde")
     if group["refloatauto"] in [5,10,15,30]:
-        refloatauto_text = "✅ Reflotar automático (%s minutos)" % group["refloatauto"]
+        refloatauto_text = "✅ " + _("Reflotar automático ({0} minutos)").format(group["refloatauto"])
     else:
-        refloatauto_text = "▪️ Reflotar automático"
+        refloatauto_text = "▪️ " + _("Reflotar automático")
     if group["rankingweek"] in [5,10,15,20,25]:
-        rankingweek_text = "✅ Ranking semanal (TOP %s)" % group["rankingweek"]
+        rankingweek_text = "✅ " + _("Ranking semanal (TOP {0})").format(group["rankingweek"])
     else:
-        rankingweek_text = "▪️ Ranking semanal"
+        rankingweek_text = "▪️ " + _("Ranking semanal")
     if group["rankingmonth"] in [15,25,35,50]:
-        rankingmonth_text = "✅ Ranking mensual (TOP %s)" % group["rankingmonth"]
+        rankingmonth_text = "✅ " + _("Ranking mensual (TOP {0})").format(group["rankingmonth"])
     else:
-        rankingmonth_text = "▪️ Ranking mensual"
+        rankingmonth_text = "▪️ " + _("Ranking mensual")
     if group["rankingauto"] == 1:
-        rankingauto_text = "✅ Publicar automáticamente"
+        rankingauto_text = "✅ " + _("Publicar automáticamente")
     else:
-        rankingauto_text = "▪️ Publicar automáticamente"
+        rankingauto_text = "▪️ " + _("Publicar automáticamente")
     icons = iconthemes[group["icontheme"]]
-    icontheme_text = "%s%s%s Tema de iconos" % (icons["Rojo"],icons["Azul"],icons["Amarillo"])
+    icontheme_text = "{0}{1}{2} ".format(icons["Rojo"],icons["Azul"],icons["Amarillo"]) + _("Tema de iconos")
 
     if keyboard == "main":
-        settings_keyboard = [[InlineKeyboardButton("Funcionamiento del grupo/canal »", callback_data='settings_goto_behaviour')], [InlineKeyboardButton("Comandos disponibles para usuarios »", callback_data='settings_goto_commands')], [InlineKeyboardButton("Opciones de vista de incursiones »", callback_data='settings_goto_raids')], [InlineKeyboardButton("Funcionamiento de incursiones »", callback_data='settings_goto_raidbehaviour')], [InlineKeyboardButton("Funcionamiento de rankings »", callback_data='settings_goto_ranking')], [InlineKeyboardButton("Terminado", callback_data='settings_done')]]
+        settings_keyboard = [[InlineKeyboardButton(_("Funcionamiento del grupo/canal »"), callback_data='settings_goto_behaviour')], [InlineKeyboardButton(_("Comandos disponibles para usuarios »"), callback_data='settings_goto_commands')], [InlineKeyboardButton(_("Opciones de vista de incursiones »"), callback_data='settings_goto_raids')], [InlineKeyboardButton(_("Funcionamiento de incursiones »"), callback_data='settings_goto_raidbehaviour')], [InlineKeyboardButton(_("Funcionamiento de rankings »"), callback_data='settings_goto_ranking')], [InlineKeyboardButton("Terminado", callback_data='settings_done')]]
     elif keyboard == "behaviour":
-        settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations')], [InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')], [InlineKeyboardButton(validationrequired_text, callback_data='settings_validationrequired')], [InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations')], [InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')], [InlineKeyboardButton(validationrequired_text, callback_data='settings_validationrequired')], [InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')], [InlineKeyboardButton(_("« Menú principal"), callback_data='settings_goto_main')]]
     elif keyboard == "commands":
-        settings_keyboard = [[InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand')], [InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar')], [InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(gymcommand_text, callback_data='settings_gymcommand')], [InlineKeyboardButton(raidcommand_text, callback_data='settings_raidcommand')], [InlineKeyboardButton(refloat_text, callback_data='settings_reflotar')], [InlineKeyboardButton(candelete_text, callback_data='settings_borrar')], [InlineKeyboardButton(_("« Menú principal"), callback_data='settings_goto_main')]]
     elif keyboard == "raidbehaviour":
-        settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton(plusdisaggregated_text, callback_data='settings_plusdisaggregated')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(latebutton_text, callback_data='settings_botonllegotarde')], [InlineKeyboardButton(gotitbuttons_text, callback_data='settings_lotengo')], [InlineKeyboardButton(plusmax_text, callback_data='settings_plusmax')], [InlineKeyboardButton(plusdisaggregated_text, callback_data='settings_plusdisaggregated')], [InlineKeyboardButton(_("« Menú principal"), callback_data='settings_goto_main')]]
     elif keyboard == "raids":
-        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(plusdisaggregatedinline_text, callback_data='settings_plusdisaggregatedinline')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(raidcommandorder_text, callback_data='settings_raidcommandorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(disaggregated_text, callback_data='settings_desagregado')], [InlineKeyboardButton(plusdisaggregatedinline_text, callback_data='settings_plusdisaggregatedinline')], [InlineKeyboardButton(timeformat_text, callback_data='settings_timeformat')], [InlineKeyboardButton(icontheme_text, callback_data='settings_icontheme')], [InlineKeyboardButton(listorder_text, callback_data='settings_listorder')], [InlineKeyboardButton(raidcommandorder_text, callback_data='settings_raidcommandorder')], [InlineKeyboardButton(snail_text, callback_data='settings_snail')], [InlineKeyboardButton(_("« Menú principal"), callback_data='settings_goto_main')]]
     elif keyboard == "ranking":
-        settings_keyboard = [[InlineKeyboardButton(rankingweek_text, callback_data='settings_rankingweek')], [InlineKeyboardButton(rankingmonth_text, callback_data='settings_rankingmonth')], [InlineKeyboardButton(rankingauto_text, callback_data='settings_rankingauto')], [InlineKeyboardButton("« Menú principal", callback_data='settings_goto_main')]]
+        settings_keyboard = [[InlineKeyboardButton(rankingweek_text, callback_data='settings_rankingweek')], [InlineKeyboardButton(rankingmonth_text, callback_data='settings_rankingmonth')], [InlineKeyboardButton(rankingauto_text, callback_data='settings_rankingauto')], [InlineKeyboardButton(_("« Menú principal"), callback_data='settings_goto_main')]]
 
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
@@ -766,8 +766,8 @@ def get_pokemons_keyboard():
             keyboard_row.append(InlineKeyboardButton(current_pokemons[i+2]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i+2]["pokemon"]))
         keyboard.append(keyboard_row)
 
-    keyboard.append([InlineKeyboardButton("Niv. 5", callback_data="iraid_pokemon_N5"), InlineKeyboardButton("Niv. 4", callback_data="iraid_pokemon_N4"), InlineKeyboardButton("Niv. 3", callback_data="iraid_pokemon_N3"), InlineKeyboardButton("EX", callback_data="iraid_pokemon_EX")])
-    keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    keyboard.append([InlineKeyboardButton(_("Niv. 5"), callback_data="iraid_pokemon_N5"), InlineKeyboardButton(_("Niv. 4"), callback_data="iraid_pokemon_N4"), InlineKeyboardButton(_("Niv. 3"), callback_data="iraid_pokemon_N3"), InlineKeyboardButton(_("EX"), callback_data="iraid_pokemon_EX")])
+    keyboard.append([InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
@@ -784,14 +784,14 @@ def get_gyms_keyboard(group_id, page=0, zone=None, order="activity"):
         keyboard.append(keyboard_row)
 
     if len(current_gyms)>14 and int(page) == 0:
-        keyboard.append([InlineKeyboardButton("Página 2 >", callback_data="iraid_gyms_page2"), InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+        keyboard.append([InlineKeyboardButton("Página 2 >", callback_data="iraid_gyms_page2"), InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
     elif int(page) > 0:
         if len(current_gyms) > 14*(int(page)+1)+1:
-            keyboard.append([InlineKeyboardButton("< Pág.%s" % str(page), callback_data="iraid_gyms_page%s" % str(page)), InlineKeyboardButton("Pág.%s >" % str(int(page)+2), callback_data="iraid_gyms_page%s" % str(int(page)+2)), InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+            keyboard.append([InlineKeyboardButton("< Pág.%s" % str(page), callback_data="iraid_gyms_page%s" % str(page)), InlineKeyboardButton("Pág.%s >" % str(int(page)+2), callback_data="iraid_gyms_page%s" % str(int(page)+2)), InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
         else:
-            keyboard.append([InlineKeyboardButton("< Página %s" % str(page), callback_data="iraid_gyms_page%s" % str(page)), InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+            keyboard.append([InlineKeyboardButton("< Página %s" % str(page), callback_data="iraid_gyms_page%s" % str(page)), InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
     else:
-        keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+        keyboard.append([InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
@@ -809,7 +809,7 @@ def get_zones_keyboard(group_id, order="activity"):
             keyboard_row.append(InlineKeyboardButton(zones[i+1], callback_data="iraid_zone_%s" % zones[i+1].lower()))
         keyboard.append(keyboard_row)
 
-    keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    keyboard.append([InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     return reply_markup
@@ -827,14 +827,14 @@ def get_days_keyboard(tz):
         dts.append(basedt + timedelta(days=x))
 
     for i in range(0,10,3):
-        h1 = dts[i].strftime('Día %d')
+        h1 = dts[i].strftime(_('Día %d'))
         h1k = dts[i].strftime('%d/00:00')
-        h2 = dts[i+1].strftime('Día %d')
+        h2 = dts[i+1].strftime(_('Día %d'))
         h2k = dts[i+1].strftime('%d/00:00')
-        h3 = dts[i+2].strftime('Día %d')
+        h3 = dts[i+2].strftime(_('Día %d'))
         h3k = dts[i+2].strftime('%d/00:00')
         keyboard.append([InlineKeyboardButton(h1, callback_data="iraid_date_%s" % h1k), InlineKeyboardButton(h2, callback_data="iraid_date_%s" % h2k), InlineKeyboardButton(h3, callback_data="iraid_date_%s" % h3k)])
-    keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    keyboard.append([InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
     pass
@@ -891,13 +891,13 @@ def get_times_keyboard(tz, date=None, offset=False):
     if newoffset is not False:
         if newoffset > 0:
             hk = dts[0].strftime("%d/00" + (":" + str(newoffset).zfill(2)))
-            timechange_text = "+%i minutos >" % newoffset
+            timechange_text = _("+{0} minutos >").format(newoffset)
         else:
             hk = dts[0].strftime('%d/00:00')
-            timechange_text = "< %i minutos" % newoffset
-        keyboard.append([InlineKeyboardButton(timechange_text, callback_data="iraid_date_%s" % hk), InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+            timechange_text = _("< {0} minutos").format(newoffset)
+        keyboard.append([InlineKeyboardButton(timechange_text, callback_data="iraid_date_%s" % hk), InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
     else:
-        keyboard.append([InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+        keyboard.append([InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
@@ -928,7 +928,7 @@ def get_endtimes_keyboard(timeraid, offset=False):
         h3k = dts[i+2].strftime('%d/%H:%M')
         keyboard.append([InlineKeyboardButton(h1, callback_data="iraid_endtime_%s" % h1k), InlineKeyboardButton(h2, callback_data="iraid_endtime_%s" % h2k), InlineKeyboardButton(h3, callback_data="iraid_endtime_%s" % h3k)])
 
-    keyboard.append([InlineKeyboardButton("No sé / no ponerla", callback_data="iraid_endtime_unknown"), InlineKeyboardButton("Cancelar", callback_data="iraid_cancel")])
+    keyboard.append([InlineKeyboardButton(_("No sé / no poner"), callback_data="iraid_endtime_unknown"), InlineKeyboardButton(_("Cancelar"), callback_data="iraid_cancel")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
@@ -939,16 +939,16 @@ def get_keyboard(raid):
     group = getGroup(raid["grupo_id"])
     if raid["status"] == "started" or raid["status"] == "waiting":
         icons = iconthemes[group["icontheme"]]
-        button_voy = InlineKeyboardButton("🙋Voy", callback_data='voy')
-        button_novoy = InlineKeyboardButton("🙅No voy", callback_data='novoy')
-        button_estoy = InlineKeyboardButton("✅Estoy", callback_data='estoy')
-        button_plus = InlineKeyboardButton("👭+1", callback_data='plus1')
-        button_plusy = InlineKeyboardButton("%s+1" % icons["Amarillo"], callback_data='plus1yellow')
-        button_plusb = InlineKeyboardButton("%s+1" % icons["Azul"], callback_data='plus1blue')
-        button_plusr = InlineKeyboardButton("%s+1" % icons["Rojo"], callback_data='plus1red')
-        button_tardo = InlineKeyboardButton("🕒Tardo", callback_data='llegotarde')
-        button_location = InlineKeyboardButton("🌎Ubicación", callback_data='ubicacion')
-        button_loc = InlineKeyboardButton("🌎Ubi", callback_data='ubicacion')
+        button_voy = InlineKeyboardButton("🙋" + _("Voy"), callback_data='voy')
+        button_novoy = InlineKeyboardButton("🙅" + _("No voy"), callback_data='novoy')
+        button_estoy = InlineKeyboardButton("✅" + _("Estoy"), callback_data='estoy')
+        button_plus = InlineKeyboardButton("👭" + _("+1"), callback_data='plus1')
+        button_plusy = InlineKeyboardButton(icons["Amarillo"] + _("+1"), callback_data='plus1yellow')
+        button_plusb = InlineKeyboardButton(icons["Azul"] + _("+1"), callback_data='plus1blue')
+        button_plusr = InlineKeyboardButton(icons["Rojo"] + _("+1"), callback_data='plus1red')
+        button_tardo = InlineKeyboardButton("🕒" + _("Tardo"), callback_data='llegotarde')
+        button_location = InlineKeyboardButton("🌎" + _("Ubicación"), callback_data='ubicacion')
+        button_loc = InlineKeyboardButton("🌎" + _("Ubi"), callback_data='ubicacion')
         if group["plusdisaggregated"] == 0:
             keyboard_row1 = [button_voy]
             if group["plusmax"] > 0:
@@ -976,7 +976,7 @@ def get_keyboard(raid):
     else:
         keyboard = []
     if group is not None and group["gotitbuttons"] == 1 and (raid["status"] == "started" or raid["status"] == "ended"):
-        keyboard.append([InlineKeyboardButton("👍¡Lo tengo!", callback_data='lotengo'), InlineKeyboardButton("👎¡Ha escapado!", callback_data='escapou')])
+        keyboard.append([InlineKeyboardButton("👍" + _("¡Lo tengo!"), callback_data='lotengo'), InlineKeyboardButton("👎" + _("¡Ha escapado!"), callback_data='escapou')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
@@ -990,27 +990,25 @@ def update_settings_message(chat_id, bot, keyboard = "main"):
 
     settings_markup = get_settings_keyboard(chat_id, keyboard = keyboard)
     if keyboard == "main":
-        text = "Elige una categoría para ver las opciones disponibles. Cuando termines, pulsa el botón <b>Terminado</b> para borrar el mensaje."
+        text = _("Elige una categoría para ver las opciones disponibles. Cuando termines, pulsa el botón <b>Terminado</b> para borrar el mensaje.")
     elif keyboard == "raids":
-        text = "Estas opciones permiten cambiar la forma en la que se muestran los listados de las incursiones."
+        text = _("Estas opciones permiten cambiar la forma en la que se muestran los listados de las incursiones.")
     elif keyboard == "commands":
-        text = "Estas opciones definen qué comandos pueden utilizar los usuarios que no son administradores. Los administradores siempre pueden utilizarlos igualmente."
+        text = _("Estas opciones definen qué comandos pueden utilizar los usuarios que no son administradores. Los administradores siempre pueden utilizarlos igualmente.")
     elif keyboard == "raidbehaviour":
-        text = "Estas opciones permiten configurar características opcionales de las incursiones."
+        text = _("Estas opciones permiten configurar características opcionales de las incursiones.")
     elif keyboard == "behaviour":
-        text = "Estas opciones son muy importantes porque definen el funcionamiento general del bot en el grupo/canal. Revisa la ayuda en caso de duda."
+        text = _("Estas opciones son muy importantes porque definen el funcionamiento general del bot en el grupo/canal. Revisa la ayuda en caso de duda.")
     elif keyboard == "ranking":
-        text = "Estas opciones definen el comportamiento de los rankings del bot en el grupo/canal."
+        text = _("Estas opciones definen el comportamiento de los rankings del bot en el grupo/canal.")
 
     return bot.edit_message_text(text=text, chat_id=chat_id, message_id=group["settings_message"], reply_markup=settings_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 def edit_check_private(chat_id, chat_type, user_username, command, bot):
     logging.debug("supportmethods:edit_check_private")
     if chat_type != "private":
-        if user_username is not None:
-            text = "@%s el comando `/%s` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_" % (ensure_escaped(user_username), command)
-        else:
-            text = "El comando `/%s` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_" % command
+        user_text = "@%s " % ensure_escaped(user_username) if user_username is not None else ""
+        text = _("{0}El comando `/{1}` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_").format(user_text, command)
         sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         return False
@@ -1030,14 +1028,14 @@ def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username
         raid = getRaidbyMessage(reply_chat_id, reply_message_id)
     elif chat_type == "private":
         if len(args)<(expectedargs+1) or (expectedargs>0 and not str(args[expectedargs-1]).isnumeric()):
-            bot.sendMessage(chat_id=chat_id, text="¡No he reconocido los datos que me envías!",parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.sendMessage(chat_id=chat_id, text=_("¡No he reconocido los datos que me envías!"), parse_mode=telegram.ParseMode.MARKDOWN)
             return
         raid_id = args[0]
         raid = getRaid(raid_id)
     else:
         delete_message(chat_id, message.message_id, bot)
-        user_text = "@%s el" % ensure_escaped(user_username) if user_username is not None else "El"
-        text = "%s comando `/%s` solo funciona por privado o contestando al mensaje de la incursión.\n\n_(Este mensaje se borrará en unos segundos)_" % (user_text, command)
+        user_text = "@%s " % ensure_escaped(user_username) if user_username is not None else ""
+        text = _("{0}El comando `/{1}` solo funciona por privado o contestando al mensaje de la incursión.\n\n_(Este mensaje se borrará en unos segundos)_").format(user_text, command)
         sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
         raid = None

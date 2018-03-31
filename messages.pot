@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2018-03-31 01:56+0200\n"
+"POT-Creation-Date: 2018-03-31 02:01+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -278,7 +278,7 @@ msgid "❌ En la captura pone que eres *nivel {0}*, pero ya eras *nivel {1}*. ¿
 msgstr ""
 
 #: detectivepikachubot.py:560
-msgid "❌ No he reconocido correctamente el *equipo*. Si no consigues que la reconozca, envía un correo a `%s` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente."
+msgid "❌ No he reconocido correctamente el *equipo*. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente."
 msgstr ""
 
 #: detectivepikachubot.py:567
