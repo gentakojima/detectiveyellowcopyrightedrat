@@ -2339,6 +2339,6 @@ def callback_remove_incomplete_raids(bot, job):
 job4 = j.run_repeating(callback_remove_incomplete_raids, interval=15, first=42)
 def callback_auto_ranking(bot, job):
     Thread(target=auto_ranking, args=(bot,)).start()
-job6 = j.run_repeating(callback_auto_ranking, interval=300, first=10) # FIXME change
+job6 = j.run_repeating(callback_auto_ranking, interval=600, first=310)
 
 updater.start_polling()
