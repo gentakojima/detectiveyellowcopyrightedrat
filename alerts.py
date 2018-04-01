@@ -39,6 +39,9 @@ def alerts(bot, update, args=None):
 
     alerts = getAlerts(user_id)
 
+    user = getUser(user_id)
+    _ = set_language(user["language"])
+
     if not len(alerts):
         text_message = _("🔔 No tienes ninguna alerta de incursión definida.")
 
@@ -69,6 +72,9 @@ def addalert(bot, update, args=None):
     if edit_check_private(chat_id, chat_type, user_username, "addalert", bot) == False:
         delete_message(chat_id, message.message_id, bot)
         return
+
+    user = getUser(user_id)
+    _ = set_language(user["language"])
 
     if len(args) < 1 or not str(args[0]).isnumeric():
         bot.sendMessage(chat_id=chat_id, text=_("❌ ¡Tienes que pasarme un identificador numérico como parámetro!"), parse_mode=telegram.ParseMode.MARKDOWN)
@@ -112,6 +118,9 @@ def delalert(bot, update, args=None):
         delete_message(chat_id, message.message_id, bot)
         return
 
+    user = getUser(user_id)
+    _ = set_language(user["language"])
+
     if len(args)<1 or not str(args[0]).isnumeric():
         bot.sendMessage(chat_id=chat_id, text=_("❌ ¡Tienes que pasarme un identificador numérico como parámetro!"), parse_mode=telegram.ParseMode.MARKDOWN)
         return
@@ -141,6 +150,9 @@ def clearalerts(bot, update):
         delete_message(chat_id, message.message_id, bot)
         return
 
+    user = getUser(user_id)
+    _ = set_language(user["language"])
+
     if clearAlerts(user_id):
         bot.sendMessage(chat_id=chat_id, text=_("👌 Se han eliminado las alertas de todos los gimnasios.\n\nA partir de ahora, ya no recibirás mensajes privados cada vez que alguien cree una incursión."), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
@@ -158,6 +170,10 @@ def processLocation(bot, update):
         return
 
     if chat_type == "private":
+
+        user = getUser(user_id)
+        _ = set_language(user["language"])
+
         places = getPlacesByLocation(location.latitude, location.longitude, 200)
         logging.debug(places)
         filtered_places = []

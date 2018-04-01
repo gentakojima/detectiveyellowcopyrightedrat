@@ -216,6 +216,8 @@ def format_message(raid):
     ordering = "addedtime" if group["listorder"] == 0 else "teamlevel"
     gente = getRaidPeople(raid["id"], ordering)
 
+    _ = set_language(group["language"])
+
     if "edited" in raid.keys() and raid["edited"]>0:
         text_edited = " " + _("<em>(editada)</em>")
     else:
@@ -400,7 +402,7 @@ def update_raids_status(bot):
         try:
             reply_markup = get_keyboard(r)
             group = getGroup(r["grupo_id"])
-            set_language(group["language"])
+            _ = set_language(group["language"])
             updated = update_message(r["grupo_id"], r["message"], reply_markup, bot)
             logging.debug(updated)
         except Exception as e:
@@ -415,7 +417,7 @@ def update_validations_status(bot):
         logging.debug("Sending notification for validation ID %s, user ID %s" % (v["id"], v["usuario_id"]))
         try:
             user = getUser(v["usuario_id"])
-            set_language(user["language"])
+            _ = set_language(user["language"])
             bot.sendMessage(chat_id=v["usuario_id"], text=_("⚠ El proceso de validación pendiente ha caducado porque han pasado 6 horas desde que empezó. Si quieres validarte, debes volver a empezar el proceso."), parse_mode=telegram.ParseMode.MARKDOWN)
         except Exception as e:
             logging.debug("supportmethods:update_validations_status error: %s" % str(e))
@@ -442,7 +444,7 @@ def auto_refloat(bot):
         logging.debug("supportmethods:auto_refloat auto refloat group %s %s" % (g["id"],g["title"]))
         updateLastAutorefloat(g["id"])
         group = getGroup(g["id"])
-        set_language(group["language"])
+        _ = set_language(group["language"])
         intwohours_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) + timedelta(minutes = 90)
         tenminsago_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes = 9)
         fifminsago_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes = 15)
@@ -477,7 +479,7 @@ def auto_ranking(bot):
     groups = getAutorankingGroups()
     logging.debug("supportmethods:auto_ranking testing for %i groups..." % len(groups))
     for g in groups:
-        set_language(g["language"])
+        _ = set_language(g["language"])
         (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods(g["timezone"])
         if g["rankingweek"] > 0:
             logging.debug("supportmethods:auto_ranking testing weekly auto ranking group %s %s" % (g["id"],g["title"]))
@@ -646,6 +648,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
 def get_settings_keyboard(chat_id, keyboard="main"):
     logging.debug("supportmethods:get_settings_keyboard")
     group = getGroup(chat_id)
+    _ = set_language(group["language"])
     if group["alerts"] == 1:
         alertas_text = "✅ " + _("Permitir configurar alertas")
     else:
@@ -942,6 +945,7 @@ def get_keyboard(raid):
     logging.debug("supportmethods:get_keyboard")
     global iconthemes
     group = getGroup(raid["grupo_id"])
+    _ = set_language(group["language"])
     if raid["status"] == "started" or raid["status"] == "waiting":
         icons = iconthemes[group["icontheme"]]
         button_voy = InlineKeyboardButton("🙋" + _("Voy"), callback_data='voy')
@@ -992,6 +996,7 @@ def update_settings_message_timed(chat_id, sleep_time, bot):
 def update_settings_message(chat_id, bot, keyboard = "main"):
     logging.debug("supportmethods:update_settings_message: %s %s" % (chat_id, keyboard))
     group = getGroup(chat_id)
+    _ = set_language(group["language"])
 
     settings_markup = get_settings_keyboard(chat_id, keyboard = keyboard)
     if keyboard == "main":
@@ -1015,9 +1020,9 @@ def edit_check_private(chat_id, chat_type, user_username, command, bot):
         user_text = "@%s " % ensure_escaped(user_username) if user_username is not None else ""
         group = getGroup(chat_id)
         if group is not None:
-            set_language(group["language"])
+            _ = set_language(group["language"])
         else:
-            set_language("es_ES")
+            _ = set_language("es_ES")
         text = _("{0}El comando `/{1}` solo funciona por privado.\n\n_(Este mensaje se borrará en unos segundos)_").format(user_text, command)
         sent_message = bot.sendMessage(chat_id=chat_id, text=text,parse_mode=telegram.ParseMode.MARKDOWN)
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
@@ -1503,8 +1508,7 @@ def set_language(lang):
     logging.debug("supportmethods:set_language: %s" % lang)
     if lang in available_languages.keys():
         logging.debug("supportmethods:set_language Installing language")
-        available_languages[lang].install()
-        return True
+        return available_languages[lang].gettext
     else:
         logging.debug("supportmethods:set_language Language not available")
-        return False
+        return available_languages["es_ES"].gettext
