@@ -444,7 +444,6 @@ def auto_refloat(bot):
         logging.debug("supportmethods:auto_refloat auto refloat group %s %s" % (g["id"],g["title"]))
         updateLastAutorefloat(g["id"])
         group = getGroup(g["id"])
-        _ = set_language(group["language"])
         intwohours_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) + timedelta(minutes = 90)
         tenminsago_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes = 9)
         fifminsago_datetime = datetime.now(timezone(group["timezone"])).replace(tzinfo=timezone(group["timezone"])) - timedelta(minutes = 15)
@@ -479,7 +478,6 @@ def auto_ranking(bot):
     groups = getAutorankingGroups()
     logging.debug("supportmethods:auto_ranking testing for %i groups..." % len(groups))
     for g in groups:
-        _ = set_language(g["language"])
         (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end) = ranking_time_periods(g["timezone"])
         if g["rankingweek"] > 0:
             logging.debug("supportmethods:auto_ranking testing weekly auto ranking group %s %s" % (g["id"],g["title"]))
@@ -500,6 +498,7 @@ def auto_ranking(bot):
 
 def ranking_text(group, startdate, enddate, type="week"):
     logging.debug("supportmethods:ranking_text")
+    _ = set_language(group["language"])
     # Group name
     if group["alias"] is not None:
         group_text = "<a href='https://t.me/%s'>%s</a>" % (group["alias"],html.escape(group["title"]))
@@ -567,6 +566,7 @@ def send_edit_instructions(group, raid, user_id, bot):
     what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
     what_day = format_text_day(raid["timeraid"], group["timezone"])
     day = extract_day(raid["timeraid"], group["timezone"])
+    _ = set_language(group["language"])
     if group["refloat"] == 1 or is_admin(raid["grupo_id"], user_id, bot):
         text_refloat="\n" + _("🎈 *Reflotar incursión*: `/reflotar`")
     else:
