@@ -19,7 +19,7 @@ import logging
 import gettext
 
 from supportmethods import delete_message, edit_check_private, extract_update_info, ensure_escaped
-from storagemethods import getAlerts, getPlace, getGroup, isBanned, delAlert, addAlert, clearAlerts, getPlacesByLocation, getGroupsByUser
+from storagemethods import getAlerts, getPlace, getGroup, isBanned, delAlert, addAlert, clearAlerts, getPlacesByLocation, getGroupsByUser, getUser
 
 
 def alerts(bot, update, args=None):
