@@ -151,8 +151,8 @@ def send_alerts(raid, bot):
     alerts = getAlertsByPlace(raid["gimnasio_id"])
     group = getGroup(raid["grupo_id"])
     if group["alerts"] == 1:
-        what_text = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-        what_day = format_text_day(raid["timeraid"], group["timezone"])
+        what_text = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
+        what_day = format_text_day(raid["timeraid"], group["timezone"], langfunc=_)
         if group["alias"] is not None:
             incursion_text = "<a href='https://t.me/%s/%s'>incursión</a>" % (group["alias"], raid["message"])
             group_text =  "<a href='https://t.me/%s'>%s</a>" % (group["alias"], html.escape(group["title"]))
@@ -246,8 +246,8 @@ def format_message(raid):
             gym_emoji="❓"
     else:
         gym_emoji=""
-    what_text = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-    what_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+    what_text = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
+    what_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
     if creador["username"] is not None:
         if creador["trainername"] is not None:
             created_text = "\n" + _("Creada por <a href='https://t.me/{0}'>{1}</a>{2}{3}").format(creador["username"], creador["trainername"], text_edited, text_refloated)
@@ -351,7 +351,9 @@ def format_message(raid):
                 text = text + "\n%s➖ - - <a href='https://t.me/%s'>@%s</a>%s%s%s" % (estoy_text,user["username"],user["username"],lotengo_text,lateadded_text,plus_text)
     return text
 
-def format_text_pokemon(pokemon, egg, format="markdown"):
+def format_text_pokemon(pokemon, egg, format="markdown", langfunc=None):
+    if langfunc is not None:
+        _ = langfunc
     if pokemon is not None:
         what_text = "de <b>%s</b>" % pokemon if format == "html" else "de *%s*" % pokemon
     else:
@@ -361,8 +363,10 @@ def format_text_pokemon(pokemon, egg, format="markdown"):
             what_text = egg.replace("N",_("de <b>nivel") + " ") + "</b>" if format == "html" else egg.replace("N",_("de *nivel") + " ") + "*"
     return what_text
 
-def format_text_day(timeraid, tzone, format="markdown"):
+def format_text_day(timeraid, tzone, format="markdown", langfunc=None):
     logging.debug("supportmethods:format_text_day %s %s" % (timeraid, tzone))
+    if langfunc is not None:
+        _ = langfunc
     try:
         raid_datetime = datetime.strptime(timeraid,"%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(tzone))
     except:
@@ -376,8 +380,10 @@ def format_text_day(timeraid, tzone, format="markdown"):
         what_day = ""
     return what_day
 
-def format_text_creating(creator):
+def format_text_creating(creator, langfunc=None):
     logging.debug("supportmethods:format_text_creating");
+    if langfunc is not None:
+        _ = langfunc
     if creator is not None and creator["username"] is not None:
         if creator["trainername"] is not None:
             creating_text = _("<a href='https://t.me/{0}'>{1}</a> está creando una incursión...").format(creator["username"], creator["trainername"])
@@ -563,10 +569,11 @@ def error_callback(bot, update, error):
         logging.debug("TELEGRAM ERROR: Unknown - %s" % error)
 
 def send_edit_instructions(group, raid, user_id, bot):
-    what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
-    what_day = format_text_day(raid["timeraid"], group["timezone"])
-    day = extract_day(raid["timeraid"], group["timezone"])
     _ = set_language(group["language"])
+    what_text = format_text_pokemon(raid["pokemon"], raid["egg"], langfunc=_)
+    what_day = format_text_day(raid["timeraid"], group["timezone"], langfunc=_)
+    day = extract_day(raid["timeraid"], group["timezone"])
+
     if group["refloat"] == 1 or is_admin(raid["grupo_id"], user_id, bot):
         text_refloat="\n" + _("🎈 *Reflotar incursión*: `/reflotar`")
     else:
@@ -601,54 +608,57 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
     if people is None:
         return
     if group["alias"] is not None:
-        incursion_text = "<a href='https://t.me/%s/%s'>incursión</a>" % (group["alias"], raid["message"])
+        incursion_text = _("<a href='https://t.me/{0}/{1}'>incursión</a>").format(group["alias"], raid["message"])
     else:
-        incursion_text = "incursión"
+        incursion_text = _("incursión")
     for p in people:
         if p["username"] == user_username or p["novoy"] > 0:
             continue
         try:
-            user_text = "@%s" % user_username if user_username is not None else "Se"
+            user_text = "@%s" % user_username if user_username is not None else _("Se")
             if warntype == "cancelar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "❌ %s ha <b>cancelado</b> la %s %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+                text = _("❌ {0} ha <b>cancelado</b> la {1} {2} a las {3} en {4}").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "descancelar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha <b>descancelado</b> la %s %s a las %s en %s" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+                text = _("⚠️ {0} ha <b>descancelado</b> la {1} {2} a las {3} en {4}").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "borrar":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "🚫 %s ha <b>borrado</b> la incursión %s a las %s en %s" % (user_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+                text = _("🚫 {0} ha <b>borrado</b> la incursión {1} a las {2} en {3}").format(user_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarhora":
-                text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+                text_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
                 if text_day != "":
                     text_day = " " + text_day
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha cambiado la hora de la %s %s en %s para las <b>%s</b>%s" % (user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeraid"]), text_day)
+                text = _("⚠️ {0} ha cambiado la hora de la {1} {2} en {3} para las <b>{4}</b>{5}").format(user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeraid"]), text_day)
             elif warntype == "cambiarhorafin":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha cambiado la hora a la que se termina la %s %s en %s a las <b>%s</b> (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
+                text = _("⚠️ {0} ha cambiado la hora a la que se termina la {1} {2} en {3} a las <b>{4}</b> (¡ojo, la incursión sigue programada para la misma hora: {5}!)").format(user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
             elif warntype == "borrarhorafin":
-                text = "⚠️ %s ha borrado la hora a la que se termina la %s %s en %s (¡ojo, la incursión sigue programada para la misma hora: %s!)" % (user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]))
+                text = _("⚠️ {0} ha borrado la hora a la que se termina la {1} {2} en {3} (¡ojo, la incursión sigue programada para la misma hora: {4}!)").format(user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]))
             elif warntype == "cambiargimnasio":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha cambiado el gimnasio de la %s %s para las %s a <b>%s</b>" % (user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
+                text = _("⚠️ {0} ha cambiado el gimnasio de la {1} {2} para las {3} a <b>{4}</b>").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarpokemon":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-                text = "⚠️ %s ha cambiado la %s para las %s en %s a incursión %s" % (user_text, incursion_text, extract_time(raid["timeraid"]), raid["gimnasio_text"], text_pokemon)
+                text = _("⚠️ {0} ha cambiado la {1} para las {2} en {3} a incursión {4}").format(user_text, incursion_text, extract_time(raid["timeraid"]), raid["gimnasio_text"], text_pokemon)
             bot.sendMessage(chat_id=p["id"], text=text, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
             warned.append(p["username"])
         except Exception as e:
             logging.debug("supportmethods:warn_people error sending message to %s: %s" % (p["username"],str(e)))
             notwarned.append(p["username"])
     if len(warned)>0:
-        bot.sendMessage(chat_id=chat_id, text="He avisado por privado a: @%s" % ensure_escaped(", @".join(warned)), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("(He avisado por privado a: @{0}").format(ensure_escaped(", @".join(warned))), parse_mode=telegram.ParseMode.MARKDOWN)
     if len(notwarned)>0:
-        bot.sendMessage(chat_id=chat_id, text="No he podido avisar a: @%s" % ensure_escaped(", @".join(notwarned)), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("No he podido avisar a: @{0}").format(ensure_escaped(", @".join(notwarned))), parse_mode=telegram.ParseMode.MARKDOWN)
 
-def get_settings_keyboard(chat_id, keyboard="main"):
+def get_settings_keyboard(chat_id, keyboard="main", langfunc=None):
     logging.debug("supportmethods:get_settings_keyboard")
+
     group = getGroup(chat_id)
-    _ = set_language(group["language"])
+    if langfunc is not None:
+        _ = langfunc
+
     if group["alerts"] == 1:
         alertas_text = "✅ " + _("Permitir configurar alertas")
     else:
@@ -745,7 +755,7 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     icontheme_text = "{0}{1}{2} ".format(icons["Rojo"],icons["Azul"],icons["Amarillo"]) + _("Tema de iconos")
 
     if keyboard == "main":
-        settings_keyboard = [[InlineKeyboardButton(_("Funcionamiento del grupo/canal »"), callback_data='settings_goto_behaviour')], [InlineKeyboardButton(_("Comandos disponibles para usuarios »"), callback_data='settings_goto_commands')], [InlineKeyboardButton(_("Opciones de vista de incursiones »"), callback_data='settings_goto_raids')], [InlineKeyboardButton(_("Funcionamiento de incursiones »"), callback_data='settings_goto_raidbehaviour')], [InlineKeyboardButton(_("Funcionamiento de rankings »"), callback_data='settings_goto_ranking')], [InlineKeyboardButton("Terminado", callback_data='settings_done')]]
+        settings_keyboard = [[InlineKeyboardButton(_("Funcionamiento del grupo/canal »"), callback_data='settings_goto_behaviour')], [InlineKeyboardButton(_("Comandos disponibles para usuarios »"), callback_data='settings_goto_commands')], [InlineKeyboardButton(_("Opciones de vista de incursiones »"), callback_data='settings_goto_raids')], [InlineKeyboardButton(_("Funcionamiento de incursiones »"), callback_data='settings_goto_raidbehaviour')], [InlineKeyboardButton(_("Funcionamiento de rankings »"), callback_data='settings_goto_ranking')], [InlineKeyboardButton(_("Terminado"), callback_data='settings_done')]]
     elif keyboard == "behaviour":
         settings_keyboard = [[InlineKeyboardButton(locations_text, callback_data='settings_locations')], [InlineKeyboardButton(alertas_text, callback_data='settings_alertas')], [InlineKeyboardButton(babysitter_text, callback_data='settings_babysitter')], [InlineKeyboardButton(validationrequired_text, callback_data='settings_validationrequired')], [InlineKeyboardButton(refloatauto_text, callback_data='settings_refloatauto')], [InlineKeyboardButton(_("« Menú principal"), callback_data='settings_goto_main')]]
     elif keyboard == "commands":
@@ -760,11 +770,14 @@ def get_settings_keyboard(chat_id, keyboard="main"):
     settings_markup = InlineKeyboardMarkup(settings_keyboard)
     return settings_markup
 
-def get_pokemons_keyboard():
+def get_pokemons_keyboard(langfunc=None):
     logging.debug("supportmethods:get_pokemons_keyboard")
     keyboard = []
     current_pokemons = getCurrentPokemons()
     maxpokes = min(12,len(current_pokemons))
+
+    if langfunc is not None:
+        _ = langfunc
 
     for i in range(0, maxpokes ,3):
         keyboard_row = [InlineKeyboardButton(current_pokemons[i]["pokemon"], callback_data="iraid_pokemon_%s" % current_pokemons[i]["pokemon"])]
@@ -779,11 +792,14 @@ def get_pokemons_keyboard():
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
-def get_gyms_keyboard(group_id, page=0, zone=None, order="activity"):
+def get_gyms_keyboard(group_id, page=0, zone=None, order="activity", langfunc=None):
     logging.debug("supportmethods:get_gyms_keyboard %s %s" % (group_id, page))
     keyboard = []
     current_gyms = getCurrentGyms(group_id, zone, order=order)
     maxgyms = min(14*page+13, len(current_gyms))
+
+    if langfunc is not None:
+        _ = langfunc
 
     for i in range(page*14, maxgyms,2):
         keyboard_row = [InlineKeyboardButton(current_gyms[i]["name"], callback_data="iraid_gym_%s" % current_gyms[i]["id"])]
@@ -803,10 +819,13 @@ def get_gyms_keyboard(group_id, page=0, zone=None, order="activity"):
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
-def get_zones_keyboard(group_id, order="activity"):
+def get_zones_keyboard(group_id, order="activity", langfunc=None):
     logging.debug("supportmethods:get_zones_keyboard %s" % (group_id))
     keyboard = []
     zones = getZones(group_id, order=order)
+
+    if langfunc is not None:
+        _ = langfunc
 
     if len(zones) == 0:
         return False
@@ -822,9 +841,12 @@ def get_zones_keyboard(group_id, order="activity"):
 
     return reply_markup
 
-def get_days_keyboard(tz):
+def get_days_keyboard(tz, langfunc=None):
     logging.debug("supportmethods:get_days_keyboard")
     keyboard = []
+
+    if langfunc is not None:
+        _ = langfunc
 
     basedt = datetime.now(timezone(tz))
     minute = math.floor(basedt.minute/10)*10
@@ -847,10 +869,13 @@ def get_days_keyboard(tz):
     return reply_markup
     pass
 
-def get_times_keyboard(tz, date=None, offset=False):
+def get_times_keyboard(tz, date=None, offset=False, langfunc=None):
     logging.debug("supportmethods:get_times_keyboard")
     keyboard = []
     dts = []
+
+    if langfunc is not None:
+        _ = langfunc
 
     nowdt = datetime.now(timezone(tz))
     try:
@@ -909,10 +934,13 @@ def get_times_keyboard(tz, date=None, offset=False):
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
-def get_endtimes_keyboard(timeraid, offset=False):
+def get_endtimes_keyboard(timeraid, offset=False, langfunc=None):
     logging.debug("supportmethods:get_endtimes_keyboard")
     keyboard = []
     dts = []
+
+    if langfunc is not None:
+        _ = langfunc
 
     basedt = timeraid
     minute = math.floor(basedt.minute/10)*10
@@ -998,7 +1026,7 @@ def update_settings_message(chat_id, bot, keyboard = "main"):
     group = getGroup(chat_id)
     _ = set_language(group["language"])
 
-    settings_markup = get_settings_keyboard(chat_id, keyboard = keyboard)
+    settings_markup = get_settings_keyboard(chat_id, keyboard=keyboard, langfunc=_)
     if keyboard == "main":
         text = _("Elige una categoría para ver las opciones disponibles. Cuando termines, pulsa el botón <b>Terminado</b> para borrar el mensaje.")
     elif keyboard == "raids":
@@ -1495,20 +1523,26 @@ def ranking_time_periods(tz):
     lastmonth_end = now.replace(hour=23,minute=59) - timedelta(days=now.day)
     return (lastweek_start, lastweek_end, lastmonth_start, lastmonth_end)
 
-available_languages = {}
-available_languages["gl_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["gl_ES"], fallback=True)
-available_languages["es_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["es_ES"], fallback=True)
-available_languages["ca_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ca_ES"], fallback=True)
-available_languages["it_IT"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["it_IT"], fallback=True)
-available_languages["ast_ES"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ast_ES"], fallback=True)
-available_languages["pt_PT"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["pt_PT"], fallback=True)
-available_languages["en_US"] = gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["en_US"], fallback=True)
+available_languages = {
+    "es_ES": {
+        "name": "Español (Spanish)",
+        "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["es_ES"], fallback=True)
+    },
+    "ca_ES": {
+        "name": "Catalá (Catalan)",
+        "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ca_ES"], fallback=True)
+    },
+    "pt_PT": {
+        "name": "Português (Portuguese)",
+        "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["pt_PT"], fallback=True)
+    }
+}
 
 def set_language(lang):
     logging.debug("supportmethods:set_language: %s" % lang)
     if lang in available_languages.keys():
         logging.debug("supportmethods:set_language Installing language")
-        return available_languages[lang].gettext
+        return available_languages[lang]["gettext"].gettext
     else:
         logging.debug("supportmethods:set_language Language not available")
-        return available_languages["es_ES"].gettext
+        return available_languages["es_ES"]["gettext"].gettext

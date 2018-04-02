@@ -70,7 +70,7 @@ logging.basicConfig(filename=logdir+'/debug.log', format='%(asctime)s %(message)
 logging.info("--------------------- Starting bot! -----------------------")
 
 # Set default language
-available_languages["es_ES"].install()
+available_languages["es_ES"]["gettext"].install()
 
 updater = Updater(token=config["telegram"]["token"], workers=10)
 dispatcher = updater.dispatcher
@@ -155,8 +155,8 @@ def register(bot, update):
     bot.sendMessage(chat_id=chat_id, text=_("¿Cómo es el nombre de entrenador que aparece en tu perfil del juego?\n\n_Acabas de iniciar el proceso de validación. Debes completarlo antes de 6 horas, o caducará. Si te equivocas y deseas volver a empezar, debes esperar esas 6 horas._"), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def settimezone(bot, update, args=None):
-    logging.debug("detectivepikachubot:settimezone: %s %s %s" % (bot, update, args))
+def timezonecmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:timezonecmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     chat_title = message.chat.title
     group_alias = None
@@ -181,7 +181,8 @@ def settimezone(bot, update, args=None):
     _ = set_language(group["language"])
 
     if args is None or len(args)!=1 or len(args[0])<3 or len(args[0])>60:
-        bot.sendMessage(chat_id=chat_id, text=_("❌ Debes pasarme un nombre de zona horaria en inglés, por ejemplo, `America/Montevideo` o `Europe/Madrid`."), parse_mode=telegram.ParseMode.MARKDOWN)
+        now = datetime.now(timezone(group["timezone"])).strftime("%H:%M")
+        bot.sendMessage(chat_id=chat_id, text=_("🕒 Zona horaria actual: *{0}*\nHora: *{1}*").format(group["timezone"], now), parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
     tz = searchTimezone(args[0])
@@ -190,9 +191,8 @@ def settimezone(bot, update, args=None):
         group["title"] = chat_title
         group["alias"] = group_alias
         saveGroup(group)
-        bot.sendMessage(chat_id=chat_id, text=_("👌 Establecida zona horaria *{0}*.").format(group["timezone"]), parse_mode=telegram.ParseMode.MARKDOWN)
         now = datetime.now(timezone(group["timezone"])).strftime("%H:%M")
-        bot.sendMessage(chat_id=chat_id, text=_("🕒 Comprueba que la hora sea correcta: {0}").format(now), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("👌 Establecida zona horaria *{0}*.\n🕒 Comprueba que la hora sea correcta: *{1}*").format(group["timezone"], now), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha encontrado ninguna zona horaria válida con ese nombre."), parse_mode=telegram.ParseMode.MARKDOWN)
 
@@ -241,8 +241,8 @@ def settalkgroup(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text=_("👌 Eliminada la referencia al grupo de charla."), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def setspreadsheet(bot, update, args=None):
-    logging.debug("detectivepikachubot:setspreadsheet: %s %s %s" % (bot, update, args))
+def spreadsheetcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:spreadsheetcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     chat_title = message.chat.title
     group_alias = None
@@ -634,9 +634,11 @@ def channelCommands(bot, update):
         command = m.group(1).lower()
         logging.debug("detectivepikachubot:channelCommands: Possible command %s" % command)
         if command == "setspreadsheet" or command == "spreadsheet":
-            setspreadsheet(bot, update, args)
+            spreadsheetcmd(bot, update, args)
         elif command == "settimezone" or command == "timezone":
-            settimezone(bot, update, args)
+            timezonecmd(bot, update, args)
+        elif command == "setlanguage" or command == "language":
+            languagecmd(bot, update, args)
         elif command == "refresh":
             refresh(bot, update, args)
         elif command == "settings":
@@ -713,18 +715,59 @@ def settings(bot, update):
     group["alias"] = group_alias
     group["title"] = chat_title
 
-    settings_markup = get_settings_keyboard(chat_id)
+    settings_markup = get_settings_keyboard(chat_id, langfunc=_)
     message = bot.sendMessage(chat_id=chat_id, text=_("Cargando preferencias del grupo. Un momento..."))
     group["settings_message"] = message.message_id
     saveGroup(group)
     Thread(target=update_settings_message_timed, args=(chat_id, 1, bot)).start()
 
 @run_async
-def setlanguage(bot, update):
-    logging.debug("detectivepikachubot:setlanguage: %s %s" % (bot, update))
+def languagecmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:languagecmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     chat_title = message.chat.title
-    pass
+    group_alias = None
+    if hasattr(message.chat, 'username') and message.chat.username is not None:
+        group_alias = message.chat.username
+
+    if chat_type not in ["channel","private"] and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
+        return
+
+    if chat_type == "private":
+        user = getUser(user_id)
+        _ = set_language(user["language"])
+        bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos"))
+        return
+
+    try:
+        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+    except:
+        pass
+
+    group = getGroup(chat_id)
+    _ = set_language(group["language"])
+
+    if args is None or len(args)!=1 or len(args[0])<3 or len(args[0])>60:
+        avlangs = ", ".join([available_languages[i]["name"] for i in available_languages.keys()])
+        curlang = available_languages[group["language"]]["name"]
+        bot.sendMessage(chat_id=chat_id, text=_("💬 Idioma actual: *{0}*\nIdiomas disponibles: _{1}_").format(curlang, avlangs), parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+
+    chosenlang = None
+    wantedlang = args[0]
+    for l in available_languages.keys():
+        if re.search("%s" % unidecode(args[0]), unidecode(available_languages[l]["name"]), flags=re.IGNORECASE) != None:
+            chosenlang = l
+
+    if chosenlang is not None:
+        group["language"] = chosenlang
+        group["title"] = chat_title
+        group["alias"] = group_alias
+        saveGroup(group)
+        curlang = available_languages[group["language"]]["name"]
+        bot.sendMessage(chat_id=chat_id, text=_("👌 Establecido idioma *{0}*.").format(curlang), parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha encontrado ningún idioma válido con ese nombre."), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
 def list(bot, update):
@@ -803,7 +846,7 @@ def raids(bot, update):
                 what_text = "<b>%s</b>" % r["pokemon"]
             else:
                 what_text= r["egg"].replace("N",_("<b>Nivel") + " ").replace("EX",_("<b>EX")) + "</b>"
-            what_day = format_text_day(r["timeraid"], group["timezone"], "html")
+            what_day = format_text_day(r["timeraid"], group["timezone"], "html", langfunc=_)
             if creador["username"] is not None:
                 created_text = " por @%s" % (creador["username"])
             if is_admin(r["grupo_id"], user_id, bot):
@@ -1080,11 +1123,11 @@ def raid(bot, update, args=None):
 
     currgyms = getCurrentGyms(chat_id)
     if (len(args) == 0 or args == None) and len(currgyms) >= 2 and group["locations"] == 1:
-        keyboard = get_pokemons_keyboard()
+        keyboard = get_pokemons_keyboard(langfunc=_)
         if chat_type != "channel":
-            creating_text = format_text_creating(thisuser)
+            creating_text = format_text_creating(thisuser, langfunc=_)
         else:
-            creating_text = format_text_creating(None)
+            creating_text = format_text_creating(None, langfunc=_)
         sent_message = bot.sendMessage(chat_id=chat_id, text=_("🤔 {0}\n\nElige el <b>Pokémon</b> o el huevo del que quieres realizar la incursión. Si no está en la lista, pulsa <i>Cancelar</i> y créala manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>").format(creating_text), reply_markup=keyboard, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
         current_raid = {}
@@ -1475,7 +1518,7 @@ def cambiarhora(bot, update, args=None):
                 saveRaid(raid)
                 reply_markup = get_keyboard(raid)
                 update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
-                what_day = format_text_day(raid["timeraid"], group["timezone"])
+                what_day = format_text_day(raid["timeraid"], group["timezone"], langfunc=_)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha cambiado la hora de la incursión `{0}` a las *{1}* {2}correctamente!").format(raid["id"], extract_time(raid["timeraid"]), what_day), parse_mode=telegram.ParseMode.MARKDOWN)
                 warn_people("cambiarhora", raid, user_username, user_id, bot)
@@ -1821,7 +1864,7 @@ def cambiarpokemon(bot, update, args=None):
                     saveRaid(raid)
                     reply_markup = get_keyboard(raid)
                     update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
-                    what_text = format_text_pokemon(raid["pokemon"], raid["egg"])
+                    what_text = format_text_pokemon(raid["pokemon"], raid["egg"], langfunc=_)
                     if user_id is not None:
                         bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha cambiado el Pokémon/nivel de la incursión `{0}` a incursión {1} correctamente!").format(raid["id"], what_text), parse_mode=telegram.ParseMode.MARKDOWN)
                     warn_people("cambiarpokemon", raid, user_username, user_id, bot)
@@ -2013,13 +2056,13 @@ def raidbutton(bot, update):
             else:
                 return
             saveRaid(raid)
-            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-            creating_text = format_text_creating(thisuser)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
+            creating_text = format_text_creating(thisuser, langfunc=_)
             if raid["egg"] != "EX":
-                reply_markup = get_times_keyboard(group["timezone"])
+                reply_markup = get_times_keyboard(group["timezone"], langfunc=_)
                 bot.edit_message_text(text=_("🤔 {0}\n\nHas escogido una incursión {1}. Ahora selecciona la hora a la que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>").format(creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
             else:
-                reply_markup = get_days_keyboard(group["timezone"])
+                reply_markup = get_days_keyboard(group["timezone"], langfunc=_)
                 bot.edit_message_text(text=_("🤔 {0}\n\nHas escogido una incursión {1}. Ahora selecciona el día en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>").format(creating_text, text_pokemon), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
         if re.match("^iraid_date_[0-9]{1,2}/00:[0-9]{1,2}$", data) != None:
@@ -2028,10 +2071,10 @@ def raidbutton(bot, update):
             saveRaid(raid)
             m2 = re.match("^iraid_date_[0-9]{1,2}/00:([0-9]{1,2})$", data)
             time_offset = False if m2.group(1) == "00" else True
-            reply_markup = get_times_keyboard(group["timezone"], date=raid["timeraid"], offset=time_offset)
-            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-            creating_text = format_text_creating(thisuser)
-            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            reply_markup = get_times_keyboard(group["timezone"], date=raid["timeraid"], offset=time_offset, langfunc=_)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
+            creating_text = format_text_creating(thisuser, langfunc=_)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
             if text_day != "":
                 text_day = " " + text_day
             text_time = extract_time(raid["timeraid"])
@@ -2041,17 +2084,17 @@ def raidbutton(bot, update):
             m = re.match("^iraid_time_([0-9]{1,2}/[0-9]{2}:[0-9]{2})$", data)
             raid["timeraid"] = parse_time(m.group(1), group["timezone"])
             saveRaid(raid)
-            reply_markup = get_gyms_keyboard(group["id"])
-            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-            creating_text = format_text_creating(thisuser)
-            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            reply_markup = get_gyms_keyboard(group["id"], langfunc=_)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
+            creating_text = format_text_creating(thisuser, langfunc=_)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
             if text_day != "":
                 text_day = " " + text_day
             text_time = extract_time(raid["timeraid"])
             gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
-            reply_markup = get_zones_keyboard(group["id"], gyms_ordering)
+            reply_markup = get_zones_keyboard(group["id"], gyms_ordering, langfunc=_)
             if reply_markup is False:
-                reply_markup = get_gyms_keyboard(group["id"], order=gyms_ordering)
+                reply_markup = get_gyms_keyboard(group["id"], order=gyms_ordering, langfunc=_)
                 bot.edit_message_text(text=_("🤔 {0}\n\nHas escogido una incursión {1}{2} a las <b>{3}</b>. Ahora selecciona el gimnasio en el que quieres crearla. Si no está en la lista, pulsa <i>Cancelar</i> y escribe el comando manualmente.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>").format(creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
             else:
                 bot.edit_message_text(text=_("🤔 {0}\n\nHas escogido una incursión {1}{2} a las <b>{3}</b>. Ahora selecciona la zona del gimnasio en el que quieres crearla.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>").format(creating_text, text_pokemon, text_day, text_time), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
@@ -2061,10 +2104,10 @@ def raidbutton(bot, update):
             raid["gimnasio_text"] = m.group(1)
             saveRaid(raid)
             gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
-            reply_markup = get_gyms_keyboard(group["id"], 0, m.group(1), order=gyms_ordering)
-            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-            creating_text = format_text_creating(thisuser)
-            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            reply_markup = get_gyms_keyboard(group["id"], 0, m.group(1), order=gyms_ordering, langfunc=_)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
+            creating_text = format_text_creating(thisuser, langfunc=_)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
             if text_day != "":
                 text_day = " " + text_day
             text_time = extract_time(raid["timeraid"])
@@ -2073,10 +2116,10 @@ def raidbutton(bot, update):
         if re.match("^iraid_gyms_page[1-9]$", data) != None:
             m = re.match("^iraid_gyms_page([1-9])$", data)
             gyms_ordering = "alphabetical" if group["raidcommandorder"] == 0 else "activity"
-            reply_markup = get_gyms_keyboard(group["id"], page=int(m.group(1))-1, zone=raid["gimnasio_text"], order=gyms_ordering)
-            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-            creating_text = format_text_creating(thisuser)
-            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            reply_markup = get_gyms_keyboard(group["id"], page=int(m.group(1))-1, zone=raid["gimnasio_text"], order=gyms_ordering, langfunc=_)
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
+            creating_text = format_text_creating(thisuser, langfunc=_)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
             if text_day != "":
                 text_day = " " + text_day
             text_time = extract_time(raid["timeraid"])
@@ -2088,14 +2131,14 @@ def raidbutton(bot, update):
             raid["gimnasio_id"] = gym["id"]
             raid["gimnasio_text"] = gym["desc"]
             saveRaid(raid)
-            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
-            creating_text = format_text_creating(thisuser)
-            text_day = format_text_day(raid["timeraid"], group["timezone"], "html")
+            text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
+            creating_text = format_text_creating(thisuser, langfunc=_)
+            text_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
             if text_day != "":
                 text_day = " " + text_day
             text_time = extract_time(raid["timeraid"])
             text_gym = gym["desc"]
-            reply_markup = get_endtimes_keyboard(raid["timeraid"])
+            reply_markup = get_endtimes_keyboard(raid["timeraid"], langfunc=_)
             bot.edit_message_text(text=_("🤔 {0}\n\nHas escogido una incursión {1}{2} a las <b>{3}</b> en <b>{4}</b>. Ahora selecciona la hora <b>a la que desaparece</b> el Pokémon.\n\n<i>(Este mensaje se borrará si no completas el proceso de creación en menos de un minuto)</i>").format(creating_text, text_pokemon, text_day, text_time, text_gym), chat_id=chat_id, message_id=message_id, reply_markup=reply_markup, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
         if re.match("^iraid_endtime_.+$", data) != None: # OLDCODE
@@ -2286,14 +2329,14 @@ dispatcher.add_handler(CommandHandler('register', register))
 dispatcher.add_handler(CommandHandler('profile', profile))
 dispatcher.add_handler(CommandHandler(['stats','ranking'], stats, pass_args=True))
 # Admin commands
-dispatcher.add_handler(CommandHandler(['setspreadsheet', 'spreadsheet'], setspreadsheet, pass_args=True))
-dispatcher.add_handler(CommandHandler(['settimezone', 'timezone'], settimezone, pass_args=True))
+dispatcher.add_handler(CommandHandler(['setspreadsheet', 'spreadsheet'], spreadsheetcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['settimezone', 'timezone'], timezonecmd, pass_args=True))
 dispatcher.add_handler(CommandHandler('settalkgroup', settalkgroup, pass_args=True))
 dispatcher.add_handler(CommandHandler('refresh', refresh))
 dispatcher.add_handler(CommandHandler('list', list))
 dispatcher.add_handler(CommandHandler(['raids','incursiones'], raids))
 dispatcher.add_handler(CommandHandler('settings', settings))
-dispatcher.add_handler(CommandHandler(['language','setlanguage'], setlanguage))
+dispatcher.add_handler(CommandHandler(['language','setlanguage'], languagecmd, pass_args=True))
 # Commands related to raids
 dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))
 dispatcher.add_handler(CommandHandler(['cancelar','cancel'], cancelar, pass_args=True))
