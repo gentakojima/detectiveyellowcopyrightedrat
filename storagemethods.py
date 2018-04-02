@@ -702,7 +702,7 @@ def getCurrentGyms(group_id, zone=None, order="activity"):
     db = getDbConnection()
     logging.debug("storagemethods:getCurrentPokemons")
     with db.cursor() as cursor:
-        limit = "56" if zone is None else "256"
+        limit = "56" if zone is None else "3000"
         sql_order = "ORDER BY count DESC, gimnasios.name ASC" if order == "activity" else "ORDER BY gimnasios.name ASC"
         sql = "SELECT count(DISTINCT incursiones.id) AS count, name, zones, gimnasios.id AS id \
             FROM gimnasios \
@@ -741,7 +741,7 @@ def getZones(group_id, order="activity"):
             AND gimnasios.grupo_id = %s \
             GROUP BY gimnasios.id \
             ORDER BY count DESC, gimnasios.name ASC \
-            LIMIT 0,256;"
+            LIMIT 0,3000;"
         cursor.execute(sql, (group_id))
         results = cursor.fetchall()
         for r in results:
