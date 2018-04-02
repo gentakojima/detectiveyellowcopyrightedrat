@@ -18,7 +18,7 @@ import telegram
 import logging
 import gettext
 
-from supportmethods import delete_message, edit_check_private, extract_update_info, ensure_escaped
+from supportmethods import delete_message, edit_check_private, extract_update_info, ensure_escaped, set_language
 from storagemethods import getAlerts, getPlace, getGroup, isBanned, delAlert, addAlert, clearAlerts, getPlacesByLocation, getGroupsByUser, getUser
 
 
