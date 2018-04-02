@@ -114,6 +114,10 @@ def pikaping(bot, update):
             bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
         except:
             pass
+
+    if isBanned(user_id):
+        return
+
     sent_message = bot.sendMessage(chat_id=update.message.chat_id, text="Pikapong! %ds" % (timediff.seconds), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
     if chat_type != "private":
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot)).start()
@@ -784,7 +788,7 @@ def list(bot, update):
     except:
         pass
 
-    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id) or is_banned(chat_id)):
+    if chat_type != "channel" and (not is_admin(chat_id, user_id, bot) or isBanned(user_id) or isBanned(chat_id)):
         return
 
     group = getGroup(chat_id)
