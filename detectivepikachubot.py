@@ -853,7 +853,7 @@ def raids(bot, update):
                 raid_emoji = "💥"
             else:
                 continue
-            text = _("\n{0} {1} {2}a las <b>{3}</b> en {4}<b>{5}</b>{6}{7} - {8} en {9}").format(raid_emoji, what_text, what_day, extract_time(r["timeraid"]), gym_emoji, r["gimnasio_text"], created_text, identifier_text, incursion_text, group_text)
+            text = "\n" + _("{0} {1} {2}a las <b>{3}</b> en {4}<b>{5}</b>{6}{7} - {8} en {9}").format(raid_emoji, what_text, what_day, extract_time(r["timeraid"]), gym_emoji, r["gimnasio_text"], created_text, identifier_text, incursion_text, group_text)
             output = output + text
     else:
         output = _("🐲 No hay incursiones activas en los grupos en los que has participado recientemente")
@@ -877,7 +877,14 @@ def profile(bot, update):
     if user is not None:
         text_alias = ("*%s*" % user["username"]) if user["username"] is not None else _("_Desconocido_")
         text_trainername = ("*%s*" % user["trainername"]) if user["trainername"] is not None else _("_Desconocido_")
-        text_team = ("*%s*" % user["team"]) if user["team"] is not None else _("_Desconocido_")
+        if user["team"] is None:
+            text_team = _("_Desconocido_")
+        elif user["team"] == "Rojo":
+            text_team = _("*Valor*")
+        elif user["team"] == "Azul":
+            text_team = _("*Sabiduría*")
+        elif user["team"] == "Amarillo":
+            text_team = _("*Instinto*")
         text_level = ("*%s*" % user["level"]) if user["level"] is not None else _("_Desconocido_")
         if user["banned"] == 1:
             text_validationstatus = _("*Baneada*")
