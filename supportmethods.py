@@ -696,9 +696,9 @@ def get_settings_keyboard(chat_id, keyboard="main", langfunc=None):
     else:
         validationrequired_text = "▪️ " + _("Validación obligatoria")
     if group["gymcommand"] == 1:
-        gymcommand_text = "✅ " + _("Consultar gimnasios (comando /gym)")
+        gymcommand_text = "✅ " + _("Consultar gimnasios (comando /buscar)")
     else:
-        gymcommand_text = "▪️ " + _("Consultar gimnasios (comando /gym)")
+        gymcommand_text = "▪️ " + _("Consultar gimnasios (comando /buscar)")
     if group["raidcommand"] == 1:
         raidcommand_text = "✅ " + _("Crear incursiones (comando /raid)")
     else:
