@@ -579,9 +579,11 @@ def refreshUsername(user_id, username):
         thisuser = {}
         thisuser["id"] = user_id
         thisuser["validation"] = "none"
+        saveUser(thisuser)
+        thisuser = getUser(user_id)
     if username is not None and username != "None":
         thisuser["username"] = username
-    saveUser(thisuser)
+        saveUser(thisuser)
     return thisuser
 
 def getUser(user_id, reconnect=True):
