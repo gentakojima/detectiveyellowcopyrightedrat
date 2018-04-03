@@ -729,31 +729,22 @@ def settings(bot, update):
 def languagecmd(bot, update, args=None):
     logging.debug("detectivepikachubot:languagecmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    chat_title = message.chat.title
-    group_alias = None
-    if hasattr(message.chat, 'username') and message.chat.username is not None:
-        group_alias = message.chat.username
+    user_username = message.from_user.username
 
     if chat_type not in ["channel","private"] and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
         return
 
     if chat_type == "private":
-        user = getUser(user_id)
-        _ = set_language(user["language"])
-        bot.sendMessage(chat_id=chat_id, text=_("❌ Este comando solo funciona en canales y grupos"))
-        return
+        user = refreshUsername(user_id, user_username)
+        entity = getUser(user_id)
+    else:
+        entity = getGroup(chat_id)
 
-    try:
-        bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
-    except:
-        pass
-
-    group = getGroup(chat_id)
-    _ = set_language(group["language"])
+    _ = set_language(entity["language"])
 
     if args is None or len(args)!=1 or len(args[0])<3 or len(args[0])>60:
         avlangs = ", ".join([available_languages[i]["name"] for i in available_languages.keys()])
-        curlang = available_languages[group["language"]]["name"]
+        curlang = available_languages[entity["language"]]["name"]
         bot.sendMessage(chat_id=chat_id, text=_("💬 Idioma actual: *{0}*\nIdiomas disponibles: _{1}_").format(curlang, avlangs), parse_mode=telegram.ParseMode.MARKDOWN)
         return
 
@@ -764,11 +755,12 @@ def languagecmd(bot, update, args=None):
             chosenlang = l
 
     if chosenlang is not None:
-        group["language"] = chosenlang
-        group["title"] = chat_title
-        group["alias"] = group_alias
-        saveGroup(group)
-        curlang = available_languages[group["language"]]["name"]
+        entity["language"] = chosenlang
+        if chat_type == "private":
+            saveWholeUser(entity)
+        else:
+            saveGroup(entity)
+        curlang = available_languages[entity["language"]]["name"]
         bot.sendMessage(chat_id=chat_id, text=_("👌 Establecido idioma *{0}*.").format(curlang), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha encontrado ningún idioma válido con ese nombre."), parse_mode=telegram.ParseMode.MARKDOWN)
