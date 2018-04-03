@@ -647,8 +647,8 @@ def channelCommands(bot, update):
             refresh(bot, update, args)
         elif command == "settings":
             settings(bot, update)
-        elif command == "gym":
-            gym(bot, update, args)
+        elif command == "search" or command == "buscar":
+            searchcmd(bot, update, args)
         elif command == "raid":
             raid(bot, update, args)
         elif command == "list":
@@ -1013,8 +1013,8 @@ def stats(bot, update, args = None):
             bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 @run_async
-def gym(bot, update, args=None):
-    logging.debug("detectivepikachubot:gym: %s %s %s" % (bot, update, args))
+def searchcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:searchcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -2355,7 +2355,7 @@ dispatcher.add_handler(CommandHandler('reflotar', reflotar, pass_args=True))
 dispatcher.add_handler(CommandHandler(['reflotartodo','reflotartodas'], reflotartodas, pass_args=True))
 dispatcher.add_handler(CommandHandler(['reflotaractivo','reflotaractivas'], reflotaractivas, pass_args=True))
 dispatcher.add_handler(CommandHandler(['reflotarhoy'], reflotarhoy, pass_args=True))
-dispatcher.add_handler(CommandHandler('gym', gym, pass_args=True))
+dispatcher.add_handler(CommandHandler(['buscar','search'], searchcmd, pass_args=True))
 # Commands related to alerts
 dispatcher.add_handler(MessageHandler(Filters.location, processLocation))
 dispatcher.add_handler(CommandHandler('alerts', alerts, pass_args=True))

@@ -181,7 +181,7 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 #### Comandos disponibles para usuarios ####
 
-1. **Consultar gimnasios (comando /gym)**. Si está activada, permite que los usuarios consulten localizaciones de los gimnasios. Opción desactivada por defecto.
+1. **Consultar gimnasios (comando /buscar)**. Si está activada, permite que los usuarios consulten localizaciones de los gimnasios. Opción desactivada por defecto.
 
 2. **Crear incursiones (comando /raid)**. Si está activada, permite que los usuarios creen incursiones. Opción activada por defecto.
 
@@ -254,9 +254,9 @@ Una vez tengas lista la hoja de cálculo, debes pulsar en el botón **Compartir*
 
 Una vez establecida, debes utilizar el comando `/refresh` para que la cargue. Cada vez que hagas cambios, debes volver a utilizar `/refresh` para recargar la lista. No es necesario volver a utilizar `/spreadsheet` a no ser que cambies la hoja de cálculo por otra.
 
-Se pueden probar las ubicaciones preguntando por ellas con el comando `/gym`. Por ejemplo:
+Se pueden probar las ubicaciones preguntando por ellas con el comando `/buscar`. Por ejemplo:
 
-    /gym león de boca abierta
+    /buscar león de boca abierta
 
 Para listar todos los gimnasios conocidos puedes usar el comando `/list`. Este comando puede mostrar la lista cortada si hay demasiados gimnasios, sobre 120 gimnasios o más.
 
