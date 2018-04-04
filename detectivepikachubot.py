@@ -743,16 +743,20 @@ def settings(bot, update):
 def languagecmd(bot, update, args=None):
     logging.debug("detectivepikachubot:languagecmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
-    user_username = message.from_user.username
 
     if chat_type not in ["channel","private"] and (not is_admin(chat_id, user_id, bot) or isBanned(user_id)):
         return
 
     if chat_type == "private":
+        user_username = message.from_user.username
         user = refreshUsername(user_id, user_username)
         entity = getUser(user_id)
     else:
         entity = getGroup(chat_id)
+        try:
+            bot.deleteMessage(chat_id=chat_id,message_id=message.message_id)
+        except:
+            pass
 
     _ = set_language(entity["language"])
 
