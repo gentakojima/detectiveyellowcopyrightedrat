@@ -779,6 +779,7 @@ def languagecmd(bot, update, args=None):
         else:
             saveGroup(entity)
         curlang = available_languages[entity["language"]]["name"]
+        _ = set_language(entity["language"])
         bot.sendMessage(chat_id=chat_id, text=_("👌 Establecido idioma *{0}*.").format(curlang), parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha encontrado ningún idioma válido con ese nombre."), parse_mode=telegram.ParseMode.MARKDOWN)
