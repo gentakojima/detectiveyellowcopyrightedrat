@@ -465,8 +465,15 @@ def joinedChat(bot, update):
                 group = getGroup(chat_id)
                 if group is None:
                     saveGroup({"id":chat_id, "title":message.chat.title})
-                message_text = _("¡Hola a todos los miembros de *{0}*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir.").format(ensure_escaped(chat_title))
-                Thread(target=send_message_timed, args=(chat_id, message_text, 3, bot)).start()
+                    message_text = "¡Hola! Antes de comenzar, elige el idioma.\nHi! Before getting started, please choose your language.\n"
+                    languages_keyboard = []
+                    for language in available_languages.keys():
+                        languages_keyboard.append([InlineKeyboardButton(available_languages[language]["name"], callback_data="language_%s" % language)])
+                    languages_markup = InlineKeyboardMarkup(languages_keyboard)
+                    Thread(target=send_message_timed, args=(chat_id, message_text, 3, bot, languages_markup)).start()
+                else:
+                    message_text = _("¡Hola a todos los miembros de *{0}*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir.").format(ensure_escaped(chat_title))
+                    Thread(target=send_message_timed, args=(chat_id, message_text, 3, bot)).start()
     except Exception as e:
         logging.debug("detectivepikachubot:joinedChat: Exception entering in %s: %s" % (chat_title,str(e)));
         pass
@@ -1079,11 +1086,13 @@ def raid(bot, update, args=None):
     if isBanned(chat_id):
         return
 
+    group = getGroup(chat_id)
+
     if chat_type != "channel":
         user_username = message.from_user.username
         if isBanned(user_id):
             return
-        thisuser = refreshUsername(user_id, user_username)
+        thisuser = refreshUsername(user_id, user_username, language=group["language"])
 
     if chat_type == "private":
         _ = set_language(thisuser["language"])
@@ -1091,7 +1100,6 @@ def raid(bot, update, args=None):
         return
 
     current_raid = {}
-    group = getGroup(chat_id)
 
     if group is None:
         _ = set_language("es_ES")
@@ -1891,13 +1899,12 @@ def raidbutton(bot, update):
     if isBanned(user_id) or isBanned(chat_id) or data == None:
         return
 
-    thisuser = refreshUsername(user_id, user_username)
-
     update_text = False
 
     logging.debug("detectivepikachubot:raidbutton:%s: %s %s" % (data, bot, update))
 
     group = getGroup(chat_id)
+    thisuser = refreshUsername(user_id, user_username, language=group["language"])
     _ = set_language(group["language"])
 
     if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
@@ -2041,6 +2048,19 @@ def raidbutton(bot, update):
                 bot.answerCallbackQuery(text=_("Para que te pueda enviar la ubicación, debes abrir un privado antes con @{0} y pulsar en «Iniciar»").format(config["telegram"]["botalias"]), callback_query_id=update.callback_query.id, show_alert="true")
         else:
             bot.answerCallbackQuery(text=_("La ubicación es desconocida"), callback_query_id=update.callback_query.id, show_alert="true")
+
+    # Choose language
+    if re.match("^language_.+", data) != None:
+        m = re.match("^language_(.+)", data)
+        lang = m.group(1)
+        if lang in available_languages.keys():
+            group["language"] = lang
+            saveGroup(group)
+            _ = set_language(group["language"])
+            bot.deleteMessage(chat_id=chat_id, message_id=message_id)
+            chat_title = query.message.chat.title
+            message_text = _("¡Hola a todos los miembros de *{0}*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir.").format(ensure_escaped(chat_title))
+            Thread(target=send_message_timed, args=(chat_id, message_text, 1, bot)).start()
 
     # Create raid interactively
     if re.match("^iraid_.+", data) != None:

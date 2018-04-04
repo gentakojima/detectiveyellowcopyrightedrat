@@ -563,22 +563,25 @@ def saveUser(user):
     db = getDbConnection()
     logging.debug("storagemethods:saveUser: %s" % (user))
     with db.cursor() as cursor:
-        sql = "INSERT INTO usuarios (id,username) VALUES (%s, %s) \
+        if "language" not in user.keys():
+            user["language"] = "es_ES"
+        sql = "INSERT INTO usuarios (id,username,language) VALUES (%s, %s, %s) \
         ON DUPLICATE KEY UPDATE username=%s;"
         if "username" not in user.keys():
             user["username"] = None
-        cursor.execute(sql, (user["id"], user["username"], user["username"]))
+        cursor.execute(sql, (user["id"], user["username"], user["language"], user["username"]))
     db.commit()
     db.close()
 
-def refreshUsername(user_id, username):
+def refreshUsername(user_id, username, language="es_ES"):
     db = getDbConnection()
-    logging.debug("storagemethods:refreshUsername: %s %s" % (user_id, username))
+    logging.debug("storagemethods:refreshUsername: %s %s %s" % (user_id, username, language))
     thisuser = getUser(user_id)
     if thisuser is None:
         thisuser = {}
         thisuser["id"] = user_id
         thisuser["validation"] = "none"
+        thisuser["language"] = language
         saveUser(thisuser)
         thisuser = getUser(user_id)
     if username is not None and username != "None":
