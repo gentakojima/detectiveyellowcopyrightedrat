@@ -355,7 +355,7 @@ def format_text_pokemon(pokemon, egg, format="markdown", langfunc=None):
     if langfunc is not None:
         _ = langfunc
     if pokemon is not None:
-        what_text = "de <b>%s</b>" % pokemon if format == "html" else "de *%s*" % pokemon
+        what_text = _("de <b>{0}</b>").format(pokemon) if format == "html" else _("de *{0}*").format(pokemon)
     else:
         if egg == "EX":
             what_text = _("<b>🌟EX</b>") if format == "html" else _("*🌟EX*")

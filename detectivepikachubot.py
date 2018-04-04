@@ -819,7 +819,7 @@ def raids(bot, update):
 
     raids = getActiveRaidsforUser(user_id)
     if len(raids) > 0:
-        output = _("🐲 Estas son las incursiones activas en los grupos en los que participas activamente:\n")
+        output = _("🐲 Estas son las incursiones activas en los grupos en los que participas activamente:") + "\n"
         for r in raids:
             creador = getCreadorRaid(r["id"])
             group = getGrupoRaid(r["id"])

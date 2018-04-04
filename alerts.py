@@ -46,15 +46,15 @@ def alerts(bot, update, args=None):
         text_message = _("🔔 No tienes ninguna alerta de incursión definida.")
 
     else:
-        text_message = _("🔔 Tienes definidas {0} alertas para los siguientes gimnasios:\n").format(len(alerts))
+        text_message = _("🔔 Tienes definidas {0} alertas para los siguientes gimnasios:").format(len(alerts)) + "\n"
 
         for alert in alerts:
             place = getPlace(alert["place_id"])
             group = getGroup(place["group_id"])
-            text_message = text_message + _("\n✅ `{0}` {1} - Grupo {2}").format(place["id"], ensure_escaped(place["desc"]), ensure_escaped(group["title"]))
+            text_message = text_message + "\n" + _("✅ `{0}` {1} - Grupo {2}").format(place["id"], ensure_escaped(place["desc"]), ensure_escaped(group["title"]))
 
-        text_message = text_message + _("\n\nPara borrar una alerta, envíame `/delalert` seguido del identificador numérico, o `/clearalerts` para borrarlas todas.")
-    text_message = text_message + _("\n\nPara añadir alertas de incursión nuevas, *envíame una ubicación* con gimnasios cercanos (_usando la función de Telegram de enviar ubicaciones_) y te explico.")
+        text_message = text_message + "\n\n" + _("Para borrar una alerta, envíame `/delalert` seguido del identificador numérico, o `/clearalerts` para borrarlas todas.")
+    text_message = text_message + "\n\n" + _("Para añadir alertas de incursión nuevas, *envíame una ubicación* con gimnasios cercanos (_usando la función de Telegram de enviar ubicaciones_) y te explico.")
     bot.send_message(chat_id=user_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
@@ -192,7 +192,7 @@ def processLocation(bot, update):
         if len(filtered_places) == 0:
             bot.sendMessage(chat_id=chat_id, text=_("❌ No se han encontrado gimnasios cerca de esta zona en grupos en los que hayas participado en una incursión recientemente. Ten en cuenta que el radio de búsqueda es de aproximadamente 180 metros."), parse_mode=telegram.ParseMode.MARKDOWN)
         else:
-            text_message = _("🗺 Se han encontrado los siguientes gimnasios:\n")
+            text_message = _("🗺 Se han encontrado los siguientes gimnasios:") + "\n"
             example_id = None
             alerts = getAlerts(user_id)
             alert_ids = []
@@ -207,5 +207,5 @@ def processLocation(bot, update):
                 else:
                     icon = "▪️"
                 text_message = text_message + "\n%s `%s` %s - Grupo %s" % (icon, place["id"], ensure_escaped(place["name"]), ensure_escaped(group["title"]))
-            text_message = text_message + _("\n\nPara añadir una alerta para alguno de estos gimnasios, envíame el comando `/addalert` seguido del identificador numérico.\n\nPor ejemplo:\n`/addalert {0}`").format(example_id)
+            text_message = text_message + "\n\n" + _("Para añadir una alerta para alguno de estos gimnasios, envíame el comando `/addalert` seguido del identificador numérico.\n\nPor ejemplo:\n`/addalert {0}`").format(example_id)
             bot.sendMessage(chat_id=chat_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
