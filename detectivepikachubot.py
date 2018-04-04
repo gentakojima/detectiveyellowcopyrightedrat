@@ -94,7 +94,13 @@ def start(bot, update):
         if user is not None:
             _ = set_language(user["language"])
         else:
-            _ = set_language("es_ES")
+            message_text = "¡Hola! Antes de comenzar, elige el idioma.\nHi! Before getting started, please choose your language."
+            languages_keyboard = []
+            for language in available_languages.keys():
+                languages_keyboard.append([InlineKeyboardButton(available_languages[language]["name"], callback_data="language_%s" % language)])
+            languages_markup = InlineKeyboardMarkup(languages_keyboard)
+            Thread(target=send_message_timed, args=(chat_id, message_text, 1, bot, languages_markup)).start()
+            return
         deletion_text = ""
     sent_message = bot.sendMessage(chat_id=update.message.chat_id, text=_("📖 ¡Echa un vistazo a <a href='{0}'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nEscríbeme por privado en @{1} el comando <code>/register</code>. En vez de eso, puedes preguntar <code>quién soy?</code> a @profesoroak_bot y reenviarme su respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @{2} el comando <code>/alerts</code>.{3}").format(config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"], deletion_text), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
     if chat_type != "private":
@@ -465,7 +471,7 @@ def joinedChat(bot, update):
                 group = getGroup(chat_id)
                 if group is None:
                     saveGroup({"id":chat_id, "title":message.chat.title})
-                    message_text = "¡Hola! Antes de comenzar, elige el idioma.\nHi! Before getting started, please choose your language.\n"
+                    message_text = "¡Hola! Antes de comenzar, elige tu idioma.\nHi! Before getting started, please choose your language."
                     languages_keyboard = []
                     for language in available_languages.keys():
                         languages_keyboard.append([InlineKeyboardButton(available_languages[language]["name"], callback_data="language_%s" % language)])
@@ -498,12 +504,12 @@ def processMessage(bot, update):
         return
 
     user = getUser(user_id)
-    if user is not None:
-        _ = set_language(user["language"])
-    else:
-        _ = set_language("es_ES")
 
     if chat_type == "private":
+        if user is not None:
+            _ = set_language(user["language"])
+        else:
+            _ = set_language("es_ES")
         # Are we in a validation process?
         validation = getCurrentValidation(user_id)
         if validation is not None:
@@ -615,6 +621,7 @@ def processMessage(bot, update):
             registerOak(bot, update)
     else:
         if group is not None and group["babysitter"] == 1 and not is_admin(chat_id, user_id, bot):
+            _ = set_language(group["language"])
             delete_message(chat_id, message.message_id, bot)
             if group["talkgroup"] is not None:
                 if re.match("@?[a-zA-Z]([a-zA-Z0-9_]+)$", group["talkgroup"]) is not None:
@@ -1904,8 +1911,9 @@ def raidbutton(bot, update):
     logging.debug("detectivepikachubot:raidbutton:%s: %s %s" % (data, bot, update))
 
     group = getGroup(chat_id)
-    thisuser = refreshUsername(user_id, user_username, language=group["language"])
-    _ = set_language(group["language"])
+    if group != None:
+        thisuser = refreshUsername(user_id, user_username, language=group["language"])
+        _ = set_language(group["language"])
 
     if (data in ["voy", "plus1", "plus1red", "plus1yellow", "plus1blue", "novoy", "estoy", "lotengo", "escapou", "llegotarde"]) \
         and (thisuser["username"] is None or thisuser["username"] == "None"):
@@ -2054,13 +2062,20 @@ def raidbutton(bot, update):
         m = re.match("^language_(.+)", data)
         lang = m.group(1)
         if lang in available_languages.keys():
-            group["language"] = lang
-            saveGroup(group)
-            _ = set_language(group["language"])
-            bot.deleteMessage(chat_id=chat_id, message_id=message_id)
-            chat_title = query.message.chat.title
-            message_text = _("¡Hola a todos los miembros de *{0}*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir.").format(ensure_escaped(chat_title))
-            Thread(target=send_message_timed, args=(chat_id, message_text, 1, bot)).start()
+            if chat_type == "private":
+                user = refreshUsername(user_id, user_username, language=lang)
+                user = getUser(user_id)
+                _ = set_language(lang)
+                bot.edit_message_text(text=_("Has escogido el idioma **{0}**. Si te has equivocado, utiliza `/language` para ver los idiomas disponibles y `/language idiomadeseado` para cambiar el idioma.").format(available_languages[lang]["name"]), chat_id=user_id, message_id=message_id, reply_markup=None, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
+                bot.sendMessage(chat_id=user_id, text=_("📖 ¡Echa un vistazo a <a href='{0}'>la ayuda</a> para enterarte de todas las funciones!\n\n🆕 <b>Crear incursión</b>\n<code>/raid Suicune 12:00 Alameda</code>\n\n❄️🔥⚡️ <b>Registrar nivel/equipo</b>\nEscríbeme por privado en @{1} el comando <code>/register</code>. En vez de eso, puedes preguntar <code>quién soy?</code> a @profesoroak_bot y reenviarme su respuesta.\n\n🔔 <b>Configurar alertas</b>\nEscríbeme por privado en @{2} el comando <code>/alerts</code>.{3}").format(config["telegram"]["bothelp"],config["telegram"]["botalias"],config["telegram"]["botalias"], ""), parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+            else:
+                group["language"] = lang
+                saveGroup(group)
+                _ = set_language(group["language"])
+                bot.deleteMessage(chat_id=chat_id, message_id=message_id)
+                chat_title = query.message.chat.title
+                message_text = _("¡Hola a todos los miembros de *{0}*!\n\nAntes de poder utilizarme, un administrador tiene que configurar algunas cosas. Comenzad viendo la ayuda con el comando `/help` para enteraros de todas las funciones. Aseguraos de ver la *ayuda para administradores*, donde se explica en detalle todos los pasos que se deben seguir.").format(ensure_escaped(chat_title))
+                Thread(target=send_message_timed, args=(chat_id, message_text, 1, bot)).start()
 
     # Create raid interactively
     if re.match("^iraid_.+", data) != None:
