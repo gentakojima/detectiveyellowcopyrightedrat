@@ -1918,116 +1918,116 @@ def raidbutton(bot, update):
         return
 
     if data == "voy":
-            result = raidVoy(chat_id, message_id, user_id)
-            if result is True:
-                if group["plusmax"]>0:
-                        bot.answerCallbackQuery(text=_("¡Apuntado! Si vas con más gente, pulsa +1"), callback_query_id=update.callback_query.id)
-                else:
-                        bot.answerCallbackQuery(text=_("¡Apuntado correctamente!"), callback_query_id=update.callback_query.id)
-                update_text = True
-            elif result == "no_changes":
-                bot.answerCallbackQuery(text=_("¡Ya te habías apuntado antes!"), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "old_raid":
-                bot.answerCallbackQuery(text=_("Ya no te puedes apuntar a esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_raid":
-                bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
+        result = raidVoy(chat_id, message_id, user_id)
+        if result is True:
+            if group["plusmax"]>0:
+                    bot.answerCallbackQuery(text=_("¡Apuntado! Si vas con más gente, pulsa +1"), callback_query_id=update.callback_query.id)
             else:
-                bot.answerCallbackQuery(text=_("¡No has podido apuntarte! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
+                    bot.answerCallbackQuery(text=_("¡Apuntado correctamente!"), callback_query_id=update.callback_query.id)
+            update_text = True
+        elif result == "no_changes":
+            bot.answerCallbackQuery(text=_("¡Ya te habías apuntado antes!"), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "old_raid":
+            bot.answerCallbackQuery(text=_("Ya no te puedes apuntar a esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_raid":
+            bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            bot.answerCallbackQuery(text=_("¡No has podido apuntarte! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
     elif data in ["plus1", "plus1red", "plus1yellow", "plus1blue"]:
-            plus1type = data.replace("plus1","")
-            result = raidPlus1(chat_id, message_id, user_id, plus1type = plus1type)
-            if result == "old_raid":
-                bot.answerCallbackQuery(text=_("Ya no te puedes apuntar a esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_raid":
-                bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "demasiados":
-                group = getGroup(chat_id)
-                bot.answerCallbackQuery(text=_("No puedes apuntarte con más de {0} personas. Si quieres borrar personas, pulsa en el botón «Voy».").format(group["plusmax"]), callback_query_id=update.callback_query.id, show_alert="true")
-            elif str(result).isdigit():
-                bot.answerCallbackQuery(text=_("¡Te has apuntado con {0} más! Si sois más, pulsa +1").format(result), callback_query_id=update.callback_query.id)
-                update_text = True
-            else:
-                bot.answerCallbackQuery(text=_("¡No has podido apuntarte con más gente! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
+        plus1type = data.replace("plus1","")
+        result = raidPlus1(chat_id, message_id, user_id, plus1type = plus1type)
+        if result == "old_raid":
+            bot.answerCallbackQuery(text=_("Ya no te puedes apuntar a esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_raid":
+            bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "demasiados":
+            group = getGroup(chat_id)
+            bot.answerCallbackQuery(text=_("No puedes apuntarte con más de {0} personas. Si quieres borrar personas, pulsa en el botón «Voy».").format(group["plusmax"]), callback_query_id=update.callback_query.id, show_alert="true")
+        elif str(result).isdigit():
+            bot.answerCallbackQuery(text=_("¡Te has apuntado con {0} más! Si sois más, pulsa +1").format(result), callback_query_id=update.callback_query.id)
+            update_text = True
+        else:
+            bot.answerCallbackQuery(text=_("¡No has podido apuntarte con más gente! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
     elif data == "novoy":
-            result = raidNovoy(chat_id, message_id, user_id)
-            if result is True:
-                bot.answerCallbackQuery(text=_("Te has desapuntado de la incursión"), callback_query_id=update.callback_query.id)
-                update_text = True
-            elif result == "old_raid":
-                bot.answerCallbackQuery(text=_("Ya no te puedes desapuntar de esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_raid":
-                bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "no_changes":
-                bot.answerCallbackQuery(text=_("¡Ya te habías desapuntado antes! Si te has equivocado, pulsa en «Voy»."), callback_query_id=update.callback_query.id, show_alert="true")
-            else:
-                bot.answerCallbackQuery(text=_("¡No has podido desapuntarte! Error desconocido"), callback_query_id=update.callback_query.id, show_alert="true")
+        result = raidNovoy(chat_id, message_id, user_id)
+        if result is True:
+            bot.answerCallbackQuery(text=_("Te has desapuntado de la incursión"), callback_query_id=update.callback_query.id)
+            update_text = True
+        elif result == "old_raid":
+            bot.answerCallbackQuery(text=_("Ya no te puedes desapuntar de esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_raid":
+            bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "no_changes":
+            bot.answerCallbackQuery(text=_("¡Ya te habías desapuntado antes! Si te has equivocado, pulsa en «Voy»."), callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            bot.answerCallbackQuery(text=_("¡No has podido desapuntarte! Error desconocido"), callback_query_id=update.callback_query.id, show_alert="true")
     elif data == "estoy":
-            result = raidEstoy(chat_id, message_id, user_id)
-            if result is True:
-                bot.answerCallbackQuery(text=_("Has marcardo que has llegado a la incursión"), callback_query_id=update.callback_query.id)
-                update_text = True
-            elif result == "no_changes":
-                bot.answerCallbackQuery(text=_("¡Ya habías marcado antes que estás! Si te has equivocado, pulsa en «voy»."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "old_raid":
-                bot.answerCallbackQuery(text=_("Ya no puedes marcar que estás en esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_raid":
-                bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
-            else:
-                bot.answerCallbackQuery(text=_("¡No has podido marcar como llegado! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
+        result = raidEstoy(chat_id, message_id, user_id)
+        if result is True:
+            bot.answerCallbackQuery(text=_("Has marcardo que has llegado a la incursión"), callback_query_id=update.callback_query.id)
+            update_text = True
+        elif result == "no_changes":
+            bot.answerCallbackQuery(text=_("¡Ya habías marcado antes que estás! Si te has equivocado, pulsa en «voy»."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "old_raid":
+            bot.answerCallbackQuery(text=_("Ya no puedes marcar que estás en esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_raid":
+            bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            bot.answerCallbackQuery(text=_("¡No has podido marcar como llegado! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
     elif data == "llegotarde":
-            result = raidLlegotarde(chat_id, message_id, user_id)
-            if result is True:
-                bot.answerCallbackQuery(text=_("Has marcardo que llegarás tarde a la incursión"), callback_query_id=update.callback_query.id)
-                update_text = True
-            elif result == "no_changes":
-                bot.answerCallbackQuery(text=_("¡Ya habías marcado que llegas tarde! Si te has equivocado, pulsa en «voy»."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "old_raid":
-                bot.answerCallbackQuery(text=_("Ya no puedes decir que has llegado tarde a esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_raid":
-                bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
-            else:
-                bot.answerCallbackQuery(text=_("¡No has podido marcar como que llegas tarde! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
+        result = raidLlegotarde(chat_id, message_id, user_id)
+        if result is True:
+            bot.answerCallbackQuery(text=_("Has marcardo que llegarás tarde a la incursión"), callback_query_id=update.callback_query.id)
+            update_text = True
+        elif result == "no_changes":
+            bot.answerCallbackQuery(text=_("¡Ya habías marcado que llegas tarde! Si te has equivocado, pulsa en «voy»."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "old_raid":
+            bot.answerCallbackQuery(text=_("Ya no puedes decir que has llegado tarde a esta incursión"), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_raid":
+            bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            bot.answerCallbackQuery(text=_("¡No has podido marcar como que llegas tarde! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
     elif data == "lotengo":
-            result = raidLotengo(chat_id, message_id, user_id)
-            if result is True:
-                bot.answerCallbackQuery(text=_("¿Lo has capturado? ¡Enhorabuena!"), callback_query_id=update.callback_query.id)
-                update_text = True
-            elif result == "no_changes":
-                bot.answerCallbackQuery(text=_("¡Ya habías marcado que lo has capturado!"), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "old_raid":
-                bot.answerCallbackQuery(text=_("Ya no puedes marcar que has capturado este Pokémon."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_raid":
-                bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_going":
-                bot.answerCallbackQuery(text=_("No puedes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_now":
-                bot.answerCallbackQuery(text=_("No puedes marcar que has capturado este Pokémon porque no te habías apuntado a la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
-            else:
-                bot.answerCallbackQuery(text="¡No has podido marcar que lo has capturado! (Error desconocido)", callback_query_id=update.callback_query.id, show_alert="true")
+        result = raidLotengo(chat_id, message_id, user_id)
+        if result is True:
+            bot.answerCallbackQuery(text=_("¿Lo has capturado? ¡Enhorabuena!"), callback_query_id=update.callback_query.id)
+            update_text = True
+        elif result == "no_changes":
+            bot.answerCallbackQuery(text=_("¡Ya habías marcado que lo has capturado!"), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "old_raid":
+            bot.answerCallbackQuery(text=_("Ya no puedes marcar que has capturado este Pokémon."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_raid":
+            bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_going":
+            bot.answerCallbackQuery(text=_("No puedes marcar que has capturado este Pokémon porque te habías desapuntado de la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_now":
+            bot.answerCallbackQuery(text=_("No puedes marcar que has capturado este Pokémon porque no te habías apuntado a la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            bot.answerCallbackQuery(text="¡No has podido marcar que lo has capturado! (Error desconocido)", callback_query_id=update.callback_query.id, show_alert="true")
     elif data == "escapou":
-            result = raidEscapou(chat_id, message_id, user_id)
-            if result is True:
-                bot.answerCallbackQuery(text=_("¿Se te ha escapado? ¡Lo siento!"), callback_query_id=update.callback_query.id)
-                update_text = True
-            elif result == "no_changes":
-                bot.answerCallbackQuery(text=_("¡Ya habías marcado antes que se te ha escapado!"), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "old_raid":
-                bot.answerCallbackQuery(text=_("Ya no puedes marcar que se te ha escapado este Pokémon."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_raid":
-                bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_going":
-                bot.answerCallbackQuery(text=_("No puedes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
-            elif result == "not_now":
-                bot.answerCallbackQuery(text=_("No puedes marcar que se te ha escapado este Pokémon porque no te habías apuntado a la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
-            else:
-                bot.answerCallbackQuery(text=_("¡No has podido marcar que se te ha escapado! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
+        result = raidEscapou(chat_id, message_id, user_id)
+        if result is True:
+            bot.answerCallbackQuery(text=_("¿Se te ha escapado? ¡Lo siento!"), callback_query_id=update.callback_query.id)
+            update_text = True
+        elif result == "no_changes":
+            bot.answerCallbackQuery(text=_("¡Ya habías marcado antes que se te ha escapado!"), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "old_raid":
+            bot.answerCallbackQuery(text=_("Ya no puedes marcar que se te ha escapado este Pokémon."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_raid":
+            bot.answerCallbackQuery(text=_("La incursión no existe. Pudo haberse borrado ya o puede estar fallando el bot."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_going":
+            bot.answerCallbackQuery(text=_("No puedes marcar que se te ha escapado este Pokémon porque te habías desapuntado de la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
+        elif result == "not_now":
+            bot.answerCallbackQuery(text=_("No puedes marcar que se te ha escapado este Pokémon porque no te habías apuntado a la incursión."), callback_query_id=update.callback_query.id, show_alert="true")
+        else:
+            bot.answerCallbackQuery(text=_("¡No has podido marcar que se te ha escapado! (Error desconocido)"), callback_query_id=update.callback_query.id, show_alert="true")
     if update_text:
-            raid = getRaidbyMessage(chat_id, message_id)
-            if raid is not None:
-                reply_markup = get_keyboard(raid)
-                update_message(chat_id, message_id, reply_markup, bot)
-            else:
-                bot.answerCallbackQuery(text=_("Error actualizando incursión"), callback_query_id=update.callback_query.id, show_alert="true")
+        raid = getRaidbyMessage(chat_id, message_id)
+        if raid is not None:
+            reply_markup = get_keyboard(raid)
+            update_message(chat_id, message_id, reply_markup, bot)
+        else:
+            bot.answerCallbackQuery(text=_("Error actualizando incursión"), callback_query_id=update.callback_query.id, show_alert="true")
 
     if data == "ubicacion":
         raid = getRaidbyMessage(chat_id, message_id)
