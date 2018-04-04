@@ -21,8 +21,9 @@ Puedes pedir ayuda en el grupo [@detectivepikachuayuda](https://t.me/detectivepi
       4. [Límites en número de zonas y ubicaciones de gimnasios](#límites-en-número-de-zonas-y-ubicaciones-de-gimnasios)
    5. [Modo niñero](#modo-niñero)
    6. [Zona horaria](#zona-horaria)
-   7. [Rankings](#rankings)
-   8. [Otros comandos exclusivos para administradores](#otros-comandos-exclusivos-para-administradores)
+   7. [Idioma](#idioma)
+   8. [Rankings](#rankings)
+   9. [Otros comandos exclusivos para administradores](#otros-comandos-exclusivos-para-administradores)
 3. [Política de tramposos](#política-de-tramposos)
 4. [Protección de datos](#protección-de-datos)
 5. [Problemas frecuentes](#problemas-frecuentes)
@@ -342,6 +343,17 @@ Para establecer la zona horaria correcta se debe utilizar el comando `/timezone`
 
     /timezone Europe/Madrid
     /timezone Atlantic/Canary
+
+### Idioma ###
+
+El bot soporta varios idiomas. Para ver los idiomas disponibles, utiliza el comando `/language`.
+
+Al entrar a un grupo por primera vez o al hablar con usuario por primera vez por privado, el bot preguntará antes el idioma deseado. Siempre se puede cambiar más adelante con el comando `/language idioma`. Por ejemplo:
+
+    /language Portuguese
+
+Si un usuario interacciona por primera vez con el bot desde un grupo, se le asignará automáticamente el idioma del grupo y no se le preguntará por privado. En este caso, el usuario también puede cambiar el idioma por privado de la misma forma.
+
 
 ### Rankings ###
 
