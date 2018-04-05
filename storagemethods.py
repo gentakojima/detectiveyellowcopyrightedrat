@@ -770,7 +770,7 @@ def getRaidPeople(raid_id, order="addedtime"):
             ordering_text = "`usuarios`.`team` DESC, `voy`.`novoy` ASC, `usuarios`.`level` DESC, `voy`.`addedtime` ASC";
         else:
             ordering_text = "`voy`.`addedtime` ASC";
-        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `plusr`, `plusb`, `plusy`, `estoy`, `tarde`, `level`, `team`, `lotengo`, `novoy`, `voy`.`addedtime` AS `addedtime` FROM `incursiones` \
+        sql = "SELECT `usuarios`.`id` AS `id`, `username`, `trainername`, `plus`, `plusr`, `plusb`, `plusy`, `estoy`, `tarde`, `level`, `team`, `lotengo`, `novoy`, `voy`.`addedtime` AS `addedtime`, `usuarios`.`language` AS `language` FROM `incursiones` \
         LEFT JOIN `voy` ON `voy`.`incursion_id` = `incursiones`.`id` \
         LEFT JOIN `usuarios` ON `usuarios`.`id` = `voy`.`usuario_id` WHERE `incursiones`.`id`=%s \
         ORDER BY " + ordering_text

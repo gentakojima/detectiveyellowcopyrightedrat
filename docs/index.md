@@ -94,23 +94,23 @@ Se pueden editar y añadir todos los detalles de la incursión después de crear
 
 Para editar o añadir cualquiera de estos detalles, el creador de la incursión puede contestar al mensaje de la incursión con uno de estos comandos:
 
-    /hora 12:00
+    /time 12:00
     /pokemon Wartortle
-    /gimnasio Plaza de Abastos
-    /horafin 12:30
-    /horafin -
+    /gym Plaza de Abastos
+    /endtime 12:30
+    /endtime -
 
-En el caso de pasar una barra horizontal - como argumento a `/horafin`, se borrará la hora de fin.
+En el caso de pasar una barra horizontal - como argumento a `/endtime`, se borrará la hora de fin.
 
-Una incursión también puede ser **cancelada** contestando con el comando `/cancelar`, ser **borrada** con el comando `/borrar` y ser **reflotada** con el comando `/reflotar`.
+Una incursión también puede ser **cancelada** contestando con el comando `/cancel`, ser **borrada** con el comando `/delete` y ser **reflotada** con el comando `/refloat`.
 
-Las incursiones se finalizan automáticamente pasada media hora desde la hora de creación, pero se puede **forzar la finalización** con el comando `/cerrar`. Este comando solo se puede utilizar pasada la hora de inicio de la incursión.
+Las incursiones se finalizan automáticamente pasada media hora desde la hora de creación, pero se puede **forzar la finalización** con el comando `/close`. Este comando solo se puede utilizar pasada la hora de inicio de la incursión.
 
 Los participantes recibirán **avisos por privado** cuando se edite, cancele o borre una incursión.
 
-Ten en cuenta que los comandos `/borrar` y `/reflotar` por defecto solo están activados para los administradores de los grupos y solo algunos grupos permiten que los usen los propios creadores de las incursiones.
+Ten en cuenta que los comandos `/delete` y `/refloat` por defecto solo están activados para los administradores de los grupos y solo algunos grupos permiten que los usen los propios creadores de las incursiones.
 
-Al editar una hora hay las mismas restricciones que al crear la incursión. Con `/hora` es **necesario especificar el día** si no es el día actual. Con `/horafin`, sin embargo, no es necesario, ya que por defecto se toma el mismo día en que se realiza la incursión.
+Al editar una hora hay las mismas restricciones que al crear la incursión. Con `/time` es **necesario especificar el día** si no es el día actual. Con `/endtime`, sin embargo, no es necesario, ya que por defecto se toma el mismo día en que se realiza la incursión.
 
 ### Apuntarse a una incursión ###
 
@@ -129,6 +129,8 @@ Para poder apuntarse a una incursión es **necesario tener un alias** definido e
 ### Alertas de incursiones ###
 
 Los usuarios pueden configurar alertas por mensaje privado cuando se creen incursiones en determinados gimnasios. Para configurarlas, utiliza el comando `/alerts` por privado al bot y sigue las instrucciones.
+
+Con `/addalert` seguido del identificador numérico del gimnasio, añades una alerta para ese gimnasio. Usando `/delalert` seguido del identificador numérico, borras la alerta para ese gimnasio. Con `/clearalerts` borras todas las alertas.
 
 Ten en cuenta que antes de configurar las alertas tienes que haber participado en alguna incursión en un grupo con las ubicaciones de los gimnasios coniguradas y la opción de permitir alertas activada.
 
@@ -182,13 +184,13 @@ Para hacer la configuración básica del bot utiliza el comando `/settings`. La 
 
 #### Comandos disponibles para usuarios ####
 
-1. **Consultar gimnasios (comando /buscar)**. Si está activada, permite que los usuarios consulten localizaciones de los gimnasios. Opción desactivada por defecto.
+1. **Consultar gimnasios (comando /search)**. Si está activada, permite que los usuarios consulten localizaciones de los gimnasios. Opción desactivada por defecto.
 
 2. **Crear incursiones (comando /raid)**. Si está activada, permite que los usuarios creen incursiones. Opción activada por defecto.
 
-3. **Reflotar incursiones (comando /reflotar)**. Si está activada, permite que los creadores de las incursiones las refloten utilizando el comando `/reflotar`. Opción desactivada por defecto.
+3. **Reflotar incursiones (comando /refloat)**. Si está activada, permite que los creadores de las incursiones las refloten utilizando el comando `/reflotar`. Opción desactivada por defecto.
 
-4. **Borrar incursiones (comando /borrar)**. Si está activada, permite que los creadores de las incursiones las borren utilizando el comando `/borrar`. Si desactivas esta opción, todavía pueden cancelarlas con el comando `/cancelar`. Opción activada por defecto.
+4. **Borrar incursiones (comando /delete)**. Si está activada, permite que los creadores de las incursiones las borren utilizando el comando `/delete`. Si desactivas esta opción, todavía pueden cancelarlas con el comando `/cancel`. Opción activada por defecto.
 
 #### Opciones de vista de incursiones ####
 
@@ -367,9 +369,9 @@ Los rankings están disponibles a partir de las 10 de la noche del día anterior
 
 ### Otros comandos exclusivos para administradores ###
 
-Para revertir la cancelación de una incursión puedes usar el comando `/descancelar`. Se utiliza exactamente igual que el `/cancelar`, pero sobre incursiones canceladas.
+Para revertir la cancelación de una incursión puedes usar el comando `/uncancel`. Se utiliza exactamente igual que el `/cancel`, pero sobre incursiones canceladas.
 
-Un administrador siempre puede cancelar incursiones con el comando `/cancelar`, aunque sean antiguas. Normalmente, un creador de incursión solo puede cancelar incursiones que no sean más antiguas de tres horas.
+Un administrador siempre puede cancelar incursiones con el comando `/cancel`, aunque sean antiguas. Normalmente, un creador de incursión solo puede cancelar incursiones que no sean más antiguas de tres horas.
 
 Para reflotar todas las incursiones activas una vez, sin necesidad de usar el reflotado automático, se puede usar el comando `/reflotaractivas`. También se pueden reflotar todas las incursiones, incluídas las EX que transcurrirán dentro de varias horas o días, con `/reflotartodas`.
 

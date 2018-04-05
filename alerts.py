@@ -22,8 +22,8 @@ from supportmethods import delete_message, edit_check_private, extract_update_in
 from storagemethods import getAlerts, getPlace, getGroup, isBanned, delAlert, addAlert, clearAlerts, getPlacesByLocation, getGroupsByUser, getUser
 
 
-def alerts(bot, update, args=None):
-    logging.debug("detectivepikachubot:alerts: %s %s %s" % (bot, update, args))
+def alertscmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:alertscmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -58,8 +58,8 @@ def alerts(bot, update, args=None):
     bot.send_message(chat_id=user_id, text=text_message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def addalert(bot, update, args=None):
-    logging.debug("detectivepikachubot:addalert: %s %s %s" % (bot, update, args))
+def addalertcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:addalertcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -103,8 +103,8 @@ def addalert(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha podido añadir una alerta para ese gimnasio."), parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def delalert(bot, update, args=None):
-    logging.debug("detectivepikachubot:delalert: %s %s %s" % (bot, update, args))
+def delalertcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:delalertcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -135,8 +135,8 @@ def delalert(bot, update, args=None):
     else:
         bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha podido eliminar la alerta para ese gimnasio."), parse_mode=telegram.ParseMode.MARKDOWN)
 
-def clearalerts(bot, update):
-    logging.debug("detectivepikachubot:clearlerts: %s %s" % (bot, update))
+def clearalertscmd(bot, update):
+    logging.debug("detectivepikachubot:clearalertscmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 

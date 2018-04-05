@@ -55,7 +55,7 @@ import gettext
 from config import config
 from storagemethods import saveGroup, savePlaces, savePlace, getGroup, getPlaces, saveUser, saveWholeUser, getUser, isBanned, refreshUsername, saveRaid, getRaid, raidVoy, raidPlus1, raidEstoy, raidNovoy, raidLlegotarde, getCreadorRaid, getRaidbyMessage, getPlace, deleteRaid, getRaidPeople, closeRaid, cancelRaid, uncancelRaid, getLastRaids, raidLotengo, raidEscapou, searchTimezone, getActiveRaidsforUser, getGrupoRaid, getCurrentValidation, saveValidation, getUserByTrainername, getActiveRaidsforGroup, getGroupsByUser, getGroupUserStats, getRanking, getRemovedAlerts, getCurrentGyms, getCachedRanking, saveCachedRanking, resetCachedRanking
 from supportmethods import is_admin, extract_update_info, delete_message_timed, send_message_timed, pokemonlist, egglist, iconthemes, update_message, update_raids_status, send_alerts, send_alerts_delayed, error_callback, ensure_escaped, warn_people, get_settings_keyboard, update_settings_message, update_settings_message_timed, get_keyboard, format_message, edit_check_private, edit_check_private_or_reply, delete_message, parse_time, parse_pokemon, extract_time, extract_day, format_text_day, format_text_pokemon, parse_profile_image, validation_pokemons, validation_names, update_validations_status, already_sent_location, auto_refloat, format_gym_emojis, fetch_gym_address, get_pokemons_keyboard, get_gyms_keyboard, get_zones_keyboard, get_times_keyboard, get_endtimes_keyboard, get_days_keyboard, format_text_creating, remove_incomplete_raids, send_edit_instructions, ranking_time_periods, auto_ranking, ranking_text, set_language, available_languages
-from alerts import alerts, addalert, clearalerts, delalert, processLocation
+from alerts import alertscmd, addalertcmd, clearalertscmd, delalertcmd, processLocation
 
 def cleanup(signum, frame):
     logging.info("Closing bot!")
@@ -77,8 +77,8 @@ dispatcher = updater.dispatcher
 dispatcher.add_error_handler(error_callback)
 
 @run_async
-def start(bot, update):
-    logging.debug("detectivepikachubot:start: %s %s" % (bot, update))
+def startcmd(bot, update):
+    logging.debug("detectivepikachubot:startcmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if chat_type != "private":
@@ -94,7 +94,7 @@ def start(bot, update):
         if user is not None:
             _ = set_language(user["language"])
         else:
-            message_text = "¡Hola! Antes de comenzar, elige el idioma.\nHi! Before getting started, please choose your language."
+            message_text = "Hi! Before getting started, please choose your language."
             languages_keyboard = []
             for language in available_languages.keys():
                 languages_keyboard.append([InlineKeyboardButton(available_languages[language]["name"], callback_data="language_%s" % language)])
@@ -107,8 +107,8 @@ def start(bot, update):
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 40, bot)).start()
 
 @run_async
-def pikaping(bot, update):
-    logging.debug("detectivepikachubot:pikaping: %s %s" % (bot, update))
+def pikapingcmd(bot, update):
+    logging.debug("detectivepikachubot:pikapingcmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     sent_dt = message.date
@@ -129,8 +129,8 @@ def pikaping(bot, update):
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 10, bot)).start()
 
 @run_async
-def register(bot, update):
-    logging.debug("detectivepikachubot:raids: %s %s" % (bot, update))
+def registercmd(bot, update):
+    logging.debug("detectivepikachubot:registercmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -207,8 +207,8 @@ def timezonecmd(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha encontrado ninguna zona horaria válida con ese nombre."), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def settalkgroup(bot, update, args=None):
-    logging.debug("detectivepikachubot:settalkgroup: %s %s %s" % (bot, update, args))
+def talkgroupcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:talkgroupcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     chat_title = message.chat.title
     group_alias = None
@@ -300,8 +300,8 @@ def spreadsheetcmd(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text=_("👌 Establecido hoja de cálculo con identificador `{0}`.\n\nDebes usar `/refresh` ahora para hacer la carga inicial de los gimnasios y cada vez que modifiques el documento para recargarlos.").format(ensure_escaped(spreadsheet_id)), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def refresh(bot, update, args=None):
-    logging.debug("detectivepikachubot:refresh: %s %s %s" % (bot, update, args))
+def refreshcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:refreshcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     chat_title = message.chat.title
     group_alias = None
@@ -471,7 +471,7 @@ def joinedChat(bot, update):
                 group = getGroup(chat_id)
                 if group is None:
                     saveGroup({"id":chat_id, "title":message.chat.title})
-                    message_text = "¡Hola! Antes de comenzar, elige tu idioma.\nHi! Before getting started, please choose your language."
+                    message_text = "Hi! Before getting started, please choose your language."
                     languages_keyboard = []
                     for language in available_languages.keys():
                         languages_keyboard.append([InlineKeyboardButton(available_languages[language]["name"], callback_data="language_%s" % language)])
@@ -651,51 +651,51 @@ def channelCommands(bot, update):
     if m is not None:
         command = m.group(1).lower()
         logging.debug("detectivepikachubot:channelCommands: Possible command %s" % command)
-        if command == "setspreadsheet" or command == "spreadsheet":
+        if command in ["setspreadsheet","spreadsheet"]:
             spreadsheetcmd(bot, update, args)
-        elif command == "settimezone" or command == "timezone":
+        elif command in ["settimezone","timezone"]:
             timezonecmd(bot, update, args)
-        elif command == "setlanguage" or command == "language":
+        elif command in ["setlanguage","language"]:
             languagecmd(bot, update, args)
         elif command == "refresh":
-            refresh(bot, update, args)
+            refreshcmd(bot, update, args)
         elif command == "settings":
-            settings(bot, update)
-        elif command == "search" or command == "buscar":
+            settingscmd(bot, update)
+        elif command in ["search","buscar"]:
             searchcmd(bot, update, args)
         elif command == "raid":
-            raid(bot, update, args)
+            raidcmd(bot, update, args)
         elif command == "list":
-            list(bot, update)
-        elif command == "borrar":
-            borrar(bot, update, args)
-        elif command == "cancelar":
-            cancelar(bot, update, args)
-        elif command == "reflotar":
-            reflotar(bot, update, args)
-        elif command == "reflotartodo" or command=="reflotartodas":
-            reflotartodas(bot, update, args)
-        elif command == "reflotarhoy":
-            reflotarhoy(bot, update, args)
-        elif command == "reflotaractivas" or command=="reflotaractivo":
-            reflotaractivas(bot, update, args)
-        elif command == "cambiarhora" or command == "hora":
-            cambiarhora(bot, update, args)
-        elif command == "cambiarhorafin" or command == "horafin":
-            cambiarhorafin(bot, update, args)
-        elif command == "cambiargimnasio" or command == "gimnasio":
-            cambiargimnasio(bot, update, args)
-        elif command == "cambiarpokemon" or command == "pokemon":
-            cambiarpokemon(bot, update, args)
-        elif command == "stats" or command == "ranking":
-            stats(bot, update, args)
+            listcmd(bot, update)
+        elif command in ["borrar","delete"]:
+            deletecmd(bot, update, args)
+        elif command in ["cancelar","cancel"]:
+            cancelcmd(bot, update, args)
+        elif command in ["reflotar","refloat"]:
+            refloatcmd(bot, update, args)
+        elif command in ["reflotartodo","reflotartodas","refloatall"]:
+            refloatallcmd(bot, update, args)
+        elif command in ["reflotarhoy","refloattoday"]:
+            refloattodaycmd(bot, update, args)
+        elif command in ["reflotaractivas","reflotaractivo","refloatactive"]:
+            refloatactivecmd(bot, update, args)
+        elif command in ["cambiarhora","hora","time"]:
+            timecmd(bot, update, args)
+        elif command in ["cambiarhorafin","horafin","endtime"]:
+            endtimecmd(bot, update, args)
+        elif command in ["cambiargimnasio","gimnasio","gym"]:
+            gymcmd(bot, update, args)
+        elif command in ["cambiarpokemon","pokemon"]:
+            pokemoncmd(bot, update, args)
+        elif command in ["stats","ranking"]:
+            statscmd(bot, update, args)
         else:
             # Default to process normal message for babysitter mode
             processMessage(bot,update)
 
 @run_async
-def settings(bot, update):
-    logging.debug("detectivepikachubot:settings: %s %s" % (bot, update))
+def settingscmd(bot, update):
+    logging.debug("detectivepikachubot:settingscmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     chat_title = message.chat.title
 
@@ -785,8 +785,8 @@ def languagecmd(bot, update, args=None):
         bot.sendMessage(chat_id=chat_id, text=_("❌ No se ha encontrado ningún idioma válido con ese nombre."), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def list(bot, update):
-    logging.debug("detectivepikachubot:list: %s %s" % (bot, update))
+def listcmd(bot, update):
+    logging.debug("detectivepikachubot:listcmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     if chat_type == "private":
         user = getUser(user_id)
@@ -818,8 +818,8 @@ def list(bot, update):
     bot.sendMessage(chat_id=chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def raids(bot, update):
-    logging.debug("detectivepikachubot:raids: %s %s" % (bot, update))
+def raidscmd(bot, update):
+    logging.debug("detectivepikachubot:raidscmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -879,8 +879,8 @@ def raids(bot, update):
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
 
 @run_async
-def profile(bot, update):
-    logging.debug("detectivepikachubot:profile: %s %s" % (bot, update))
+def profilecmd(bot, update):
+    logging.debug("detectivepikachubot:profilecmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
     user_username = message.from_user.username
 
@@ -917,8 +917,8 @@ def profile(bot, update):
     bot.sendMessage(chat_id=user_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def stats(bot, update, args = None):
-    logging.debug("detectivepikachubot:stats: %s %s" % (bot, update))
+def statscmd(bot, update, args = None):
+    logging.debug("detectivepikachubot:statscmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1091,8 +1091,8 @@ def searchcmd(bot, update, args=None):
         Thread(target=delete_message_timed, args=(chat_id, sent_message.message_id, 15, bot)).start()
 
 @run_async
-def raid(bot, update, args=None):
-    logging.debug("detectivepikachubot:raid: %s %s %s" % (bot, update, args))
+def raidcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:raidcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1278,7 +1278,7 @@ def raid(bot, update, args=None):
     saveRaid(current_raid)
 
     if chat_type != "channel":
-        send_edit_instructions(group, current_raid, user_id, bot)
+        send_edit_instructions(group, current_raid, thisuser, bot)
 
     if group["locations"] == 1:
         if "gimnasio_id" in current_raid.keys() and current_raid["gimnasio_id"] is not None:
@@ -1304,8 +1304,8 @@ def raid(bot, update, args=None):
             logging.debug("Error sending warning in private. Maybe conversation not started?")
 
 @run_async
-def cerrar(bot, update, args=None):
-    logging.debug("detectivepikachubot:cerrar: %s %s %s" % (bot, update, args))
+def closecmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:closecmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1320,12 +1320,15 @@ def cerrar(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cerrar", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "close", bot)
     if raid is None:
         return
 
     group = getGroup(raid["grupo_id"])
-    _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
+    else:
+        _ = set_language(group["language"])
     if raid is not None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             response = closeRaid(raid["id"])
@@ -1348,8 +1351,8 @@ def cerrar(bot, update, args=None):
             bot.sendMessage(chat_id=user_id, text=_("❌ No tienes permiso para cerrar la incursión `{0}`.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def cancelar(bot, update, args=None):
-    logging.debug("detectivepikachubot:cancelar: %s %s %s" % (bot, update, args))
+def cancelcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:cancelcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1364,12 +1367,15 @@ def cancelar(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cancelar", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cancel", bot)
     if raid is None:
         return
 
     group = getGroup(raid["grupo_id"])
-    _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
+    else:
+        _ = set_language(group["language"])
     if raid is not None:
         if raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             response = cancelRaid(raid["id"], force=is_admin(raid["grupo_id"], user_id, bot))
@@ -1380,7 +1386,7 @@ def cancelar(bot, update, args=None):
                 raid_datetime = raid["timeraid"].replace(tzinfo=timezone(group["timezone"]))
                 threehoursago_datetime = datetime.now(timezone(group["timezone"])) - timedelta(minutes = 180)
                 if raid_datetime > threehoursago_datetime:
-                    warn_people("cancelar", raid, user_username, user_id, bot)
+                    warn_people("cancel", raid, thisuser, user_id, bot)
             elif response == "already_cancelled":
                 user_id = chat_id if user_id is None else user_id
                 bot.sendMessage(chat_id=user_id, text=_("❌ No se puede cancelar la incursión `{0}` porque ya ha sido cancelada previamente.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
@@ -1394,8 +1400,8 @@ def cancelar(bot, update, args=None):
             bot.sendMessage(chat_id=user_id, text=_("❌ No tienes permiso para cancelar la incursión `{0}`.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def descancelar(bot, update, args=None):
-    logging.debug("detectivepikachubot:descancelar: %s %s %s" % (bot, update, args))
+def uncancelcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:uncancelcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1410,12 +1416,15 @@ def descancelar(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "descancelar", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "uncancel", bot)
     if raid is None:
         return
 
     group = getGroup(raid["grupo_id"])
-    _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
+    else:
+        _ = set_language(group["language"])
     if raid is not None:
         if is_admin(raid["grupo_id"], user_id, bot):
             response = uncancelRaid(raid["id"])
@@ -1425,7 +1434,7 @@ def descancelar(bot, update, args=None):
                 update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha descancelado la incursión `{0}` correctamente!").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
-                warn_people("descancelar", raid, user_username, user_id, bot)
+                warn_people("uncancel", raid, thisuser, user_id, bot)
             elif response == "not_cancelled":
                 user_id = chat_id if user_id is None else user_id
                 bot.sendMessage(chat_id=user_id, text=_("❌ No se puede descancelar la incursión `{0}` porque no ha sido cancelada previamente.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
@@ -1436,8 +1445,8 @@ def descancelar(bot, update, args=None):
             bot.sendMessage(chat_id=user_id, text=_("❌ No tienes permiso para descancelar la incursión `{0}`.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def borrar(bot, update, args=None):
-    logging.debug("detectivepikachubot:borrar: %s %s" % (bot, update))
+def deletecmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:deletecmd: %s %s" % (bot, update))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1452,12 +1461,15 @@ def borrar(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "borrar", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "delete", bot)
     if raid is None:
         return
 
     group = getGroup(raid["grupo_id"])
-    _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
+    else:
+        _ = set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or is_admin(raid["grupo_id"], user_id, bot) or (group["candelete"] == 1 and raid["usuario_id"] == user_id):
             response = deleteRaid(raid["id"])
@@ -1466,7 +1478,7 @@ def borrar(bot, update, args=None):
                     bot.deleteMessage(chat_id=raid["grupo_id"],message_id=raid["message"])
                 except:
                     pass
-                warn_people("borrar", raid, user_username, user_id, bot)
+                warn_people("delete", raid, thisuser, user_id, bot)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha borrado la incursión `{0}` correctamente!").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
             elif response == "already_deleted":
@@ -1479,8 +1491,8 @@ def borrar(bot, update, args=None):
             bot.sendMessage(chat_id=user_id, text=_("❌ No tienes permiso para borrar la incursión `{0}`.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def cambiarhora(bot, update, args=None):
-    logging.debug("detectivepikachubot:cambiarHora: %s %s %s" % (bot, update, args))
+def timecmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:timecmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1495,13 +1507,16 @@ def cambiarhora(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cambiarhora", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "time", bot)
     if raid is None:
         return
 
     numarg = 1 if chat_type == "private" else 0
     group = getGroup(raid["grupo_id"])
-    _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
+    else:
+        _ = set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["status"] == "old":
@@ -1544,13 +1559,13 @@ def cambiarhora(bot, update, args=None):
                 what_day = format_text_day(raid["timeraid"], group["timezone"], langfunc=_)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha cambiado la hora de la incursión `{0}` a las *{1}* {2}correctamente!").format(raid["id"], extract_time(raid["timeraid"]), what_day), parse_mode=telegram.ParseMode.MARKDOWN)
-                warn_people("cambiarhora", raid, user_username, user_id, bot)
+                warn_people("time", raid, thisuser, user_id, bot)
         else:
             bot.sendMessage(chat_id=user_id, text=_("❌ No tienes permiso para editar la incursión `{0}`.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def cambiarhorafin(bot, update, args=None):
-    logging.debug("detectivepikachubot:cambiarHoraFin: %s %s %s" % (bot, update, args))
+def endtimecmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:endtimecmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1565,13 +1580,16 @@ def cambiarhorafin(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cambiarhorafin", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "endtime", bot)
     if raid is None:
         return
 
     numarg = 1 if chat_type == "private" else 0
     group = getGroup(raid["grupo_id"])
-    _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
+    else:
+        _ = set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["status"] == "old":
@@ -1598,7 +1616,7 @@ def cambiarhorafin(bot, update, args=None):
                 update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha borrado la hora de fin de la incursión `{0}` correctamente!").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
-                warn_people("borrarhorafin", raid, user_username, user_id, bot)
+                warn_people("deleteendtime", raid, thisuser, user_id, bot)
             else:
                 raid["timeend"] = parse_time(args[numarg], group["timezone"])
                 if raid["timeend"] is None:
@@ -1624,13 +1642,13 @@ def cambiarhorafin(bot, update, args=None):
                 update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
                 if user_id is not None:
                     bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha cambiado la hora de fin de la incursión `{0}` a las *{1}* correctamente!").format(raid["id"], extract_time(raid["timeend"])), parse_mode=telegram.ParseMode.MARKDOWN)
-                warn_people("cambiarhorafin", raid, user_username, user_id, bot)
+                warn_people("endtime", raid, thisuser, user_id, bot)
         else:
             bot.sendMessage(chat_id=user_id, text=_("❌ No tienes permiso para editar la incursión `{0}`.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def cambiargimnasio(bot, update, args=None):
-    logging.debug("detectivepikachubot:cambiargimnasio: %s %s %s" % (bot, update, args))
+def gymcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:gymcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1645,7 +1663,7 @@ def cambiargimnasio(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cambiargimnasio", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "gym", bot)
     if raid is None:
         return
 
@@ -1656,7 +1674,10 @@ def cambiargimnasio(bot, update, args=None):
     new_gymtext = new_gymtext.strip()
 
     group = getGroup(raid["grupo_id"])
-    _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
+    else:
+        _ = set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or raid["usuario_id"] == user_id or is_admin(raid["grupo_id"], user_id, bot):
             if raid["status"] == "old":
@@ -1708,25 +1729,25 @@ def cambiargimnasio(bot, update, args=None):
                     else:
                         if user_id is not None:
                             bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha cambiado el gimnasio de la incursión `{0}` a *{1}* correctamente!").format(raid["id"], raid["gimnasio_text"]), parse_mode=telegram.ParseMode.MARKDOWN)
-                warn_people("cambiargimnasio", raid, user_username, user_id, bot)
+                warn_people("gym", raid, thisuser, user_id, bot)
                 if "gimnasio_id" in raid.keys() and raid["gimnasio_id"] is not None:
                     Thread(target=send_alerts_delayed, args=(raid, bot)).start()
         else:
             bot.sendMessage(chat_id=user_id, text=_("❌ No tienes permiso para editar la incursión `{0}`.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def reflotartodas(bot, update, args=None):
-    logging.debug("detectivepikachubot:reflotartodas: %s %s %s" % (bot, update, args))
+def refloatallcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:refloatallcmd: %s %s %s" % (bot, update, args))
     mass_refloat(bot, update, args, "all")
 
 @run_async
-def reflotarhoy(bot, update, args=None):
-    logging.debug("detectivepikachubot:reflotarhoy: %s %s %s" % (bot, update, args))
+def refloattodaycmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:refloattodaycmd: %s %s %s" % (bot, update, args))
     mass_refloat(bot, update, args, "today")
 
 @run_async
-def reflotaractivas(bot, update, args=None):
-    logging.debug("detectivepikachubot:reflotaractivas: %s %s %s" % (bot, update, args))
+def refloatactivecmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:refloatactivecmd: %s %s %s" % (bot, update, args))
     mass_refloat(bot, update, args, "active")
 
 def mass_refloat(bot, update, args=None, mode="all"):
@@ -1780,8 +1801,8 @@ def mass_refloat(bot, update, args=None, mode="all"):
             time.sleep(1.0)
 
 @run_async
-def reflotar(bot, update, args=None):
-    logging.debug("detectivepikachubot:reflotar: %s %s %s" % (bot, update, args))
+def refloatcmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:refloatcmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1796,15 +1817,15 @@ def reflotar(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "reflotar", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "refloat", bot)
     if raid is None:
         return
 
     group = getGroup(raid["grupo_id"])
-    if group is not None:
-        _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
     else:
-        _ = set_language("es_ES")
+        _ = set_language(group["language"])
     if raid is not None:
         if chat_type == "channel" or is_admin(raid["grupo_id"], user_id, bot) or (group["refloat"] == 1 and raid["usuario_id"] == user_id):
             if raid["status"] == "old":
@@ -1835,8 +1856,8 @@ def reflotar(bot, update, args=None):
             bot.sendMessage(chat_id=user_id, text=_("❌ No tienes permiso para reflotar la incursión `{0}`.").format(raid["id"]), parse_mode=telegram.ParseMode.MARKDOWN)
 
 @run_async
-def cambiarpokemon(bot, update, args=None):
-    logging.debug("detectivepikachubot:cambiarpokemon: %s %s %s" % (bot, update, args))
+def pokemoncmd(bot, update, args=None):
+    logging.debug("detectivepikachubot:pokemoncmd: %s %s %s" % (bot, update, args))
     (chat_id, chat_type, user_id, text, message) = extract_update_info(update)
 
     if isBanned(chat_id):
@@ -1851,12 +1872,15 @@ def cambiarpokemon(bot, update, args=None):
         user_username = None
         thisuser = None
 
-    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "cambiarpokemon", bot)
+    raid = edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, "pokemon", bot)
     if raid is None:
         return
 
     group = getGroup(chat_id)
-    _ = set_language(group["language"])
+    if thisuser is not None:
+        _ = set_language(thisuser["language"])
+    else:
+        _ = set_language(group["language"])
 
     numarg = 1 if chat_type == "private" else 0
     if raid is not None:
@@ -1890,7 +1914,7 @@ def cambiarpokemon(bot, update, args=None):
                     what_text = format_text_pokemon(raid["pokemon"], raid["egg"], langfunc=_)
                     if user_id is not None:
                         bot.sendMessage(chat_id=user_id, text=_("👌 ¡Se ha cambiado el Pokémon/nivel de la incursión `{0}` a incursión {1} correctamente!").format(raid["id"], what_text), parse_mode=telegram.ParseMode.MARKDOWN)
-                    warn_people("cambiarpokemon", raid, user_username, user_id, bot)
+                    warn_people("pokemon", raid, thisuser, user_id, bot)
                 else:
                     user_id = chat_id if user_id is None else user_id
                     bot.sendMessage(chat_id=user_id, text=_("❌ No he reconocido ese Pokémon/nivel de incursión."), parse_mode=telegram.ParseMode.MARKDOWN)
@@ -2193,7 +2217,7 @@ def raidbutton(bot, update):
             reply_markup = get_keyboard(raid)
             updated = update_message(raid["grupo_id"], raid["message"], reply_markup, bot)
             if chat_type != "channel":
-                send_edit_instructions(group, raid, user_id, bot)
+                send_edit_instructions(group, raid, thisuser, bot)
             if raid["gimnasio_id"] is not None:
                 Thread(target=send_alerts_delayed, args=(raid, bot)).start()
 
@@ -2365,42 +2389,41 @@ def raidbutton(bot, update):
             update_settings_message(chat_id, bot, settings_categories[data])
 
 # Basic and register commands
-dispatcher.add_handler(CommandHandler('start', start))
-dispatcher.add_handler(CommandHandler('pikaping', pikaping))
-dispatcher.add_handler(CommandHandler('help', start))
-dispatcher.add_handler(CommandHandler('register', register))
-dispatcher.add_handler(CommandHandler('profile', profile))
-dispatcher.add_handler(CommandHandler(['stats','ranking'], stats, pass_args=True))
+dispatcher.add_handler(CommandHandler(['start','help'], startcmd))
+dispatcher.add_handler(CommandHandler('pikaping', pikapingcmd))
+dispatcher.add_handler(CommandHandler('register', registercmd))
+dispatcher.add_handler(CommandHandler('profile', profilecmd))
+dispatcher.add_handler(CommandHandler(['stats','ranking'], statscmd, pass_args=True))
 # Admin commands
 dispatcher.add_handler(CommandHandler(['setspreadsheet', 'spreadsheet'], spreadsheetcmd, pass_args=True))
 dispatcher.add_handler(CommandHandler(['settimezone', 'timezone'], timezonecmd, pass_args=True))
-dispatcher.add_handler(CommandHandler('settalkgroup', settalkgroup, pass_args=True))
-dispatcher.add_handler(CommandHandler('refresh', refresh))
-dispatcher.add_handler(CommandHandler('list', list))
-dispatcher.add_handler(CommandHandler(['incursiones','raids'], raids))
-dispatcher.add_handler(CommandHandler('settings', settings))
+dispatcher.add_handler(CommandHandler('settalkgroup', talkgroupcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler('refresh', refreshcmd))
+dispatcher.add_handler(CommandHandler('list', listcmd))
+dispatcher.add_handler(CommandHandler(['incursiones','raids'], raidscmd))
+dispatcher.add_handler(CommandHandler('settings', settingscmd))
 dispatcher.add_handler(CommandHandler(['language','setlanguage'], languagecmd, pass_args=True))
 # Commands related to raids
-dispatcher.add_handler(CommandHandler('raid', raid, pass_args=True))
-dispatcher.add_handler(CommandHandler(['cancelar','cancel'], cancelar, pass_args=True))
-dispatcher.add_handler(CommandHandler(['cerrar','close'], cerrar, pass_args=True))
-dispatcher.add_handler(CommandHandler(['descancelar','uncancel'], descancelar, pass_args=True))
-dispatcher.add_handler(CommandHandler(['cambiarhora','hora','time'], cambiarhora, pass_args=True))
-dispatcher.add_handler(CommandHandler(['cambiarhorafin','horafin','endtime'], cambiarhorafin, pass_args=True))
-dispatcher.add_handler(CommandHandler(['cambiargimnasio','gimnasio','gym'], cambiargimnasio, pass_args=True))
-dispatcher.add_handler(CommandHandler(['cambiarpokemon','pokemon'], cambiarpokemon, pass_args=True))
-dispatcher.add_handler(CommandHandler(['borrar','delete','remove'], borrar, pass_args=True))
-dispatcher.add_handler(CommandHandler(['reflotar','refloat'], reflotar, pass_args=True))
-dispatcher.add_handler(CommandHandler(['reflotartodo','reflotartodas','refloatall'], reflotartodas, pass_args=True))
-dispatcher.add_handler(CommandHandler(['reflotaractivo','reflotaractivas','refloatactive'], reflotaractivas, pass_args=True))
-dispatcher.add_handler(CommandHandler(['reflotarhoy','refloattoday'], reflotarhoy, pass_args=True))
+dispatcher.add_handler(CommandHandler('raid', raidcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cancelar','cancel'], cancelcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cerrar','close'], closecmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['descancelar','uncancel'], uncancelcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cambiarhora','hora','time','datetime'], timecmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cambiarhorafin','horafin','endtime'], endtimecmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cambiargimnasio','gimnasio','gym'], gymcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['cambiarpokemon','pokemon'], pokemoncmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['borrar','delete','remove'], deletecmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['reflotar','refloat'], refloatcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['reflotartodo','reflotartodas','refloatall'], refloatallcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['reflotaractivo','reflotaractivas','refloatactive'], refloatactivecmd, pass_args=True))
+dispatcher.add_handler(CommandHandler(['reflotarhoy','refloattoday'], refloattodaycmd, pass_args=True))
 dispatcher.add_handler(CommandHandler(['buscar','search'], searchcmd, pass_args=True))
 # Commands related to alerts
 dispatcher.add_handler(MessageHandler(Filters.location, processLocation))
-dispatcher.add_handler(CommandHandler(['alerts','alertas'], alerts, pass_args=True))
-dispatcher.add_handler(CommandHandler('addalert', addalert, pass_args=True))
-dispatcher.add_handler(CommandHandler('delalert', delalert, pass_args=True))
-dispatcher.add_handler(CommandHandler('clearalerts', clearalerts))
+dispatcher.add_handler(CommandHandler(['alerts','alertas'], alertscmd, pass_args=True))
+dispatcher.add_handler(CommandHandler('addalert', addalertcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler('delalert', delalertcmd, pass_args=True))
+dispatcher.add_handler(CommandHandler('clearalerts', clearalertscmd))
 dispatcher.add_handler(CallbackQueryHandler(raidbutton))
 # Channel support and unknown commands
 dispatcher.add_handler(MessageHandler(Filters.command, channelCommands))

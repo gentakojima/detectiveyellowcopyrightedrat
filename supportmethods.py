@@ -568,18 +568,19 @@ def error_callback(bot, update, error):
     except:
         logging.debug("TELEGRAM ERROR: Unknown - %s" % error)
 
-def send_edit_instructions(group, raid, user_id, bot):
-    _ = set_language(group["language"])
+def send_edit_instructions(group, raid, user, bot):
+    user_id = user["id"]
+    _ = set_language(user["language"])
     what_text = format_text_pokemon(raid["pokemon"], raid["egg"], langfunc=_)
     what_day = format_text_day(raid["timeraid"], group["timezone"], langfunc=_)
     day = extract_day(raid["timeraid"], group["timezone"])
 
     if group["refloat"] == 1 or is_admin(raid["grupo_id"], user_id, bot):
-        text_refloat="\n" + _("🎈 *Reflotar incursión*: `/reflotar`")
+        text_refloat="\n" + _("🎈 *Reflotar incursión*: `/refloat`")
     else:
         text_refloat=""
     if group["candelete"] == 1 or is_admin(raid["grupo_id"], user_id, bot):
-        text_delete="\n" + _("❌ *Borrar incursión*: `/borrar`")
+        text_delete="\n" + _("❌ *Borrar incursión*: `/delete`")
     else:
         text_delete=""
     if raid["timeend"] is not None:
@@ -595,52 +596,55 @@ def send_edit_instructions(group, raid, user_id, bot):
     else:
         pokemon = raid["pokemon"]
     try:
-        bot.send_message(chat_id=user_id, text=_("Puedes editar la incursión {0} {1}a las *{2}* en *{3}* (identificador `{4}`) contestando al mensaje de la incursión con los siguientes comandos:\n\n🕒 *Día/hora*: `/hora {5}{6}`\n🕒 *Hora a la que desaparece*: `/horafin {7}`\n🌎 *Gimnasio*: `/gimnasio {8}`\n👿 *Pokémon/nivel*: `/pokemon {9}`\n\n🚫 *Cancelar incursión*: `/cancelar`{10}{11}").format(what_text, what_day, extract_time(raid["timeraid"]), raid["gimnasio_text"], raid["id"], daystr, extract_time(raid["timeraid"]), text_endtime, raid["gimnasio_text"], pokemon, text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(chat_id=user_id, text=_("Puedes editar la incursión {0} {1}a las *{2}* en *{3}* (identificador `{4}`) contestando al mensaje de la incursión con los siguientes comandos:\n\n🕒 *Día/hora*: `/time {5}{6}`\n🕒 *Hora a la que desaparece*: `/endtime {7}`\n🌎 *Gimnasio*: `/gym {8}`\n👿 *Pokémon/nivel*: `/pokemon {9}`\n\n🚫 *Cancelar incursión*: `/cancel`{10}{11}").format(what_text, what_day, extract_time(raid["timeraid"]), raid["gimnasio_text"], raid["id"], daystr, extract_time(raid["timeraid"]), text_endtime, raid["gimnasio_text"], pokemon, text_delete, text_refloat), parse_mode=telegram.ParseMode.MARKDOWN)
     except:
         logging.debug("Error sending instructions in private. Maybe conversation not started?")
 
-def warn_people(warntype, raid, user_username, chat_id, bot):
+def warn_people(warntype, raid, user, chat_id, bot):
     logging.debug("supportmethods:warn_people")
     people = getRaidPeople(raid["id"])
     group = getGroup(raid["grupo_id"])
-    _ = set_language(group["language"])
     warned = []
     notwarned = []
     if people is None:
         return
-    if group["alias"] is not None:
-        incursion_text = _("<a href='https://t.me/{0}/{1}'>incursión</a>").format(group["alias"], raid["message"])
-    else:
-        incursion_text = _("incursión")
     for p in people:
-        if p["username"] == user_username or p["novoy"] > 0:
+        _ = set_language(p["language"])
+        if p["username"] == user["username"] or p["novoy"] > 0:
             continue
+        if group["alias"] is not None:
+            incursion_text = _("<a href='https://t.me/{0}/{1}'>incursión</a>").format(group["alias"], raid["message"])
+        else:
+            incursion_text = _("incursión")
         try:
-            user_text = "@%s" % user_username if user_username is not None else _("Se")
-            if warntype == "cancelar":
+            if user is not None and user["username"] is not None:
+                user_text = "@%s" % user["username"]
+            else:
+                user_text = _("Se")
+            if warntype == "cancel":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("❌ {0} ha <b>cancelado</b> la {1} {2} a las {3} en {4}").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
-            elif warntype == "descancelar":
+            elif warntype == "uncancel":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha <b>descancelado</b> la {1} {2} a las {3} en {4}").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
-            elif warntype == "borrar":
+            elif warntype == "delete":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("🚫 {0} ha <b>borrado</b> la incursión {1} a las {2} en {3}").format(user_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
-            elif warntype == "cambiarhora":
+            elif warntype == "time":
                 text_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
                 if text_day != "":
                     text_day = " " + text_day
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha cambiado la hora de la {1} {2} en {3} para las <b>{4}</b>{5}").format(user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeraid"]), text_day)
-            elif warntype == "cambiarhorafin":
+            elif warntype == "endtime":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha cambiado la hora a la que se termina la {1} {2} en {3} a las <b>{4}</b> (¡ojo, la incursión sigue programada para la misma hora: {5}!)").format(user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
-            elif warntype == "borrarhorafin":
+            elif warntype == "deleteendtime":
                 text = _("⚠️ {0} ha borrado la hora a la que se termina la {1} {2} en {3} (¡ojo, la incursión sigue programada para la misma hora: {4}!)").format(user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]))
-            elif warntype == "cambiargimnasio":
+            elif warntype == "gym":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha cambiado el gimnasio de la {1} {2} para las {3} a <b>{4}</b>").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
-            elif warntype == "cambiarpokemon":
+            elif warntype == "pokemon":
                 text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha cambiado la {1} para las {2} en {3} a incursión {4}").format(user_text, incursion_text, extract_time(raid["timeraid"]), raid["gimnasio_text"], text_pokemon)
             bot.sendMessage(chat_id=p["id"], text=text, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
@@ -648,6 +652,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
         except Exception as e:
             logging.debug("supportmethods:warn_people error sending message to %s: %s" % (p["username"],str(e)))
             notwarned.append(p["username"])
+
     if len(warned)>0:
         bot.sendMessage(chat_id=chat_id, text=_("He avisado por privado a: @{0}").format(ensure_escaped(", @".join(warned))), parse_mode=telegram.ParseMode.MARKDOWN)
     if len(notwarned)>0:
@@ -677,13 +682,13 @@ def get_settings_keyboard(chat_id, keyboard="main", langfunc=None):
     else:
         latebutton_text = "▪️ " + _("Botón «Tardo»")
     if group["refloat"] == 1:
-        refloat_text = "✅ " + _("Reflotar incursiones (comando /reflotar)")
+        refloat_text = "✅ " + _("Reflotar incursiones (comando /refloat)")
     else:
-        refloat_text = "▪️ " + _("Reflotar incursiones (comando /reflotar)")
+        refloat_text = "▪️ " + _("Reflotar incursiones (comando /refloat)")
     if group["candelete"] == 1:
-        candelete_text = "✅ " + _("Borrar incursiones (comando /borrar)")
+        candelete_text = "✅ " + _("Borrar incursiones (comando /delete)")
     else:
-        candelete_text = "▪️ " + _("Borrar incursiones (comando /borrar)")
+        candelete_text = "▪️ " + _("Borrar incursiones (comando /delete)")
     if group["gotitbuttons"] == 1:
         gotitbuttons_text = "✅ " + _("Botones «¡Lo tengo!»")
     else:
@@ -697,9 +702,9 @@ def get_settings_keyboard(chat_id, keyboard="main", langfunc=None):
     else:
         validationrequired_text = "▪️ " + _("Validación obligatoria")
     if group["gymcommand"] == 1:
-        gymcommand_text = "✅ " + _("Consultar gimnasios (comando /buscar)")
+        gymcommand_text = "✅ " + _("Consultar gimnasios (comando /search)")
     else:
-        gymcommand_text = "▪️ " + _("Consultar gimnasios (comando /buscar)")
+        gymcommand_text = "▪️ " + _("Consultar gimnasios (comando /search)")
     if group["raidcommand"] == 1:
         raidcommand_text = "✅ " + _("Crear incursiones (comando /raid)")
     else:
@@ -1061,7 +1066,7 @@ def edit_check_private(chat_id, chat_type, user_username, command, bot):
 
 def edit_check_private_or_reply(chat_id, chat_type, message, args, user_username, command, bot):
     logging.debug("supportmethods:edit_check_private_or_reply")
-    if command in ["borrar", "cancelar", "reflotar", "descancelar", "cerrar"]:
+    if command in ["delete", "cancel", "refloat", "uncancel", "close"]:
         expectedargs = 0
     else:
         expectedargs = 1
