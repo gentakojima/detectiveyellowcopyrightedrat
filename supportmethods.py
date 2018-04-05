@@ -1530,7 +1530,7 @@ available_languages = {
         "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["es_ES"], fallback=True)
     },
     "ca_ES": {
-        "name": "Catalá (Catalan)",
+        "name": "Català (Catalan)",
         "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ca_ES"], fallback=True)
     },
     "pt_PT": {
