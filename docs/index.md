@@ -257,9 +257,9 @@ Una vez tengas lista la hoja de cálculo, debes pulsar en el botón **Compartir*
 
 Una vez establecida, debes utilizar el comando `/refresh` para que la cargue. Cada vez que hagas cambios, debes volver a utilizar `/refresh` para recargar la lista. No es necesario volver a utilizar `/spreadsheet` a no ser que cambies la hoja de cálculo por otra.
 
-Se pueden probar las ubicaciones preguntando por ellas con el comando `/buscar`. Por ejemplo:
+Se pueden probar las ubicaciones preguntando por ellas con el comando `/search`. Por ejemplo:
 
-    /buscar león de boca abierta
+    /search león de boca abierta
 
 Para listar todos los gimnasios conocidos puedes usar el comando `/list`. Este comando puede mostrar la lista cortada si hay demasiados gimnasios, sobre 120 gimnasios o más.
 
@@ -328,14 +328,14 @@ Esto no quiere decir que sea obligatorio crear zonas si se quiere mostrar más d
 
 El modo niñero evita que la gente hable en un grupo, borrando todos los mensajes que pongan los usuarios (no los administradores).
 
-El comando `/settalkgroup` permite definir un grupo para hablar. Si está el modo niñero activado, el bot recordará el enlace al grupo para hablar cada vez que hable alguien. Por ejemplo:
+El comando `/talkgroup` permite definir un grupo para hablar. Si está el modo niñero activado, el bot recordará el enlace al grupo para hablar cada vez que hable alguien. Por ejemplo:
 
-    /settalkgroup @PGSDC
-    /settalkgroup https://t.me/joinchat/XXs3XkzYsXXxnvbtxxe11x
+    /talkgroup @PGSDC
+    /talkgroup https://t.me/joinchat/XXs3XkzYsXXxnvbtxxe11x
 
 Para eliminar el grupo para hablar se puede pasar una barra horizontal como argumento, es decir:
 
-    /settalkgroup -
+    /talkgroup -
 
 ### Zona horaria ###
 
@@ -373,7 +373,7 @@ Para revertir la cancelación de una incursión puedes usar el comando `/uncance
 
 Un administrador siempre puede cancelar incursiones con el comando `/cancel`, aunque sean antiguas. Normalmente, un creador de incursión solo puede cancelar incursiones que no sean más antiguas de tres horas.
 
-Para reflotar todas las incursiones activas una vez, sin necesidad de usar el reflotado automático, se puede usar el comando `/reflotaractivas`. También se pueden reflotar todas las incursiones, incluídas las EX que transcurrirán dentro de varias horas o días, con `/reflotartodas`.
+Para reflotar todas las incursiones activas una vez, sin necesidad de usar el reflotado automático, se puede usar el comando `/refloatactive`. También se pueden reflotar todas las incursiones, incluídas las EX que transcurrirán dentro de varias horas o días, con `/refloatall`.
 
 # Política de tramposos #
 
