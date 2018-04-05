@@ -603,6 +603,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
     logging.debug("supportmethods:warn_people")
     people = getRaidPeople(raid["id"])
     group = getGroup(raid["grupo_id"])
+    _ = set_language(group["language"])
     warned = []
     notwarned = []
     if people is None:
@@ -617,30 +618,30 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
         try:
             user_text = "@%s" % user_username if user_username is not None else _("Se")
             if warntype == "cancelar":
-                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("❌ {0} ha <b>cancelado</b> la {1} {2} a las {3} en {4}").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "descancelar":
-                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha <b>descancelado</b> la {1} {2} a las {3} en {4}").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "borrar":
-                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("🚫 {0} ha <b>borrado</b> la incursión {1} a las {2} en {3}").format(user_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarhora":
                 text_day = format_text_day(raid["timeraid"], group["timezone"], "html", langfunc=_)
                 if text_day != "":
                     text_day = " " + text_day
-                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha cambiado la hora de la {1} {2} en {3} para las <b>{4}</b>{5}").format(user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeraid"]), text_day)
             elif warntype == "cambiarhorafin":
-                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha cambiado la hora a la que se termina la {1} {2} en {3} a las <b>{4}</b> (¡ojo, la incursión sigue programada para la misma hora: {5}!)").format(user_text, incursion_text, text_pokemon, raid["gimnasio_text"], extract_time(raid["timeend"]), extract_time(raid["timeraid"]))
             elif warntype == "borrarhorafin":
                 text = _("⚠️ {0} ha borrado la hora a la que se termina la {1} {2} en {3} (¡ojo, la incursión sigue programada para la misma hora: {4}!)").format(user_text, incursion_text, raid["pokemon"], raid["gimnasio_text"], extract_time(raid["timeraid"]))
             elif warntype == "cambiargimnasio":
-                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha cambiado el gimnasio de la {1} {2} para las {3} a <b>{4}</b>").format(user_text, incursion_text, text_pokemon, extract_time(raid["timeraid"]), raid["gimnasio_text"])
             elif warntype == "cambiarpokemon":
-                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html")
+                text_pokemon = format_text_pokemon(raid["pokemon"], raid["egg"], "html", langfunc=_)
                 text = _("⚠️ {0} ha cambiado la {1} para las {2} en {3} a incursión {4}").format(user_text, incursion_text, extract_time(raid["timeraid"]), raid["gimnasio_text"], text_pokemon)
             bot.sendMessage(chat_id=p["id"], text=text, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
             warned.append(p["username"])
@@ -648,7 +649,7 @@ def warn_people(warntype, raid, user_username, chat_id, bot):
             logging.debug("supportmethods:warn_people error sending message to %s: %s" % (p["username"],str(e)))
             notwarned.append(p["username"])
     if len(warned)>0:
-        bot.sendMessage(chat_id=chat_id, text=_("(He avisado por privado a: @{0}").format(ensure_escaped(", @".join(warned))), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.sendMessage(chat_id=chat_id, text=_("He avisado por privado a: @{0}").format(ensure_escaped(", @".join(warned))), parse_mode=telegram.ParseMode.MARKDOWN)
     if len(notwarned)>0:
         bot.sendMessage(chat_id=chat_id, text=_("No he podido avisar a: @{0}").format(ensure_escaped(", @".join(notwarned))), parse_mode=telegram.ParseMode.MARKDOWN)
 
