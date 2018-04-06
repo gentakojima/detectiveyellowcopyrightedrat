@@ -1304,7 +1304,7 @@ def parse_profile_image(filename, desired_pokemon, desired_pokemon_2 = None, ins
     # Crop large, medium or small bars
     for cropbarheight in [int(height/14),int(height/17),int(height/20)]:
         logging.debug("supportmethods:parse_profile_image: Testing for bottom bar %ipx..." % cropbarheight)
-        bottombar_img = image[int(height-cropbarheight):int(height),int(0):int(width)] # y1:y2,x1:x2
+        bottombar_img = image[int(height-cropbarheight):int(height),int(0):int(width/20)] # y1:y2,x1:x2
         bottombar_gray = cv2.cvtColor(bottombar_img, cv2.COLOR_BGR2GRAY)
 
         if bottombar_gray.mean() < 30 or bottombar_gray.std() < 10:
