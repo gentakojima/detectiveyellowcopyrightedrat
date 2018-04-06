@@ -653,10 +653,13 @@ def warn_people(warntype, raid, user, chat_id, bot):
             logging.debug("supportmethods:warn_people error sending message to %s: %s" % (p["username"],str(e)))
             notwarned.append(p["username"])
 
+    _ = set_language(user["language"])
     if len(warned)>0:
-        bot.sendMessage(chat_id=chat_id, text=_("He avisado por privado a: @{0}").format(ensure_escaped(", @".join(warned))), parse_mode=telegram.ParseMode.MARKDOWN)
+        warned_text = "@" + ", @".join(warned)
+        bot.sendMessage(chat_id=chat_id, text=_("He avisado por privado a {0}").format(ensure_escaped(warned_text)), parse_mode=telegram.ParseMode.MARKDOWN)
     if len(notwarned)>0:
-        bot.sendMessage(chat_id=chat_id, text=_("No he podido avisar a: @{0}").format(ensure_escaped(", @".join(notwarned))), parse_mode=telegram.ParseMode.MARKDOWN)
+        notwarned_text = "@" + ", @".join(notwarned)
+        bot.sendMessage(chat_id=chat_id, text=_("No he podido avisar a {0}").format(ensure_escaped(notwarned_text)), parse_mode=telegram.ParseMode.MARKDOWN)
 
 def get_settings_keyboard(chat_id, keyboard="main", langfunc=None):
     logging.debug("supportmethods:get_settings_keyboard")
@@ -1545,6 +1548,10 @@ available_languages = {
     "pt_PT": {
         "name": "Português (Portuguese)",
         "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["pt_PT"], fallback=True)
+    },
+    "en_US": {
+        "name": "English",
+        "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["en_US"], fallback=True)
     }
 }
 
