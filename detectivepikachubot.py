@@ -978,9 +978,9 @@ def statscmd(bot, update, args = None):
                             break
                     relposition_lastweek = 100 - (100*userposition_lastweek/groupsize_lastweek)
                     if userraids_lastweek > userraids_twoweeksago:
-                        userraids_moreorless = ("{0} más").format(userraids_lastweek - userraids_twoweeksago)
+                        userraids_moreorless = _("{0} más").format(userraids_lastweek - userraids_twoweeksago)
                     elif userraids_lastweek < userraids_twoweeksago:
-                        userraids_moreorless = ("{0} menos").format(userraids_twoweeksago - userraids_lastweek)
+                        userraids_moreorless = _("{0} menos").format(userraids_twoweeksago - userraids_lastweek)
                     else:
                         userraids_moreorless = _("las mismas")
                     daymonth_text = "%s/%s" % (lastweek_start.day, lastweek_start.month)
@@ -2001,7 +2001,7 @@ def raidbutton(bot, update):
     elif data == "estoy":
         result = raidEstoy(chat_id, message_id, user_id)
         if result is True:
-            bot.answerCallbackQuery(text=_("Has marcardo que has llegado a la incursión"), callback_query_id=update.callback_query.id)
+            bot.answerCallbackQuery(text=_("Has marcado que has llegado a la incursión"), callback_query_id=update.callback_query.id)
             update_text = True
         elif result == "no_changes":
             bot.answerCallbackQuery(text=_("¡Ya habías marcado antes que estás! Si te has equivocado, pulsa en «voy»."), callback_query_id=update.callback_query.id, show_alert="true")
@@ -2014,7 +2014,7 @@ def raidbutton(bot, update):
     elif data == "llegotarde":
         result = raidLlegotarde(chat_id, message_id, user_id)
         if result is True:
-            bot.answerCallbackQuery(text=_("Has marcardo que llegarás tarde a la incursión"), callback_query_id=update.callback_query.id)
+            bot.answerCallbackQuery(text=_("Has marcado que llegarás tarde a la incursión"), callback_query_id=update.callback_query.id)
             update_text = True
         elif result == "no_changes":
             bot.answerCallbackQuery(text=_("¡Ya habías marcado que llegas tarde! Si te has equivocado, pulsa en «voy»."), callback_query_id=update.callback_query.id, show_alert="true")
