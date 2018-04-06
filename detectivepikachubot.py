@@ -597,7 +597,7 @@ def processMessage(bot, update):
             if chosen_profile is None:
                 output = _("❌ La captura de pantalla no parece válida. Asegúrate de enviar una captura de pantalla completa del juego en un teléfono móvil. No son válidas las capturas en tablets ni otros dispositivos ni capturas recortadas o alteradas. Puedes volver a intentarlo enviando otra captura. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
             elif trainer_name.lower() != user["trainername"].lower() and distance(trainer_name.lower(),user["trainername"].lower())>2 and \
-                 trainer_name.replace("I","l").replace("0","o").lower() != user["trainername"].replace("I","l").replace("0","o").lower():
+                 trainer_name.replace("I","l").replace("0","o").replace("2","z").lower() != user["trainername"].replace("I","l").replace("0","o").replace("2","z").lower():
                 output = _("❌ No he reconocido correctamente el *nombre del entrenador*. Si no consigues que lo reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
             elif level is None:
                 output = _("❌ No he reconocido correctamente el *nivel*. Si no consigues que la reconozca, envía un correo a `{0}` indicando tu alias de Telegram y tu nombre de entrenador para que revisemos el caso manualmente.").format(config["telegram"]["validationsmail"])
