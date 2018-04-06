@@ -1538,6 +1538,10 @@ available_languages = {
         "name": "Català (Catalan)",
         "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["ca_ES"], fallback=True)
     },
+    "gl_ES": {
+        "name": "Galego (Galician)",
+        "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["gl_ES"], fallback=True)
+    },
     "pt_PT": {
         "name": "Português (Portuguese)",
         "gettext": gettext.translation("messages", localedir=sys.path[0]+"/locale", languages=["pt_PT"], fallback=True)
